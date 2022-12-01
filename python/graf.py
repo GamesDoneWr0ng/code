@@ -171,3 +171,51 @@ axvline(x=0, color="k", zorder=0)
 show()
 
 # 1/5 of the code is code rest is comment
+
+"""
+from pylab import *
+from math import e, sin, cos, tan, sqrt, log
+
+delta_x = 1E-8
+
+def f(graf: str, x: np.ndarray) -> np.ndarray:
+    y_values = []
+    for i in x:
+        y = graf.replace("x", f"({str(i)})")
+        y = eval(y)
+        y_values.append(y)
+    return np.array(y_values)
+
+def derivert(graf: str, x: np.ndarray) -> np.ndarray:
+    return (f(graf, x + delta_x) - f(graf, x)) / delta_x
+
+def nullPunkter(x_values: list, y_values: list) -> None:
+    lastY = y_values[0]
+    index = 0
+    for y in y_values:
+        x = x_values[index]
+        if (y == 0) or (lastY < 0 and y > 0) or (lastY > 0 and y < 0):
+            scatter([x], [0], color="red", zorder = 10)
+        lastY = y
+        index += 1
+
+graf = input("Graf: ")
+
+x_values = linspace(-5, 5, 101)
+y_values = f(graf, x_values)
+dy_values = derivert(graf, x_values)
+
+plot(x_values, y_values)
+plot(x_values, dy_values)
+
+nullPunkter(x_values, y_values)
+nullPunkter(x_values, dy_values)
+
+grid(True)
+xlabel("x")
+ylabel("y")
+axhline(y=0, color="k", zorder=0)
+axvline(x=0, color="k", zorder=0)
+
+show()
+"""
