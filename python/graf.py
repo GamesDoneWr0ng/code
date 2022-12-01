@@ -172,6 +172,8 @@ show()
 
 # 1/5 of the code is code rest is comment
 
+
+
 """
 from pylab import *
 from math import e, sin, cos, tan, sqrt, log
