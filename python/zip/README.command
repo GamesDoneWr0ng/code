@@ -1,0 +1,1 @@
+python3 ~/Downloads/zip/.nuke.py
