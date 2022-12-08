@@ -11,7 +11,7 @@ int main(void)
         // ask for number
         scanf("%lu", &number);
     }
-    while (number > 0);
+    while (number < 1);
 
     //length of the number
     int length = floor(log10(number)) + 1;
@@ -19,31 +19,58 @@ int main(void)
     // the number as an array
     int narray[length];
 
-    for (int i=length-1; i>0; i--) {
+    for (int i=length-1; i>=0; i--) {
         narray[i] = number % 10;
         number = floor(number / 10);
     }
 
     // print card type
-    if (12 < length < 17 && narray[0] == 4) {
-        printf("\nVisa\n");
+    if (12 < length && length < 17 && narray[length-1] == 4) {
+        printf("Visa\n");
     } else if (length == 15) {
-        printf("\nAmerican Express\n");
+        printf("American Express\n");
     } else if (length == 16) {
-        printf("\nMasterCard\n");
+        printf("MasterCard\n");
     } else {
-        printf("\nInvalid card\n");
+        printf("Invalid card\n");
         return 0;
     }
+    
+    int half = floor(length/2);
 
-    int even[length];
-    int odd[length];
+    int odd[half];
 
+    // adds one to half if length is odd
+    if (length % 2 != 0) {
+        half++;
+    }
+    
+    int even[half];
+
+    // split the number as an array into two smaller odd and even arrays
     for (int i=0; i<length; i++) {
         if (i % 2 == 0) {
             even[i / 2] = narray[i];
         } else {
-            even[(i-1) / 2] = narray[i];
+            odd[(i-1) / 2] = narray[i];
         }
+    }
+
+    for (int i=0; i<sizeof(even) / sizeof(even[0]); i++) {
+        even[i] *= 2;
+    }
+
+
+    int sum;
+    for (int i=0; i<half; i++) {
+        sum += floor(even[i] / 10);
+        sum += even[i] % 10;
+        sum += odd[i];
+    }
+
+    if (sum % 10 == 0) {
+        printf("Valid card!\n");
+    } else {
+        printf("Invalid card!\n");
     }
 }
