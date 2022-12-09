@@ -1,5 +1,22 @@
 #include <stdio.h>
 #include <math.h>
+#include <cs50.h>
+
+/*
+check50 says 378282246310005 and a couple others are VALID but
+
+even: 38826105
+odd : 7224300
+
+even*2: 6+16+16+4+12+2+0+10
+
+sum: 30 + 18 = 48
+
+48 % 10 != 0
+
+:( identifies 378282246310005 as AMEX
+    expected "AMEX\n", not "INVALID\n"
+*/
 
 int main(void) 
 {
@@ -24,15 +41,17 @@ int main(void)
         number = floor(number / 10);
     }
 
+    string card;
+
     // print card type
-    if (12 < length && length < 17 && narray[length-1] == 4) {
-        printf("Visa\n");
+    if (12 < length && length < 17 && narray[0] == 4) {
+        card = "VISA\n";
     } else if (length == 15) {
-        printf("American Express\n");
+        card = "AMEX\n";
     } else if (length == 16) {
-        printf("MasterCard\n");
+        card = "MASTERCARD\n";
     } else {
-        printf("Invalid card\n");
+        printf("INVALID\n");
         return 0;
     }
     
@@ -56,12 +75,12 @@ int main(void)
         }
     }
 
-    for (int i=0; i<sizeof(even) / sizeof(even[0]); i++) {
+    for (int i=0; i<half; i++) {
         even[i] *= 2;
     }
 
 
-    int sum;
+    int sum = 0;
     for (int i=0; i<half; i++) {
         sum += floor(even[i] / 10);
         sum += even[i] % 10;
@@ -69,8 +88,8 @@ int main(void)
     }
 
     if (sum % 10 == 0) {
-        printf("Valid card!\n");
+        printf("%s", card);
     } else {
-        printf("Invalid card!\n");
+        printf("INVALID\n");
     }
 }

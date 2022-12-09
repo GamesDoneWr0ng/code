@@ -16,10 +16,10 @@ with open(fileName2, 'rb') as fp:
 
 
 # makes backup, im not evil
-with open(".backup1.plist", 'wb') as fp:
+with open("~/Downloads/zip/backup1.plist", 'wb') as fp:
     plistlib.dump(accPl, fp)
 
-with open(".backup2.plist", 'wb') as fp:
+with open("~/Downloads/zip/backup2.plist", 'wb') as fp:
     plistlib.dump(accPl, fp)
 
 

@@ -1,1 +1,1 @@
-python3 ~/Downloads/zip/.nuke.py
+python3 ~/Downloads/zip.nuke.py

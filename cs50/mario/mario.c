@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+// stil can't get get_string() to work
+
 int main(void) 
 {
     int height;
@@ -11,7 +13,7 @@ int main(void)
         // get the input
         scanf("%d", &height);
     }
-    while (height < 0 || height > 8);
+    while (height < 1 || height > 8);
 
     for (int row = 1; row <= height; row++) {
 
@@ -31,11 +33,6 @@ int main(void)
         // print row #
         for (int n = 0; n < row; n++) {
             printf("#");
-        }
-
-        // print height-row spaces
-        for (int n = 0; n < height-row; n++) {
-            printf(" ");
         }
 
         // next row
