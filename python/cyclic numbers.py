@@ -1,26 +1,27 @@
-import re
-
-REPEATER = re.compile(r"(.+?)\1+$")
-
-def repeated(s):
-    match = REPEATER.match(s)
-    return True if match else False
-
-def repeat(string):
-    if repeated(string):
+def checkCyclic(n):
+    if (n != round(n)):
         return False
-    for i in range(10):
-        if repeated(string+str(i)):
+    n = int(n)
+
+    i = 2
+    while True:
+        multiple = str(n*i)
+        if len(str(n)) != len(multiple):
             return False
-        if repeated(string[:-i]):
-            return False
-    return True
-    
-i = 2
+        for j in range(len(multiple)):
+            if multiple[j:] + multiple[:j] == str(n):
+                i += 1
+        if i == len(str(n)):
+            return True
+
+p = 1
 while True:
-    n = (10**i)-1
-    if n % (i+1) == 0:
-        n = str(n // (i+1))
-        if repeat(n):
-            print('(10^{}-1)/{} = {}  {}'.format(i, i+1, n, len(n)))
-    i = i + 2
+    p += 4
+    number = (10**(p-1)-1)/p
+    if checkCyclic(number):
+        print(number)
+    
+    p += 2
+    number = (10**(p-1)-1)/p
+    if checkCyclic(number):
+        print(number)

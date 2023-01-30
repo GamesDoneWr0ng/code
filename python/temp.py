@@ -1,14 +1,48 @@
+import math
 from pylab import *
 
-x = [-3, -2, -1, 0, 1, 2, 3, 4]
-f = [9, 4, 1, 0, 1, 4, 9, 16]
+delta_x = 1E-8
 
-g = zeros(len(x))
+def f(graf, x):
+  if type(x) != np.ndarray:
+    y = graf.replace("x", f"({str(x)})")
+    y = eval(y)
+    return y
 
-for i in range(len(x)-1):
-    g[i] = (f[i+1] - f[i]) / (x[i+1] - x[i])
+  y_values = []
 
-plot(x[:-1], f[:-1])
-plot(x[:-1], g[:-1])
-grid()
+  for i in x:
+    y = graf.replace("x", f"({str(i)})")
+    y = eval(y)
+    y_values.append(y)
+      
+  return np.array(y_values)
+
+def df(graf, x):
+  return (f(graf, x + delta_x) - f(graf, x)) / delta_x
+
+def nyX(graf, x1):
+  return x1 - f(graf, x1) / df(graf, x1)
+
+graf = input("Graf: ")
+x = int(input("X0: "))
+
+while f(graf, x) > delta_x:
+  x = nyX(graf, x)
+  print(f"Bedre x: {x}, f(x): {f(graf, x)}")
+
+print(f"Beste x: {x}, f(x): {f(graf, x)}")
+
+x_values = linspace(-5, 5, 101)
+y_values = f(graf, x_values)
+
+plot(x_values, y_values)
+scatter([x], [0], color="red", zorder = 10)
+
+grid(True)
+xlabel("x")
+ylabel("y")
+axhline(y=0, color="k", zorder=0)
+axvline(x=0, color="k", zorder=0)
+
 show()
