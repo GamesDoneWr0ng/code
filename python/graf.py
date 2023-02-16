@@ -180,7 +180,7 @@ from math import e, sin, cos, tan, sqrt, log
 
 delta_x = 1E-8
 
-def f(graf: str, x: np.ndarray) -> np.ndarray:
+def f(graf, x):
     y_values = []
     for i in x:
         y = graf.replace("x", f"({str(i)})")
@@ -188,10 +188,10 @@ def f(graf: str, x: np.ndarray) -> np.ndarray:
         y_values.append(y)
     return np.array(y_values)
 
-def derivert(graf: str, x: np.ndarray) -> np.ndarray:
+def derivert(graf, x):
     return (f(graf, x + delta_x) - f(graf, x)) / delta_x
 
-def nullPunkter(x_values: list, y_values: list) -> None:
+def nullPunkter(x_values, y_values):
     lastY = y_values[0]
     index = 0
     for y in y_values:
