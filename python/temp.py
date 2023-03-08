@@ -1,9 +1,7 @@
-import numpy as np
+a = 2
+b = [4,4,4]
+c = 1
 
-#random = np.random.randn(4,4)
+size = [a] + b + [c]
 
-n_inputs = 5
-n_neurons = 2
-random = np.array([np.random.uniform(-1,1, n_inputs) for i in range(n_neurons)])
-
-print(random)
+print(size)
