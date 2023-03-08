@@ -18,17 +18,3 @@ class Network:
         for layer in self.layers[1:]:
             lastout = layer.forward(lastout)
         return lastout
-
-    """def Loss_CategoricalCrossentropy(self, Y_pred, Y_true):
-        samples = len(Y_pred)
-        y_pred_clipped = np.clip(Y_pred, 1e-7, 1-1e-7)
-
-        if len(Y_true.shape) == 1:
-            correct_confidences = y_pred_clipped[range(samples), Y_true]
-        else:
-            correct_confidences = np.sum(y_pred_clipped*Y_true, axis=1)
-
-        negative_log_likelihoods = -np.log(correct_confidences)
-
-        data_loss = np.mean(negative_log_likelihoods)
-        return data_loss"""
