@@ -1,7 +1,8 @@
-a = 2
-b = [4,4,4]
-c = 1
+import numpy as np
 
-size = [a] + b + [c]
+test = np.array([[1,2,3],
+          [4,5,6],
+          [7,8,9]])
 
-print(size)
+print(np.zeros_like(test) + 1)
+print(test)

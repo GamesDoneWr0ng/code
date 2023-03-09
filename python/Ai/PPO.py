@@ -2,14 +2,33 @@ import numpy as np
 from Network import Network
 
 class PPO:
-    def __init__(self, actor: Network, clippingThreshold = 0.2):
+    def __init__(self, actor: Network, scoreRequierment, clippingThreshold = 0.2):
         self.trajectories = []
         self.actor = actor
         self.oldActor = actor
+        self.critic = Network(actor.size[0], actor.size[1,-1], 1)
+        self.scoreRequierment = scoreRequierment
         self.clippingThreshold = clippingThreshold
 
-    def value(self, state):
-        pass
+    def loss_CategoricalCrossentropy(self, Y_pred, Y_true):
+        samples = len(Y_pred)
+        y_pred_clipped = np.clip(Y_pred, 1e-7, 1-1e-7)
+
+        if len(Y_true.shape) == 1:
+            correct_confidences = y_pred_clipped[range(samples), Y_true]
+        else:
+            correct_confidences = np.sum(y_pred_clipped*Y_true, axis=1)
+
+        negative_log_likelihoods = -np.log(correct_confidences)
+
+        data_loss = np.mean(negative_log_likelihoods)
+        return data_loss
+
+    def value(self, states: np.ndarray, reward: float):
+        reward = reward / self.scoreRequierment
+        Y_pred = self.critic.run(states)
+        Y_true = np.zeros_like(Y_pred) + reward
+        loss = self.loss_CategoricalCrossentropy(Y_pred, Y_true)
 
     def generalized_advantage_estimate(self, value_old_state, value_new_state, reward, done, gamma=0.99, lamda=0.95):
         """
@@ -49,9 +68,18 @@ class PPO:
         # store trajectory (state, action taken, reward, next state)
         outputs = self.network.run(inputs)
         return outputs
-    
+
     def howToRun(self):
         inputs = [1,2,3,4]
         oldChance = np.max(self.oldActor.run(inputs))
         newChance = np.max(self.actor.run(inputs))
         self.clipped_surrogate_objective(oldChance, newChance, [])
+
+
+"""inputs from snake
+16 lines out of snake head (distance to colistion / max distance)
+16 inputs for what the lines hit (-1 wall, 0 snake, 1 apple)
+2 for head position
+2 for relative position to apple
+2 for relative position to tail
+"""

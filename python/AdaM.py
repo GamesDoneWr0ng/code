@@ -1,12 +1,7 @@
 # example of plotting the adam search on a contour plot of the test function
-from math import sqrt
-from numpy import asarray
-from numpy import arange
-from numpy.random import rand
-from numpy.random import seed
-from numpy import meshgrid
+from numpy import asarray, arange, meshgrid, sqrt
+from numpy.random import rand, seed
 from matplotlib import pyplot
-from mpl_toolkits.mplot3d import Axes3D
  
 # objective function
 def objective(x, y):
