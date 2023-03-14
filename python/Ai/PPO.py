@@ -26,7 +26,7 @@ class PPO:
 
     def value(self, states: np.ndarray, reward: float):
         reward = reward / self.scoreRequierment
-        Y_pred = self.critic.run(states)
+        Y_pred = self.critic.forward(states)
         Y_true = np.zeros_like(Y_pred) + reward
         loss = self.loss_CategoricalCrossentropy(Y_pred, Y_true)
 
@@ -66,14 +66,15 @@ class PPO:
 
     def runNetwork(self, inputs):
         # store trajectory (state, action taken, reward, next state)
-        outputs = self.network.run(inputs)
+        outputs = self.actor.forward(inputs)
         return outputs
 
     def howToRun(self):
         inputs = [1,2,3,4]
-        oldChance = np.max(self.oldActor.run(inputs))
-        newChance = np.max(self.actor.run(inputs))
-        self.clipped_surrogate_objective(oldChance, newChance, [])
+        oldChance = np.max(self.oldActor.forward(inputs))
+        newChance = np.max(self.actor.forward(inputs))
+        advantages = somefunction
+        self.clipped_surrogate_objective(oldChance, newChance, advantages)
 
 
 """inputs from snake
