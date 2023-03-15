@@ -1,34 +1,23 @@
 import numpy as np
 from Network import Network
 
+# standard loss function and its derivative
+def mse(y_true, y_pred):
+    return np.mean(np.power(y_true-y_pred, 2))
+
+def mse_prime(y_true, y_pred):
+    return 2*(y_pred-y_true)/y_true.size
+
 class PPO:
-    def __init__(self, actor: Network, scoreRequierment, clippingThreshold = 0.2):
+    def __init__(self, actor: Network, maxScore, clippingThreshold = 0.2, loss = mse, loss_prime = mse_prime):
         self.trajectories = []
         self.actor = actor
         self.oldActor = actor
-        self.critic = Network(actor.size[0], actor.size[1,-1], 1)
-        self.scoreRequierment = scoreRequierment
+        self.critic = Network(actor.size[0], actor.size[1:-1], 1)
+        self.maxScore = maxScore
         self.clippingThreshold = clippingThreshold
-
-    def loss_CategoricalCrossentropy(self, Y_pred, Y_true):
-        samples = len(Y_pred)
-        y_pred_clipped = np.clip(Y_pred, 1e-7, 1-1e-7)
-
-        if len(Y_true.shape) == 1:
-            correct_confidences = y_pred_clipped[range(samples), Y_true]
-        else:
-            correct_confidences = np.sum(y_pred_clipped*Y_true, axis=1)
-
-        negative_log_likelihoods = -np.log(correct_confidences)
-
-        data_loss = np.mean(negative_log_likelihoods)
-        return data_loss
-
-    def value(self, states: np.ndarray, reward: float):
-        reward = reward / self.scoreRequierment
-        Y_pred = self.critic.forward(states)
-        Y_true = np.zeros_like(Y_pred) + reward
-        loss = self.loss_CategoricalCrossentropy(Y_pred, Y_true)
+        self.loss = loss
+        self.loss_prime = loss_prime
 
     def generalized_advantage_estimate(self, value_old_state, value_new_state, reward, done, gamma=0.99, lamda=0.95):
         """
@@ -62,25 +51,15 @@ class PPO:
         surrogate1 = ratio * advantages
         surrogate2 = clip_ratio * advantages
         return np.sum(np.minimum(surrogate1, surrogate2), axis=0)
-        #return -np.mean(np.minimum(surrogate1, surrogate2))
 
     def runNetwork(self, inputs):
         # store trajectory (state, action taken, reward, next state)
         outputs = self.actor.forward(inputs)
         return outputs
 
-    def howToRun(self):
-        inputs = [1,2,3,4]
-        oldChance = np.max(self.oldActor.forward(inputs))
-        newChance = np.max(self.actor.forward(inputs))
-        advantages = somefunction
-        self.clipped_surrogate_objective(oldChance, newChance, advantages)
-
-
-"""inputs from snake
-16 lines out of snake head (distance to colistion / max distance)
-16 inputs for what the lines hit (-1 wall, 0 snake, 1 apple)
-2 for head position
-2 for relative position to apple
-2 for relative position to tail
-"""
+    def train(self, states, rewards):
+        values = [self.critic.forward(i) for i in states]
+        done = [0 for _ in rewards[1:]] + [1]
+        advantages, value_target = self.generalized_advantage_estimate(values[:-1], values[1:], rewards, done)
+        error = self.clipped_surrogate_objective(self.oldActor, self.actor, advantages)
+        self.actor.backward(error)

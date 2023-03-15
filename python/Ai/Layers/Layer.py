@@ -2,12 +2,12 @@ import numpy as np
 
 class Layer:
     def __init__(self, n_inputs, n_neurons):
-        self.weights = np.array([np.random.uniform(-1,1, n_inputs) for i in range(n_neurons)])
+        self.weights = np.array([np.random.uniform(-1,1, n_inputs) for _ in range(n_neurons)])
         self.biases = np.zeros((1, n_neurons))
 
     def forward(self, inputs):
         self.inputs = inputs
-        self.output = np.dot(self.inputs, self.weights) + self.biases
+        self.output = np.dot(self.inputs, self.weights.T) + self.biases
         return self.output
     
     # computes dE/dW, dE/dB for a given output_error=dE/dY. Returns input_error=dE/dX.

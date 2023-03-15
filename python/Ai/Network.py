@@ -19,7 +19,8 @@ class Network:
             else:
                 self.layers.append(Layer(hidden_sizes[index-1], layer))
                 self.layers.append(types[layerTypes[index]](layer, layer))
-        self.layers.append(types[layerTypes[-1]](hidden_sizes[-1], output_size))
+        self.layers.append(Layer(hidden_sizes[-1], output_size))
+        self.layers.append(types[layerTypes[-1]](output_size, output_size))
 
     # Set loss function to use
     def use(self, loss, loss_prime):
@@ -32,7 +33,7 @@ class Network:
         for layer in self.layers:
             output = layer.forward(output)
         return output
-    
+
     # train the network
     def fit(self, inputs, expected, epochs, learning_rate = 0.1):
         # sample dimension first
@@ -48,5 +49,8 @@ class Network:
 
                 # backward propagation
                 error = self.loss_prime(expected[i], output)
-                for layer in reversed(self.layers):
-                    error = layer.backward_propagation(error, learning_rate)
+                self.backward(error, learning_rate)
+
+    def backward(self, error, learning_rate = 0.1):
+        for layer in reversed(self.layers):
+            error = layer.backward_propagation(error, learning_rate)
