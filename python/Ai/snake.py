@@ -25,29 +25,28 @@ REWARDSIZES = {
 
 class Snake:
     def __init__(self):
-        g = np.floor(gridSize/2)
-        self.parts = [[g - i, g] for i in reversed(range(5))]
-        self.length = 5
-        self.apple = [g + 5, g]
-
-        # ai
-        self.lastdistance = np.abs(np.subtract(self.parts[-1], self.apple))
-        self.generation = 1
-        self.states = []
-        self.storeState()
-        self.rewards = []
+        self.generation = 0
+        self.reset()
+        
         network = Network(39, [30,20,10], 4)
         self.ai = PPO(network, gridSize ** 2 * REWARDSIZES["apple"])
 
     def move(self, rotation):
+        self.rewards.append(0)
         newPos = np.add(self.parts[-1], rotation)
 
+        distance = np.sum(np.abs(np.subtract(self.parts[-1], self.apple)))
+        if distance < self.lastdistance:
+            self.rewards[-1] += REWARDSIZES["moveCloser"]
+        else:
+            self.rewards[-1] += REWARDSIZES["moveAway"]
+
         # hit a wall
-        if np.all((newPos >= 0)&(newPos < gridSize)):
+        if not np.all((newPos >= 0)&(newPos < gridSize)):
             self.die()
             return
         # didn't get apple
-        if newPos != self.apple:
+        if not np.all(np.equal(newPos, self.apple)):
             self.parts.pop(0)
         # got apple
         else:
@@ -58,27 +57,32 @@ class Snake:
             return
         self.parts.append(newPos)
 
-        distance = np.abs(np.subtract(self.parts[-1], self.apple))
-        if distance > self.lastdistance:
-            self.rewards.append(REWARDSIZES["moveAway"])
-        else:
-            self.rewards.append(REWARDSIZES["moveCloser"])
-
         self.storeState()
         self.draw()
 
     def die(self):
-        self.rewards.append(REWARDSIZES["die"])
+        self.draw()
+        self.rewards[-1] += REWARDSIZES["die"]
         print(f"Generation: {self.generation}, Reward: {np.sum(self.rewards)}")
-        self.ai.train(self.states, self.rewards)
-        # reset
+        if len(self.rewards) != 1:
+            self.ai.train(self.states, self.rewards)
+        else:
+            self.ai.actor = Network(39, [30,20,10], 4)
+        self.reset()
+
+    def reset(self):
         g = np.floor(gridSize/2)
         self.parts = [[g - i, g] for i in reversed(range(5))]
         self.length = 5
         self.apple = [g + 5, g]
+        self.lastdistance = np.sum(np.abs(np.subtract(self.parts[-1], self.apple)))
+        self.rewards = []
+        self.states = []
+        self.storeState()
+        self.generation += 1
 
     def newApple(self):
-        self.rewards.append(REWARDSIZES["apple"])
+        self.rewards[-1] += REWARDSIZES["apple"]
         if self.length == gridSize ** 2:
             print("Perfect game reached at:")
             print(f"Generation: {self.generation}, Reward: {np.sum(self.rewards)}")
@@ -91,7 +95,7 @@ class Snake:
                 continue
             self.apple = pos
             return
-        
+
     def collide(self, pos, state, length):
         changed = False
         if np.all(np.equal(pos, self.apple)):
@@ -153,10 +157,14 @@ class Snake:
         self.states.append(state)
 
     def draw(self):
+        # backgroung
         screen.fill(COLORS["black"])
+        # snake
         for i in self.parts:
             pg.draw.rect(screen, COLORS["green"], pg.rect.Rect(i[0]*30, i[1]*30, 30, 30))
+        # apple
         pg.draw.rect(screen, COLORS["red"], pg.rect.Rect(self.apple[0]*30, self.apple[1]*30, 30, 30))
+        # grid
         for i in range(30, gridSize*30, 30):
             pg.draw.line(screen, COLORS["white"], (i, 0), (i, gridSize*30))
             pg.draw.line(screen, COLORS["white"], (0, i), (gridSize*30, i))
@@ -164,5 +172,7 @@ class Snake:
 
 snake = Snake()
 
+moves = [[0,1], [1,0], [0,-1], [-1,0]]
 while True:
-    snake.ai.actor.forward(snake.states[-1])
+    move = snake.ai.actor.forward(snake.states[-1])
+    snake.move(moves[np.argmax(move)])

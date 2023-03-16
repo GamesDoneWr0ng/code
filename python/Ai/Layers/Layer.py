@@ -12,8 +12,8 @@ class Layer:
     
     # computes dE/dW, dE/dB for a given output_error=dE/dY. Returns input_error=dE/dX.
     def backward_propagation(self, output_error, learning_rate):
-        input_error = np.dot(output_error, self.weights.T)
-        weights_error = np.dot(self.inputs.T, output_error)
+        input_error = np.dot(output_error, self.weights)
+        weights_error = np.dot(np.transpose(self.inputs), output_error.T)
         # dBias = output_error
 
         # update parameters
