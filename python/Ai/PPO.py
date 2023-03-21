@@ -49,7 +49,7 @@ class PPO:
         ratio = new_policy / old_policy
         clip_ratio = np.clip(ratio, 1 - self.clippingThreshold, 1 + self.clippingThreshold)
         surrogate1 = ratio.T * advantages
-        surrogate2 = clip_ratio.T * advantages
+        surrogate2 = clip_ratio * advantages
         return np.sum(np.minimum(surrogate1, surrogate2), axis=0)
 
     def runNetwork(self, inputs):
@@ -58,8 +58,8 @@ class PPO:
         return outputs
 
     def train(self, states, rewards):
-        values = np.array([0]) + [self.critic.forward(i) for i in states] + [np.sum(rewards)]
-        done = np.array([0 for _ in rewards[1:]] + np.array([1]))
-        advantages, value_target = self.generalized_advantage_estimate(values[:-1], values[1:], rewards, done)
-        error = self.clipped_surrogate_objective(self.oldActor.forward(states[1:]), self.actor.forward(states[1:]), advantages)
+        values = np.array(np.array([0]) + [self.critic.forward(i) for i in states])
+        done = np.array([1 for _ in rewards[1:]] + [0])
+        advantages, value_target = self.generalized_advantage_estimate(values[1:], values, rewards, done)
+        error = self.clipped_surrogate_objective(self.oldActor.forward(states), self.actor.forward(states), advantages)
         self.actor.backward(error)
