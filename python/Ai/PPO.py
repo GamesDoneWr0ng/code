@@ -37,7 +37,7 @@ class PPO:
             delta = reward[t] + (gamma * value_new_state[t] * done[t]) - value_old_state[t]
             advantage[t] = delta + (gamma * lamda * advantage[t + 1] * done[t])
 
-        value_target = advantage[:batch_size] + np.squeeze(value_old_state)
+        value_target = advantage[:batch_size] + np.squeeze(value_old_state[1:])
 
         return advantage[:batch_size], value_target
 
@@ -49,17 +49,22 @@ class PPO:
         ratio = new_policy / old_policy
         clip_ratio = np.clip(ratio, 1 - self.clippingThreshold, 1 + self.clippingThreshold)
         surrogate1 = ratio.T * advantages
-        surrogate2 = clip_ratio * advantages
+        surrogate2 = clip_ratio.T * advantages
         return np.sum(np.minimum(surrogate1, surrogate2), axis=0)
+    
+    def adam(self, clipped, alpha=0.001, beta1=0.9, beta2=0.999, epsilon=1E-7):
+
+        return error
 
     def runNetwork(self, inputs):
-        # store trajectory (state, action taken, reward, next state)
         outputs = self.actor.forward(inputs)
         return outputs
 
     def train(self, states, rewards):
-        values = np.array(np.array([0]) + [self.critic.forward(i) for i in states])
+        values = np.array([self.critic.forward(i) for i in states])
         done = np.array([1 for _ in rewards[1:]] + [0])
-        advantages, value_target = self.generalized_advantage_estimate(values[1:], values, rewards, done)
-        error = self.clipped_surrogate_objective(self.oldActor.forward(states), self.actor.forward(states), advantages)
+        advantages, value_target = self.generalized_advantage_estimate(np.append([0], values), np.append(values, [0]), rewards, done)
+        # compute policy update
+        clipped = self.clipped_surrogate_objective(self.oldActor.forward(states), self.actor.forward(states), advantages)
+        error = self.adam(clipped)
         self.actor.backward(error)

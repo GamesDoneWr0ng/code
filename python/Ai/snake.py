@@ -122,7 +122,7 @@ class Snake:
         1 for snake lenght
         """
         state = []
-        # vision
+        # vision 0-1 and (-1)-1
         for i in [[0,1], [1,2], [1,1], [2,1], [1,0], [2,-1], [1,-1], [1,-2], [0,-1], [-1, -2], [-1,-1], [-2, -1], [-1, 0], [-2, 1], [-1,1], [-1, 2]]:
             pos = self.parts[-1]
             for length in range(1, gridSize+1):
@@ -141,7 +141,7 @@ class Snake:
                 if changed:
                     break
 
-        # positions
+        # positions 0-1
         state.append(self.parts[-1][0] / gridSize)                      # head x
         state.append(self.parts[-1][1] / gridSize)                      # head y
 
@@ -151,7 +151,7 @@ class Snake:
         state.append((self.parts[0][0] - self.parts[-1][0]) / gridSize) # relative tail x
         state.append((self.apple[1] - self.parts[-1][1]) / gridSize)    # relative tail y
 
-        # lenght
+        # lenght 0-1
         state.append(self.length / gridSize ** 2)                       # lenght
 
         self.states.append(state)
