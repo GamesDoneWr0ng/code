@@ -1,7 +1,9 @@
 from time import time
-from sympy import nextprime
+from sympy import primerange
 import numpy as np
+import sys
 import cProfile
+np.set_printoptions(threshold=sys.maxsize)
 
 def timer(func, number, iterations):
     times = []
@@ -67,10 +69,7 @@ def me(number):
             n += 1
 
 def library(number):
-    i = 1
-    while i < number:
-        #print(i)
-        i =  nextprime(i)
+    return [i for i in primerange(number)]
 
 # Define a function that accepts a number as an argument
 def chatGPT(number):
@@ -88,22 +87,36 @@ def chatGPT(number):
   # Return the list of prime numbers
   return [i for i in numbers if i != -1]
 
+def internet(n):
+    """ Input n>=6, Returns a array of primes, 2 <= p < n """
+    sieve = np.ones(n//3 + (n%6==2), dtype=bool)
+    for i in range(1,int(n**0.5*0.333333333333333)+1):
+        if sieve[i]:
+            k = 3 * i + 1 | 1
+            sieve[int(k*k*0.333333333333333)::2*k] = False
+            sieve[k* int((k-2*(i&1)+4) * 0.333333333333333) :: 2*k] = False
+    return np.r_[2,3,((3*np.nonzero(sieve)[0][1:]+1)|1)]
+
 def me_and_chatGPT(number):
-    sieve = np.ones(number+1, dtype=bool)
+    sieve = np.ones(number+1, dtype=np.uint8)
     sieve[0] = sieve[1] = False
 
     for i in range(2, int(number**0.5)+1):
         if sieve[i]:
             sieve[i*i::i] = False
-    
-    primes = np.flatnonzero(sieve)
-    return primes
+
+    return np.nonzero(sieve)
 
 # To 10000000
 # Me: --- 43.81807827949524 seconds ---
-# External library: --- 26.992177724838257 seconds ---
+# External library: --- 24.6845654964447 seconds ---
 # Ai: --- 7.066962003707886 seconds ---
+# Internet: --- 0.01201413631439209 seconds ---
+# Me and chatGPT: --- 0.036757812261581424 seconds ---
+if __name__ == '__main__':
+    #timer(internet, 10_000_000, 1000)
 
-timer(me_and_chatGPT, 1_000_000_000, 10)
-
-#cProfile.run("me_and_chatGPT(10000000)")
+    cProfile.run("internet(1_000_000_000)")
+    #print(me_and_chatGPT(10_000_000))
+    #for i in primes:
+    #    print(i)

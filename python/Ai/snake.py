@@ -29,7 +29,7 @@ class Snake:
         self.reset()
         
         network = Network(39, [30,20,10], 4)
-        self.ai = PPO(network, gridSize ** 2 * REWARDSIZES["apple"])
+        self.ai = PPO(network, 20 * REWARDSIZES["apple"])
 
     def move(self, rotation):
         self.rewards.append(0)

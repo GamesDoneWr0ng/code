@@ -17,36 +17,39 @@ for i in range(1, SIZE[0]+1):
 lastFrame = time.time()
 os.chdir("python/Apple/Frames")
 frames = sorted(i if len(i) == 8 else "0" + i for i in os.listdir('.'))[1:]
-wb = openpyxl.load_workbook("/Users/askborgen/Desktop/code/python/Apple/Meanwhile.xlsx")
-xwwb = xw.books.active
-update = xwwb.macro("Update")
-reSize = xwwb.macro("ReSize")
-sheet = wb.active
+#wb = openpyxl.load_workbook("/Users/askborgen/Desktop/code/python/Apple/Meanwhile.xlsm")
+#xwwb = xw.books.active
+wb = xw.Book("/Users/askborgen/Desktop/code/python/Apple/Book2.xlsx")
+update = wb.macro("Update")
+reSize = wb.macro("ReSize")
+#sheet = wb.active
+sheet = wb.sheets.active
 
 reSize()
 
-@jit(parallel=True, forceobj=True, target_backend='cuda')
-def display(img, lastImg, sh, cache):
+@jit(parallel=True, forceobj=True)
+def display(img, lastImg):
     for x in range(SIZE[0]):
         for y in range(SIZE[1]):
-            color = "%02x%02x%02x" % img.getpixel((x,y))
-            if color == "%02x%02x%02x" % lastImg.getpixel((x,y)):
+            color = img.getpixel((x,y))
+            if color == lastImg.getpixel((x,y)):
                 continue
-            style = openpyxl.styles.colors.Color(rgb=color)
-            fill = openpyxl.styles.fills.PatternFill(patternType='solid', fgColor=style)
-            sh[f"{cache[(x+1)]}{y+1}"].fill = fill
+            #style = openpyxl.styles.colors.Color(rgb=color)
+            #fill = openpyxl.styles.fills.PatternFill(patternType='solid', fgColor=style)
+            #sheet[f"{STRING_COL_CACHE[(x+1)]}{y+1}"].fill = fill
+            sheet[f"{STRING_COL_CACHE[(x+1)]}{y+1}"].color = color
 
 # animate
-lastImg = Image.open(frames[0][1:])
+lastImg = Image.open(frames[1102][1:])
 lastImg.mode
 for frame in frames[::3]:
     img = Image.open(frame if frame[0] != "0" else frame[1:])
     img.mode
 
-    display(img, lastImg, sheet, STRING_COL_CACHE)
+    display(img, lastImg)
     lastImg = img
 
-    wb.save("/Users/askborgen/Desktop/code/python/Apple/Meanwhile.xlsx")
-    update()
+    #wb.save("/Users/askborgen/Desktop/code/python/Apple/Meanwhile.xlsx")
+    #update()
     print(frame, 1 / (lastFrame - time.time()), "fps")
     lastFrame = time.time()

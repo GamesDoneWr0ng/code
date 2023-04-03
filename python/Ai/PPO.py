@@ -19,28 +19,6 @@ class PPO:
         self.loss = loss
         self.loss_prime = loss_prime
 
-    def generalized_advantage_estimate(self, value_old_state, value_new_state, reward, done, gamma=0.99, lamda=0.95):
-        """
-        Get generalized advantage estimate of a trajectory
-        value_old_state: value function result with old_state input
-        value_new_state: value function result with new_state input
-        reward: agent reward of taking actions in the environment
-        done: flag for end of episode
-        gamma: trajectory discount (scalar) = 0.99
-        lamda: exponential mean discount (scalar) = 0.95
-        """
-        batch_size = done.shape[0]
-
-        advantage = np.zeros(batch_size + 1)
-
-        for t in reversed(range(batch_size)):
-            delta = reward[t] + (gamma * value_new_state[t] * done[t]) - value_old_state[t]
-            advantage[t] = delta + (gamma * lamda * advantage[t + 1] * done[t])
-
-        value_target = advantage[:batch_size] + np.squeeze(value_old_state[1:])
-
-        return advantage[:batch_size], value_target
-
     def clipped_surrogate_objective(self, old_policy, new_policy, advantages):
         """
         Calculates the clipped surrogate objective function for PPO.
@@ -48,23 +26,38 @@ class PPO:
         """
         ratio = new_policy / old_policy
         clip_ratio = np.clip(ratio, 1 - self.clippingThreshold, 1 + self.clippingThreshold)
-        surrogate1 = ratio.T * advantages
-        surrogate2 = clip_ratio.T * advantages
-        return np.sum(np.minimum(surrogate1, surrogate2), axis=0)
-    
+        surrogate1 = np.apply_along_axis(np.multiply, 0, ratio, advantages.T)
+        surrogate2 = np.apply_along_axis(np.multiply, 0, clip_ratio, advantages.T)
+        return -np.mean(np.minimum(surrogate1, surrogate2))
+
     def adam(self, clipped, alpha=0.001, beta1=0.9, beta2=0.999, epsilon=1E-7):
 
-        return error
+        raise NotImplementedError
+
+    def discountedSumOfRewards(self, rewards, gamma=0.99):
+        sums = []
+        for _ in range(len(rewards)):
+            sum = 0
+            for index, i in enumerate(rewards[_:]):
+                sum += i * gamma ** index
+            sums.append(sum)
+        return np.array(sums)
 
     def runNetwork(self, inputs):
         outputs = self.actor.forward(inputs)
         return outputs
 
     def train(self, states, rewards):
-        values = np.array([self.critic.forward(i) for i in states])
-        done = np.array([1 for _ in rewards[1:]] + [0])
-        advantages, value_target = self.generalized_advantage_estimate(np.append([0], values), np.append(values, [0]), rewards, done)
+        expectedRewarwds = self.discountedSumOfRewards(np.array([self.critic.forward(i) for i in states]))
+        advantages = self.discountedSumOfRewards(rewards) - expectedRewarwds
+
         # compute policy update
+
         clipped = self.clipped_surrogate_objective(self.oldActor.forward(states), self.actor.forward(states), advantages)
-        error = self.adam(clipped)
+        loss = np.average(expectedRewarwds)
+        entropy = 
+
+        loss = clipped - loss + entropy
+
+        error = self.adam(loss)
         self.actor.backward(error)
