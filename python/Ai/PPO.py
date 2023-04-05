@@ -28,11 +28,11 @@ class PPO:
         clip_ratio = np.clip(ratio, 1 - self.clippingThreshold, 1 + self.clippingThreshold)
         surrogate1 = np.apply_along_axis(np.multiply, 0, ratio, advantages.T)
         surrogate2 = np.apply_along_axis(np.multiply, 0, clip_ratio, advantages.T)
-        return -np.mean(np.minimum(surrogate1, surrogate2))
 
-    def adam(self, clipped, alpha=0.001, beta1=0.9, beta2=0.999, epsilon=1E-7):
+        if np.any((ratio > 1+self.clippingThreshold)|(ratio < 1-self.clippingThreshold)):
+            self.oldActor = self.actor
 
-        raise NotImplementedError
+        return -np.mean(np.minimum(surrogate1, surrogate2), axis=1)
 
     def discountedSumOfRewards(self, rewards, gamma=0.99):
         sums = []
@@ -48,16 +48,19 @@ class PPO:
         return outputs
 
     def train(self, states, rewards):
-        expectedRewarwds = self.discountedSumOfRewards(np.array([self.critic.forward(i) for i in states]))
-        advantages = self.discountedSumOfRewards(rewards) - expectedRewarwds
+        expectedRewarwds = 50*((2 * np.array([self.critic.forward(i)[0][0] for i in states])) - 1)
+        actualRewards = self.discountedSumOfRewards(rewards)
+        advantages = actualRewards - expectedRewarwds
 
-        # compute policy update
+        # train critic
+        self.critic.fit(states, actualRewards, 10, self.loss_prime, learning_rate=0.01)
 
-        clipped = self.clipped_surrogate_objective(self.oldActor.forward(states), self.actor.forward(states), advantages)
+        probs = self.actor.forward(states)
+        clipped = self.clipped_surrogate_objective(self.oldActor.forward(states), probs, advantages)
         loss = np.average(expectedRewarwds)
-        entropy = 
+        #entropy = -np.sum(np.log(probs), axis=1)
 
-        loss = clipped - loss + entropy
+        loss = clipped - loss #+ entropy
 
-        error = self.adam(loss)
-        self.actor.backward(error)
+        ##error = self.adam(loss)
+        self.actor.backward(loss)

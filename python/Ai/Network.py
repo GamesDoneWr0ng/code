@@ -32,10 +32,11 @@ class Network:
         output = inputs
         for layer in self.layers:
             output = layer.forward(output)
+
         return output
 
     # train the network
-    def fit(self, inputs, expected, epochs, learning_rate = 0.1):
+    def fit(self, inputs, expected, epochs, loss_prime, learning_rate = 0.1):
         # sample dimension first
         samples = len(inputs)
 
@@ -46,9 +47,10 @@ class Network:
                 output = inputs[i]
                 for layer in self.layers:
                     output = layer.forward(output)
+                output = 50*((2 * output)-1)
 
                 # backward propagation
-                error = self.loss_prime(expected[i], output)
+                error = loss_prime(expected[i], output[0][0])
                 self.backward(error, learning_rate)
 
     def backward(self, error, learning_rate = 0.1):
