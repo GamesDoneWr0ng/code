@@ -1,11 +1,7 @@
-import numpy as np
+import pygame as pg
+pg.init()
 
-prob = np.array([[1,2,3,4],
-                 [1,2,3,4],
-                 [1,2,3,4],
-                 [1,2,3,4]])
+screen = pg.display.set_mode((600, 600))
 
-advan = np.array([1,2,3,4])
-
-out = np.apply_along_axis(np.multiply, 0, prob, advan.T)
-print()
+while True:
+    pg.display.flip()

@@ -22,7 +22,7 @@ class Layer:
             # dBias = output_error
 
             # update parameters
-            
+
             self.biases  -= learning_rate * i
             #return input_error
             iErrors.append(input_error)

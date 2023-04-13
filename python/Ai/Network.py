@@ -55,4 +55,6 @@ class Network:
 
     def backward(self, error, learning_rate = 0.1):
         for layer in reversed(self.layers):
+            if learning_rate == 0.1:
+                print(np.max(error))
             error = layer.backward_propagation(error, learning_rate)

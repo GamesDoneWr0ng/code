@@ -174,5 +174,8 @@ snake = Snake()
 
 moves = [[0,1], [1,0], [0,-1], [-1,0]]
 while True:
+    for event in pg.event.get():
+        if event.type == pg.QUIT:
+            break
     move = snake.ai.actor.forward(snake.states[-1])
     snake.move(moves[np.argmax(move)])

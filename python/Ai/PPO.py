@@ -32,9 +32,9 @@ class PPO:
         if np.any((ratio > 1+self.clippingThreshold)|(ratio < 1-self.clippingThreshold)):
             self.oldActor = self.actor
 
-        return -np.mean(np.minimum(surrogate1, surrogate2), axis=1)
+        return np.mean(np.minimum(surrogate1, surrogate2), axis=1)
 
-    def discountedSumOfRewards(self, rewards, gamma=0.99):
+    def discountedSumOfRewards(self, rewards, gamma=0.9):
         sums = []
         for _ in range(len(rewards)):
             sum = 0
@@ -62,5 +62,4 @@ class PPO:
 
         loss = clipped - loss #+ entropy
 
-        ##error = self.adam(loss)
         self.actor.backward(loss)
