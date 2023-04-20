@@ -1,31 +1,76 @@
+;section .data                           ;Data segment
+;   userMsg db 'Please enter a number: ' ;Ask the user to enter a number
+;   lenUserMsg equ $-userMsg             ;The length of the message
+;   dispMsg db 'You have entered: '
+;   lenDispMsg equ $-dispMsg
+;
+;section .bss           ;Uninitialized data
+;   num resb 5
+;
+;section .text
+;    global _start
+;
+;_start:
+;    mov rax, 0x2000004
+;    mov rdi, 1
+;    lea rsi, [rel userMsg]
+;    mov rdx, lenUserMsg
+;    syscall
+;
+;    ; Read and store the user input
+;    mov rax, 0x2000003
+;    mov rdi, 0
+;    lea rsi, [rel num]
+;    mov rdx, 5
+;    syscall
+;
+;    mov rax, 0x2000004
+;    mov rdi, 1
+;    lea rsi, [rel dispMsg]
+;    mov rdx, lenDispMsg
+;    syscall
+;
+;    ;Output the number entered
+;    mov rax, 0x2000004
+;    mov rdi, 1
+;    lea rsi, [rel num]
+;    mov rdx, 5
+;    syscall
+;
+;    ; Exit the program
+;    mov rax, 0x2000001     ; sys_exit
+;    xor rdi, rdi           ; exit code 0
+;    syscall
+
+section .data
+   msg db 'Displaying 9 stars', 0xa
+   len equ $ - msg
+   s2 times 10 db '*'
+
 section .text
     global _start
 
-section .bss
-    num resb 1
-
 _start:
-    mov rcx,10
-    mov rax, '1'
+    ; Displaying 9 stars
+    mov rax, 0x2000004
+    mov rdi, 1
+    lea rsi, [rel msg]
+    mov rdx, len
+    syscall
 
-    l1:
-        mov [rel num], rax
-        mov rax, 0x2000004
-        mov rdi, 1
-        push rcx
+    ; chainging 10 stars to 9 stars with a new line
+    lea rbx, [rel s2]
+    add rbx, 9
+    mov byte [rbx], 0xa
 
-        lea rsi, [rel num]
-        mov rdx, 1
-        syscall
+    ; print 9 stars
+    mov rax, 0x2000004
+    mov rdi, 1
+    lea rsi, [rel s2]
+    mov rdx, 10
+    syscall
 
-        mov rax, [rel num]
-        sub rax, '0'
-        inc rax
-        add rax, '0'
-        pop rcx
-        loop l1
-
-exit:
-    mov rax, 0x2000001
-    xor rdi, rdi
+    ; Exit the program
+    mov rax, 0x2000001     ; sys_exit
+    xor rdi, rdi           ; exit code 0
     syscall
