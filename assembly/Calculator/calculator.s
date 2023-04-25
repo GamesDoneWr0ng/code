@@ -1,3 +1,19 @@
+    %macro writeString 2
+        mov rax, 0x2000004
+        mov rdi, 1
+        mov rsi, %1
+        mov rdx, %2
+        syscall
+    %endmacro
+
+    %macro readString 2
+        mov rax, 0x2000003
+        mov rdi, 0
+        lea rsi, %1
+        mov rdx, %2
+        syscall
+    %endmacro
+
 section .data
     msg1 db "Enter a digit: "
     len1 equ $- msg1 
@@ -19,40 +35,13 @@ section .text
     global _start
 
 _start:
-    ; msg 1
-    mov rax, 0x2000004
-    mov rdi, 1
-    lea rsi, [rel msg1]
-    mov rdx, len1
-    syscall
+    writeString msg1, len1
+    readString [rel num1], 2
 
-    ; Read 1
-    mov rax, 0x2000003
-    mov rdi, 0
-    lea rsi, [rel num1]
-    mov rdx, 2
-    syscall
+    writeString msg2, len2
+    readString [rel num2], 2
 
-    ; msg 2
-    mov rax, 0x2000004
-    mov rdi, 1
-    lea rsi, [rel msg2]
-    mov rdx, len2
-    syscall
-
-    ; Read 2
-    mov rax, 0x2000003
-    mov rdi, 0
-    lea rsi, [rel num2]
-    mov rdx, 2
-    syscall
-
-    ; msg 3
-    mov rax, 0x2000004
-    mov rdi, 1
-    lea rsi, [rel msg3]
-    mov rdx, len3
-    syscall
+    writeString msg3, len3
 
     ; store num1 and num2 in rax and rbx then convert to desimal by sub '0'
     mov rax, [rel num1]
@@ -68,19 +57,8 @@ _start:
     ; store sum in sum
     mov [rel sum], rax
 
-    ; print the sum
-    mov rax, 0x2000004
-    mov rdi, 1
-    lea rsi, [rel sum]
-    mov rdx, 1
-    syscall
-
-    ; newline
-    mov rax, 0x2000004
-    mov rdi, 1
-    lea rsi, [rel newline]
-    mov rdx, 1
-    syscall
+    writeString sum, 1
+    writeString newline, 1
 
 exit:
     mov rax, 0x2000001

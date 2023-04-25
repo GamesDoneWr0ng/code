@@ -1,6 +1,17 @@
-from AppKit import NSPasteboard, NSHTMLPboardType
+from pylab import *
 
-pasteboard = NSPasteboard.generalPasteboard()
-html_data = pasteboard.dataForType_(NSHTMLPboardType)
-html_string = str(html_data, 'utf-8')
-#print(html_string)
+def f(x):
+    return np.array([i^10 for i in x])
+
+linX = np.array(range(-100, 100))
+linY = f(linX)
+
+plot(linX, linY)
+
+grid(True)
+xlabel("x")
+ylabel("y")
+axhline(y=0, color="k", zorder=0)
+axvline(x=0, color="k", zorder=0)
+
+show()

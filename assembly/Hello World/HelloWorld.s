@@ -13,6 +13,10 @@ _start:
     mov rdx, len           ; length of the hello string
     syscall
 
+    ;mov rax, 0x2000004     ; sys_write
+    ;mov rdx, len           ; length of the hello string
+    ;syscall
+
     ; Exit the program
     mov rax, 0x2000001     ; sys_exit
     xor rdi, rdi           ; exit code 0

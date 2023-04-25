@@ -1,76 +1,30 @@
-;section .data                           ;Data segment
-;   userMsg db 'Please enter a number: ' ;Ask the user to enter a number
-;   lenUserMsg equ $-userMsg             ;The length of the message
-;   dispMsg db 'You have entered: '
-;   lenDispMsg equ $-dispMsg
-;
-;section .bss           ;Uninitialized data
-;   num resb 5
-;
-;section .text
-;    global _start
-;
-;_start:
-;    mov rax, 0x2000004
-;    mov rdi, 1
-;    lea rsi, [rel userMsg]
-;    mov rdx, lenUserMsg
-;    syscall
-;
-;    ; Read and store the user input
-;    mov rax, 0x2000003
-;    mov rdi, 0
-;    lea rsi, [rel num]
-;    mov rdx, 5
-;    syscall
-;
-;    mov rax, 0x2000004
-;    mov rdi, 1
-;    lea rsi, [rel dispMsg]
-;    mov rdx, lenDispMsg
-;    syscall
-;
-;    ;Output the number entered
-;    mov rax, 0x2000004
-;    mov rdi, 1
-;    lea rsi, [rel num]
-;    mov rdx, 5
-;    syscall
-;
-;    ; Exit the program
-;    mov rax, 0x2000001     ; sys_exit
-;    xor rdi, rdi           ; exit code 0
-;    syscall
+    %macro writeString 2
+        mov rax, 0x2000004
+        mov rdi, 1
+        mov rsi, %1
+        mov rdx, %2
+        syscall
+    %endmacro
 
 section .data
-   msg db 'Displaying 9 stars', 0xa
-   len equ $ - msg
-   s2 times 10 db '*'
+    msg1 db 'Hello world!', 0xa
+    len1 equ $ - msg1
+
+    msg2 db 'This is a string!', 0xa
+    len2 equ $ - msg2
+
+    msg3 db 'Goodbye!', 0xa
+    len3 equ $ - msg3
 
 section .text
     global _start
 
 _start:
-    ; Displaying 9 stars
-    mov rax, 0x2000004
-    mov rdi, 1
-    lea rsi, [rel msg]
-    mov rdx, len
-    syscall
+    writeString msg1, len1
+    writeString msg2, len2
+    writeString msg3, len3
 
-    ; chainging 10 stars to 9 stars with a new line
-    lea rbx, [rel s2]
-    add rbx, 9
-    mov byte [rbx], 0xa
-
-    ; print 9 stars
-    mov rax, 0x2000004
-    mov rdi, 1
-    lea rsi, [rel s2]
-    mov rdx, 10
-    syscall
-
-    ; Exit the program
-    mov rax, 0x2000001     ; sys_exit
-    xor rdi, rdi           ; exit code 0
+exit:
+    mov rax, 0x2000001
+    xor rdi, rdi
     syscall
