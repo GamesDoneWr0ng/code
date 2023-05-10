@@ -33,17 +33,20 @@ For K = 2 and length 4 Marmot can eat, for example, (WWWW) or (RWWR), but for ex
 """
 
 import numpy  as np
+from math import comb
+import cProfile
 
-k = np.random.randint(1,10**5)
+k = np.random.randint(1,10**4)
 a = np.random.randint(1,10**5)
-b = np.random.randint(a,10**5)
+b = np.random.randint(1,10**5)
 
 print(k)
 print(a, b)
 
 def count_flowers(k=k,a=a,b=b):
-    sets = min((a // k), ((a+b) // k))
-    count = ((sets+1) * (sets+2) * 0.5) - ((sets-a) * (sets-a+1) * 0.5)
+    sets = a // k
+    count = comb(sets + b, b)
     return count
 
-print(count_flowers(2, 4, 1))
+#print(count_flowers(1, 100000, 100000))
+cProfile.run('count_flowers(1, 100000, 100000)')
