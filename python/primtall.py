@@ -107,16 +107,16 @@ def me_and_chatGPT(number):
 
     return np.nonzero(sieve)
 
-# To 10000000
+# To 10_000_000
 # Me: --- 43.81807827949524 seconds ---
 # External library: --- 24.6845654964447 seconds ---
 # Ai: --- 7.066962003707886 seconds ---
 # Internet: --- 0.01201413631439209 seconds ---
 # Me and chatGPT: --- 0.036757812261581424 seconds ---
 if __name__ == '__main__':
-    #timer(internet, 10_000_000, 1000)
+    timer(me_and_chatGPT, 10_000_000, 100)
 
-    cProfile.run("internet(1_000_000_000)")
+    #cProfile.run("internet(1_000_000_000)")
     #print(me_and_chatGPT(10_000_000))
     #for i in primes:
     #    print(i)
