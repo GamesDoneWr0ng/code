@@ -3,3 +3,11 @@
 .idea/
 .DS_Store
 __pycache__/
+
+# javascript
+.env
+.npm
+node_modules/
+jspm_packages/
+package-lock.json
+package.json
