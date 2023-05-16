@@ -16,7 +16,7 @@ class PPO:
         self.critic = Network(actor.size[0], actor.size[1:-1], 1)
         self.maxScore = maxScore
         self.clippingThreshold = clippingThreshold
-        self.loss = loss
+        self.lossF = loss
         self.loss_prime = loss_prime
 
     def clipped_surrogate_objective(self, old_policy, new_policy, advantages):
@@ -32,9 +32,9 @@ class PPO:
         if np.any((ratio > 1+self.clippingThreshold)|(ratio < 1-self.clippingThreshold)):
             self.oldActor = self.actor
 
-        return np.mean(np.minimum(surrogate1, surrogate2), axis=1)
+        return np.minimum(surrogate1, surrogate2)
 
-    def discountedSumOfRewards(self, rewards, gamma=0.9):
+    def discountedSumOfRewards(self, rewards, gamma=0.95):
         sums = []
         for _ in range(len(rewards)):
             sum = 0
@@ -56,6 +56,7 @@ class PPO:
         self.critic.fit(states, actualRewards, 10, self.loss_prime, learning_rate=0.01)
 
         probs = self.actor.forward(states)
+        print(probs)
         clipped = self.clipped_surrogate_objective(self.oldActor.forward(states), probs, advantages)
         loss = np.average(expectedRewarwds)
         #entropy = -np.sum(np.log(probs), axis=1)

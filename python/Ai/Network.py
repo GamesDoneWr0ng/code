@@ -50,11 +50,11 @@ class Network:
                 output = 50*((2 * output)-1)
 
                 # backward propagation
-                error = loss_prime(expected[i], output[0][0])
+                error = loss_prime(expected[i], output[0])
                 self.backward(error, learning_rate)
 
     def backward(self, error, learning_rate = 0.1):
         for layer in reversed(self.layers):
-            if learning_rate == 0.1:
-                print(np.max(error))
+            #if learning_rate == 0.1:
+                #print(np.max(error))
             error = layer.backward_propagation(error, learning_rate)

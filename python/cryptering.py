@@ -130,7 +130,7 @@ dekodet = "".join(dekodet)
 
 #print("Dekodet beskjer er: ", dekodet)
 
-
+#%%
 # Eksponentiering
 # FYLL UT
 #def fastExp(a,b,n):
@@ -142,6 +142,7 @@ d = 1
 
 def base2(n):
     # Returns list with base 2 representation of input number
+    return f"{n:b}"
     base2 = []
     while n>0:
         if n % 2 == 0:
@@ -165,10 +166,10 @@ def modexp(a,b,n):
 
     for i in range(len(base2rep)):
     #for i in range(len(base2rep)-1,-1,-1):
-        c = 2*c
+        #c = 2*c
         d = (d*d) % n
-        if base2rep[i] == 1:
-            c = c + 1
+        if base2rep[i] == "1":
+            #c = c + 1
             d = (d*a) % n
 
         #print(d)
@@ -180,12 +181,13 @@ def modexp(a,b,n):
 #print(modexp(2,q-1,q))   
 #print(base2(q-1))
 #print(base2(560))
-#print(modexp(7,560,561))
+print(modexp(7,560,561))
 #1111100011100101001111110010101111011001101111100011110 # Fra internett
 #1111100011100101001111110010101111011001101111100100000 # Fra min
 #print(modexp(7,560,561)) # 12423
 #print('DENNE')
 #print(modexp(81,560,561)) # 12423
+#%%
 
 def RSA(n, key, message):
     # Encrypts/decrypts RSA coded message

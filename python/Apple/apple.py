@@ -1,55 +1,50 @@
-import openpyxl
 import os
 import xlwings as xw
 from PIL import Image
-from openpyxl.utils.cell import _get_column_letter
-from numba import jit
 import time
+import numpy as np
+import pandas as pd
 
 SIZE = (480, 360)
 FPS = 12
 
-STRING_COL_CACHE = {}
-for i in range(1, SIZE[0]+1):
-    col = _get_column_letter(i)
-    STRING_COL_CACHE[i] = col
+with open('/Users/askborgen/Desktop/code/python/Apple/base.html', 'r') as f:
+    base = f.read()
 
 lastFrame = time.time()
 os.chdir("python/Apple/Frames")
 frames = sorted(i if len(i) == 8 else "0" + i for i in os.listdir('.'))[1:]
-#wb = openpyxl.load_workbook("/Users/askborgen/Desktop/code/python/Apple/Meanwhile.xlsm")
-#xwwb = xw.books.active
-wb = xw.Book("/Users/askborgen/Desktop/code/python/Apple/Book2.xlsx")
+wb = xw.Book("/Users/askborgen/Desktop/code/python/Apple/Book2.xlsm")
 update = wb.macro("Update")
 reSize = wb.macro("ReSize")
-#sheet = wb.active
 sheet = wb.sheets.active
 
 reSize()
 
-@jit(parallel=True, forceobj=True)
+def image_to_bw_np(image, threshold=128):
+    img_gray = image.convert('L')
+    img_gray_np = np.array(img_gray)
+    img_bw_np = np.where(img_gray_np < threshold, 0, 255)
+    #img_bw = Image.fromarray(img_bw_np.astype(np.uint8), 'L')
+    return img_bw_np
+
+#@jit(parallel=True, forceobj=True)
 def display(img, lastImg):
-    for x in range(SIZE[0]):
-        for y in range(SIZE[1]):
-            color = img.getpixel((x,y))
-            if color == lastImg.getpixel((x,y)):
+    for y in range(SIZE[1]):
+        for x in range(SIZE[0]):
+            if img[x][y] == lastImg[x][y]:
                 continue
-            #style = openpyxl.styles.colors.Color(rgb=color)
-            #fill = openpyxl.styles.fills.PatternFill(patternType='solid', fgColor=style)
-            #sheet[f"{STRING_COL_CACHE[(x+1)]}{y+1}"].fill = fill
-            sheet[f"{STRING_COL_CACHE[(x+1)]}{y+1}"].color = color
+            img[x][y]
 
 # animate
-lastImg = Image.open(frames[1102][1:])
-lastImg.mode
+lastImg = np.zeros(SIZE[::-1]) - 1
 for frame in frames[::3]:
     img = Image.open(frame if frame[0] != "0" else frame[1:])
-    img.mode
+    img = image_to_bw_np(img)
 
     display(img, lastImg)
     lastImg = img
 
-    #wb.save("/Users/askborgen/Desktop/code/python/Apple/Meanwhile.xlsx")
-    #update()
+    update()
     print(frame, 1 / (lastFrame - time.time()), "fps")
     lastFrame = time.time()
