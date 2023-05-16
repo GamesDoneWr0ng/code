@@ -17,7 +17,7 @@ def a(z):
 def b(z):
     return (math.sqrt(2)/(1000 * f * d)) * e ** (z/d) * (tx * np.sin(z/d + math.pi/4) + ty * np.sin(z/d + math.pi/4))
 
-zline = np.linspace(-100, 5, 10000)
+zline = np.linspace(-100, 0, 10000)
 xline = a(zline)
 yline = b(zline)
 

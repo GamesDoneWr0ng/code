@@ -9,7 +9,7 @@ def mse_prime(y_true, y_pred):
     return 2*(y_pred-y_true)/y_true.size
 
 class PPO:
-    def __init__(self, actor: Network, maxScore, clippingThreshold = 0.2, loss = mse, loss_prime = mse_prime):
+    def __init__(self, actor: Network, maxScore, c1=0.5,c2=0.01, clippingThreshold = 0.2, loss = mse, loss_prime = mse_prime):
         self.trajectories = []
         self.actor = actor
         self.oldActor = actor
@@ -18,6 +18,8 @@ class PPO:
         self.clippingThreshold = clippingThreshold
         self.lossF = loss
         self.loss_prime = loss_prime
+        self.c1 = c1
+        self.c2 = c2
 
     def clipped_surrogate_objective(self, old_policy, new_policy, advantages):
         """
@@ -34,22 +36,22 @@ class PPO:
 
         return np.minimum(surrogate1, surrogate2)
 
-    def discountedSumOfRewards(self, rewards, gamma=0.95):
+    def discountedSumOfRewards(self, rewards, done, gamma=0.95):
         sums = []
-        for _ in range(len(rewards)):
-            sum = 0
-            for index, i in enumerate(rewards[_:]):
-                sum += i * gamma ** index
-            sums.append(sum)
+        for reward, is_terminal in zip(reversed(rewards), reversed(done)):
+            if is_terminal:
+                discounted_reward = 0
+            discounted_reward = reward + (gamma * discounted_reward)
+            sums.insert(0, discounted_reward)
         return np.array(sums)
 
     def runNetwork(self, inputs):
         outputs = self.actor.forward(inputs)
         return outputs
 
-    def train(self, states, rewards):
+    def train(self, states, rewards, done):
         expectedRewarwds = 50*((2 * np.array([self.critic.forward(i)[0][0] for i in states])) - 1)
-        actualRewards = self.discountedSumOfRewards(rewards)
+        actualRewards = self.discountedSumOfRewards(rewards, done)
         advantages = actualRewards - expectedRewarwds
 
         # train critic
@@ -58,9 +60,9 @@ class PPO:
         probs = self.actor.forward(states)
         print(probs)
         clipped = self.clipped_surrogate_objective(self.oldActor.forward(states), probs, advantages)
-        loss = np.average(expectedRewarwds)
+        #loss = np.average(expectedRewarwds)
         #entropy = -np.sum(np.log(probs), axis=1)
 
-        loss = clipped - loss #+ entropy
+        loss = clipped - (self.c1 * self.lossF(actualRewards, expectedRewarwds)) #+ (self.c2 * entropy)
 
         self.actor.backward(loss)

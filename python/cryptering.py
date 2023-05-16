@@ -132,56 +132,33 @@ dekodet = "".join(dekodet)
 
 #%%
 # Eksponentiering
-# FYLL UT
-#def fastExp(a,b,n):
-c = 0
-d = 1
 
 # RSA
 # Pass på å få med støtte for flere personer slik at man kan sende krypterte meldinger til flere
 
 def base2(n):
     # Returns list with base 2 representation of input number
-    return f"{n:b}"
-    base2 = []
-    while n>0:
-        if n % 2 == 0:
-            base2.append(0)
-            n = n//2
-        else:
-            base2.append(1)
-            n = (n-1)//2
-
-    base2.reverse() # !
-
-    return base2
+    return f"{n:b}"[::-1]
 
 def modexp(a,b,n):
     # Implementation of fast modular exponentiation
     # Calculates a**b % n.
     # Implementation of algorithm from CLRS p. 957
-    c = 0
-    d = 1
-    base2rep = base2(b)
-
-    for i in range(len(base2rep)):
-    #for i in range(len(base2rep)-1,-1,-1):
-        #c = 2*c
-        d = (d*d) % n
-        if base2rep[i] == "1":
-            #c = c + 1
-            d = (d*a) % n
-
-        #print(d)
-
-    return d
+    sum = 1
+    d = -1
+    for i in base2(b):
+        d = a % n if d == -1 else (d*d) % n
+        if i == "1":
+            sum *= d
+    sum %= n
+    return sum
 
 #print(1)
 #q = 35028926852816671
 #print(modexp(2,q-1,q))   
 #print(base2(q-1))
 #print(base2(560))
-print(modexp(7,560,561))
+#print(modexp(7,560,561))
 #1111100011100101001111110010101111011001101111100011110 # Fra internett
 #1111100011100101001111110010101111011001101111100100000 # Fra min
 #print(modexp(7,560,561)) # 12423
