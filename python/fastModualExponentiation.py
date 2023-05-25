@@ -1,29 +1,34 @@
 from cProfile import run
+import timeit
 
 # implementation for fast modular exponentiation
 # set variabels
 # a**b % n
-a = 9876500
-b = 123400
-n = 12355700
+a = 987654567876542332458764534255676325476568798706859647506429857698271233459857398475981379890765897586457984675343546263542351243543546756579656879860790869758956475632432354357696807980890789676745463453654657686
+b = 3456765676545678876978654356768769870123435465768798700968856429857698273459857398475981379890765897586457984675343546263123542351243543546756579656879860790869758956475632432354357696807980890789676745463453654657687
+n = 34567876543456794235367897098675243546576789980765675646576789658746429857698273459857398475981379890765897586457984675343546263542351243543546756579656879860123790869758956475632432354357696807980890789676745463453654657687
+# a**b har sirka (len(a) - 1) * b siffer eller 1 kvintrigintilliard siffer
 
 # check
-expected = (a**b) % n
+#print(timeit.timeit(f"({a}**{b}) % {n}", number=1) / 1)
+#expected = (a**b) % n
 
 # convert b to binary and reverses
 b = f"{b:b}"[::-1]
 
 # the thing
+
 def fastModularExponetiation(a=a, b=b, n=n):
     sum = 1
-    d = -1
+    d = a % n
     for i in b:
-        d = a % n if d == -1 else (d*d) % n
         if i == "1":
             sum *= d
+        d = (d*d) % n
     sum %= n
     return sum
 
-print(expected)
+#print(expected)
+print(timeit.timeit(fastModularExponetiation, number=100) / 100)
 print(fastModularExponetiation())
-#run("fastModularExponetiation()")
+run("fastModularExponetiation()")
