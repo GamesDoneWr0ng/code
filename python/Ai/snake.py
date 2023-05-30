@@ -65,7 +65,7 @@ class Snake:
         self.rewards[-1] += REWARDSIZES["die"]
         print(f"Generation: {self.generation}, Reward: {np.sum(self.rewards)}")
         if len(self.rewards) != 1:
-            self.ai.train(self.states, self.rewards)
+            self.ai.train(self.states, self.rewards, [0 for i in self.rewards])
         else:
             self.ai.actor = Network(39, [30,20,10], 4)
         self.reset()

@@ -10,7 +10,7 @@ class Network:
     def __init__(self, input_size, hidden_sizes, output_size, layerTypes=[]):
         self.size = [input_size] + hidden_sizes + [output_size]
         if layerTypes == []:
-            layerTypes = [0] * (len(self.size) - 1) + [1]
+            layerTypes = [1] * (len(self.size) - 1) + [1]
         self.layers = []
         for index, layer in enumerate(hidden_sizes):
             if (index == 0):

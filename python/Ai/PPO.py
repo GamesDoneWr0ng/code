@@ -38,6 +38,7 @@ class PPO:
 
     def discountedSumOfRewards(self, rewards, done, gamma=0.95):
         sums = []
+        discounted_reward = 0
         for reward, is_terminal in zip(reversed(rewards), reversed(done)):
             if is_terminal:
                 discounted_reward = 0
