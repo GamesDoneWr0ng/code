@@ -1,7 +1,7 @@
 class Node {
     constructor(number) {
         this.number = number;
-        this.this.inputSum = 0;
+        this.inputSum = 0;
         this.outputValue = 0;
         this.outputConnections = [];
         this.layer = 0;
@@ -9,13 +9,13 @@ class Node {
     }
 
     engage() {
-        if (this.layer == 0) { // no activation function for inputs and bias
+        if (this.layer != 0) { // no activation function for inputs and bias
             this.outputValue = this.activation(this.inputSum);
         }
 
         for (var i = 0; i < this.outputConnections.length; i++) { // for each connection
             if (this.outputConnections[i].enabled) { //dont do shit if not enabled
-                this.outputConnections[i].node.inputSum += this.outputConnections[i].weight * this.outputValue; //add the weighted output to the sum of the inputs of whatever node this node is connected to
+                this.outputConnections[i].toNode.inputSum += this.outputConnections[i].weight * this.outputValue; //add the weighted output to the sum of the inputs of whatever node this node is connected to
             }
         }
     }

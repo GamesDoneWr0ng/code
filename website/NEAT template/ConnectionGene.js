@@ -1,5 +1,5 @@
 // a connection between to nodes
-class connectionGene {
+class ConnectionGene {
     constructor(from, to, w, inno) {
         this.fromNode = from;
         this.toNode = to;
@@ -21,7 +21,7 @@ class connectionGene {
 
     // returns a copy of this connectionGene
     clone(from, to) {
-        var clone = new connectionGene(from, to, this.weight, this.innovationNumber);
+        var clone = new ConnectionGene(from, to, this.weight, this.innovationNumber);
         clone.enabled = this.enabled;
 
         return clone;

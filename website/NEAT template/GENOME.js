@@ -38,15 +38,15 @@ class Genome {
         for (var i = 0; i < this.inputs; i++) {
             for (var j = 0; j < this.outputs; j++) {
                 var connectionInnovationNumber = this.getInnovationNumber(innovationHistory, this.nodes[i], this.nodes[this.nodes.length - j - 2])
-                this.genes.push(new connectionGene(this.nodes[i], this.nodes[this.nodes.length - j - 2], random(-1, 1), connectionInnovationNumber))
+                this.genes.push(new ConnectionGene(this.nodes[i], this.nodes[this.nodes.length - j - 2], random(-1, 1), connectionInnovationNumber))
             }
         }
     
         var connectionInnovationNumber = this.getInnovationNumber(innovationHistory, this.nodes[this.biasNode], this.nodes[this.nodes.length - 2]);
-        this.genes.push(new connectionGene(this.nodes[this.biasNode], this.nodes[this.nodes.length - 2], random(-1, 1), connectionInnovationNumber));
+        this.genes.push(new ConnectionGene(this.nodes[this.biasNode], this.nodes[this.nodes.length - 2], random(-1, 1), connectionInnovationNumber));
 
         connectionInnovationNumber = this.getInnovationNumber(innovationHistory, this.nodes[this.biasNode], this.nodes[this.nodes.length - 3]);
-        this.genes.push(new connectionGene(this.nodes[this.biasNode], this.nodes[this.nodes.length - 3], random(-1, 1), connectionInnovationNumber));
+        this.genes.push(new ConnectionGene(this.nodes[this.biasNode], this.nodes[this.nodes.length - 3], random(-1, 1), connectionInnovationNumber));
 
         this.connectNodes();
     }
@@ -77,6 +77,7 @@ class Genome {
         }
         this.nodes[this.biasNode].outputValue = 1; // Output of bias is 1
 
+        this.generateNetwork();
         for (var i = 0; i < this.network.length; i++) {
             this.network[i].engage();
         }
@@ -92,7 +93,7 @@ class Genome {
     generateNetwork() { // sets up the network
         this.connectNodes();
         this.network = [];
-        for (var l = 0; i < this.layers; l++) { // for each layer
+        for (var l = 0; l < this.layers; l++) { // for each layer
             for (var i = 0; i < this.nodes.length; i++) { // for each node
                 if (this.nodes[i].layer == l) { // if node is in that layer
                     this.network.push(this.nodes[i]);
@@ -110,9 +111,25 @@ class Genome {
             return;
         }
 
-        do { // dont disconect bias
-            var randomConnection = floor(random(this.genes.length));
-        } while (this.genes[randomConnection].fromNode == this.nodes[this.biasNode] && this.genes.length != 1)
+        var posibleGenes = []; // get a list of posible genes we dont want to touch the  bias node
+        for (var i = 0; i < this.genes.length; i++) {
+            if (this.genes[i].fromNode != this.nodes[this.biasNode]) { // if not from the bias node
+                posibleGenes.push(this.genes[i]);
+            }
+        }
+        if (posibleGenes.length == 0) {
+            return;
+        }
+
+        var rand = floor(random(posibleGenes.length));
+        var i = 0;
+        while (i < rand) { // turn the index of the gene in posibleGenes to the index in this.genes
+            if (this.genes[i].fromNode == this.nodes[this.biasNode]) {
+                rand++;
+            }
+            i++;
+        }
+        var randomConnection = i; // get the random connection
 
         this.genes[randomConnection].enabled = false; // disable the connection
 
@@ -122,16 +139,16 @@ class Genome {
         this.nextNode++;
         // add a new connection to the new node with a weight of 1
         var connectionInnovationNumber = this.getInnovationNumber(innovationHistory, this.genes[randomConnection].fromNode, this.getNode(newNodeNumber));
-        this.genes.push(new connectionGene(this.genes[randomConnection].fromNode, this.getNode(newNodeNumber), 1, connectionInnovationNumber));
+        this.genes.push(new ConnectionGene(this.genes[randomConnection].fromNode, this.getNode(newNodeNumber), 1, connectionInnovationNumber));
 
         connectionInnovationNumber = this.getInnovationNumber(innovationHistory, this.getNode(newNodeNumber), this.genes[randomConnection].toNode);
         // add a new connection from the new node with the same weight as the old connection
-        this.genes.push(new connectionGene(this.getNode(newNodeNumber), this.genes[randomConnection].toNode, this.genes[randomConnection].weight, connectionInnovationNumber));
+        this.genes.push(new ConnectionGene(this.getNode(newNodeNumber), this.genes[randomConnection].toNode, this.genes[randomConnection].weight, connectionInnovationNumber));
         this.getNode(newNodeNumber).layer = this.genes[randomConnection].fromNode.layer + 1;
 
         connectionInnovationNumber = this.getInnovationNumber(innovationHistory, this.nodes[this.biasNode], this.getNode(newNodeNumber));
         // connect the bias to the new node with a weight of 0
-        this.genes.push(new connectionGene(this.nodes[this.biasNode], this.getNode(newNodeNumber), 0, connectionInnovationNumber));
+        this.genes.push(new ConnectionGene(this.nodes[this.biasNode], this.getNode(newNodeNumber), 0, connectionInnovationNumber));
     
         //if the layer of the new node is equal to the layer of the output node of the old connection then a new layer needs to be created
         //more accurately the layer numbers of all layers equal to or greater than this new node need to be incrimented
@@ -155,10 +172,14 @@ class Genome {
         }
 
         // get random nodes
+        var limit = 15;
         do {
-            randomNode1 = floor(random(this.nodes.length));
-            randomNode2 = floor(random(this.nodes.length));
-        } while (checkValidConnection(randomNode1, randomNode2))
+            var randomNode1 = floor(random(this.nodes.length));
+            var randomNode2 = floor(random(this.nodes.length));
+        } while (this.checkValidConnection(randomNode1, randomNode2) && limit--)
+        if (limit <= 0) {
+            return;
+        }
 
         if (this.nodes[randomNode1].layer > this.nodes[randomNode2].layer) {
             var temp = randomNode1;
@@ -171,11 +192,11 @@ class Genome {
         var connectionInnovationNumber = this.getInnovationNumber(innovationHistory, this.nodes[randomNode1], this.nodes[randomNode2]);
 
         // create the connection
-        this.genes.push(new connectionGene(this.nodes[randomNode1], this.nodes[randomNode2], random(-1, 1), connectionInnovationNumber));
+        this.genes.push(new ConnectionGene(this.nodes[randomNode1], this.nodes[randomNode2], random(-1, 1), connectionInnovationNumber));
         this.connectNodes();
 
         // add the connection
-        this.genes.push(new connectionGene(this.nodes[randomNode1], this.nodes[randomNode2], random(-1, 1), connectionInnovationNumber));
+        this.genes.push(new ConnectionGene(this.nodes[randomNode1], this.nodes[randomNode2], random(-1, 1), connectionInnovationNumber));
         this.connectNodes();
     }
     
@@ -248,7 +269,10 @@ class Genome {
         // 80% of the time mutate weights
         var rand1 = random(1);
         if (rand1 < 0.8) {
-            this.mutateWeight();
+
+            for (var i = 0; i < this.genes.length; i++) {
+                this.genes[i].mutateWeight();
+            }
         }
 
         // 5% of the time add a new connection
@@ -378,6 +402,7 @@ class Genome {
                     temp.push(this.nodes[j]); // add it to this layer
                 }
             }
+            allNodes.push(temp);
         }
 
         //for each layer add the position of the node on the screen to the positions array

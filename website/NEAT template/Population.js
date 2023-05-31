@@ -7,13 +7,13 @@ class Population {
         this.gen = 1;
         this.innovationHistory = [];
         this.genPlayers = [];
-        this.species = [];
+        this.species = []; 
 
         this.massExtinctionEvent = false;
         this.newStage = false;
 
         for (var i = 0; i < size; i++) {
-            this.players.push(new player());
+            this.players.push(new Player());
             this.players[this.players.length - 1].brain.mutate(this.innovationHistory);
             this.players[this.players.length - 1].brain.generateNetwork();
         }
@@ -106,6 +106,23 @@ class Population {
         }
     }
 
+    // kill species that havent improved in 15 ish generations
+    killStaleSpecies() {
+        this.species = this.species.filter(s => s.staleness < 15);
+    }
+
+    // sorts the species by fitness best first
+    sortSpecies() {
+        // sort the players within the species
+        for (var s of this.species) {
+            s.sortSpecies();
+        }
+
+        this.species.sort((a, b) => {
+            return b.bestFitness - a.bestFitness;
+        });
+    }
+
     // separate players into species based on how similar they are to the species leader of each this.species in the previous this.gen
     speciate() {
         for (var s of this.species) { // empty this.species
@@ -115,14 +132,19 @@ class Population {
         for (var i = 0; i < this.players.length; i++) { // for each player
             var speciesFound = false;
             for (var s of this.species) { // for each species
-                s.addToSpecies(this.players[i]); // add the player to the species
-                speciesFound = true;
-                break;
+                if (s.sameSpecies(this.players[i].brain)){
+                    s.addToSpecies(this.players[i]); // add the player to the species
+                    speciesFound = true;
+                    break;
+                }
+            }
+
+            if (!speciesFound) { // if no species were found add a new species with this as its champion
+                this.species.push(new Species(this.players[i]));
             }
         }
-        if (!speciesFound) { // if no species were found add a new species with this as its champion
-            this.species.push(new Species(this.players[i]));
-        }
+
+        this.species = this.species.filter(s => s.players.length > 0); // remove species with no players
     }
     
     // calculate the fitness of each player
@@ -153,6 +175,9 @@ class Population {
 
     // returns the sum of each this.species average fitness
     getAvgFitnessSum() {
+        for (var s of this.species) {
+            s.setAverage();
+        }
         return this.species.reduce((sum, s) => sum + s.averageFitness, 0);
     }
 

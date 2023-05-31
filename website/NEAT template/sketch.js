@@ -2,10 +2,10 @@ var population;
 var nextConnectionNo = 1000;
 var speed = 60; // fps
 
-var showBest = true; //true if only show the best of the previous generation
+var showBest = false; //true if only show the best of the previous generation
 var runBest = false; //true if replaying the best ever game
 
-var showBrain = false;
+var showBrain = true;
 var showBestEachGen = false;
 var upToGen = 0;
 
@@ -28,7 +28,7 @@ function draw() {
         if (!population.done()) { //if any players are alive then update them
             population.updateAlive();
         } else { //all dead
-            population.naturalSelection(); //genetic algorithm
+            population.natrualSelection(); //genetic algorithm
         }
     }
 }
@@ -64,7 +64,9 @@ function showBestEverPlayer() {
 
 function drawToScreen() {
     if (showNothing) {
-        // replace
+        for (i = 0; i < population.players.length; i++) {
+            population.players[i].show();
+        }
 
         drawBrain();
         writeInfo();
@@ -72,10 +74,10 @@ function drawToScreen() {
 }
 
 function drawBrain() { // show the brain of whatever genome is currently showing
-    var startX = 0; // replace
-    var startY = 0;
-    var w = 0;
-    var h = 0;
+    var startX = 100; 
+    var startY = 100;
+    var w = 200;
+    var h = 200;
 
     if (runBest) {
         population.bestPlayer.brain.drawGenome(startX, startY, w, h);
@@ -86,7 +88,7 @@ function drawBrain() { // show the brain of whatever genome is currently showing
     }
 }
 
-function writeInfo() { // replace
+function writeInfo() {
     fill(200);
     textAlign(LEFT);
     textSize(30);

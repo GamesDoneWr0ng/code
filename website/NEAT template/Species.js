@@ -17,6 +17,7 @@ class Species {
             this.bestFitness = firstGenome.fitness;
             this.averageFitness = firstGenome.fitness;
             this.champ = firstGenome;
+            this.rep = firstGenome.brain.clone()
         }
     }
 
@@ -85,6 +86,9 @@ class Species {
     }
     
     setAverage() {
+        for (var i = 0; i < this.players.length; i++) {
+            this.players[i].calculateFitness();
+        }
         var totalSum = this.players.reduce((sum, player) => sum + player.fitness, 0);
 
         this.averageFitness = totalSum / this.players.length;
@@ -107,17 +111,17 @@ class Species {
                 baby = parrent2.crossover(parrent1);
             }
             baby.brain.mutate(innovationHistory); // mutate that baby brain
-            return baby;
         }
+        return baby;
     }
 
     // selects a random player based on its fitness
     selectPlayer() {
-        fitnessSum = this.players.reduce((sum, player) => sum + player.fitness, 0); // sum of fittnesses
+        var fitnessSum = this.players.reduce((sum, player) => sum + player.fitness, 0); // sum of fittnesses
 
         var rand = random(fitnessSum);
 
-        runningSum = 0;
+        var runningSum = 0;
         for (var i = 0; i < this.players.length; i++) { // loop throgh each player
             runningSum += this.players[i].fitness;
 
