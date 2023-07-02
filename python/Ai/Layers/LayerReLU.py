@@ -8,4 +8,4 @@ class LayerReLU(Layer):
         return self.output
     
     def backward_propagation(self, output_error, _):
-        return np.where(self.inputs > 0, 1, 0) * output_error
+        return np.where(self.inputs > 0, output_error, 0).flatten()

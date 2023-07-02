@@ -1,11 +1,7 @@
-i = 0
+import pygame as pg
+pg.init()
 
-def getSum(n):
-    sum = 0
-    for digit in str(n): 
-      sum += int(digit)      
-    return sum
+screen = pg.display.set_mode((1,0))
 
-while i < 10000:
-    print(getSum(getSum(i)))
-    i += 9
+while True:
+    pg.display.flip()

@@ -1,4 +1,4 @@
-from PPO import PPO
+from PPO2 import PPO
 from Network import Network
 import numpy as np
 import pygame as pg
@@ -7,6 +7,8 @@ pg.init()
 gridSize = 20
 width, height = gridSize*30, gridSize*30
 screen = pg.display.set_mode((width, height))
+
+batchSize = 32
 
 COLORS = {
     "black": (0,0,0),
@@ -25,14 +27,19 @@ REWARDSIZES = {
 
 class Snake:
     def __init__(self):
+        self.rewards = []
+        self.actions = []
+        self.states  = []
+        self.done    = []
         self.generation = 0
         self.reset()
-        
+
         network = Network(39, [30,20,10], 4)#, [0,0,0,0,0])
         self.ai = PPO(network, 20 * REWARDSIZES["apple"])
 
     def move(self, rotation):
         self.rewards.append(0)
+        self.done.append(False)
         newPos = np.add(self.parts[-1], rotation)
 
         distance = np.sum(np.abs(np.subtract(self.parts[-1], self.apple)))
@@ -40,6 +47,7 @@ class Snake:
             self.rewards[-1] += REWARDSIZES["moveCloser"]
         else:
             self.rewards[-1] += REWARDSIZES["moveAway"]
+        self.lastdistance = distance
 
         # hit a wall
         if not np.all((newPos >= 0)&(newPos < gridSize)):
@@ -63,11 +71,7 @@ class Snake:
     def die(self):
         self.draw()
         self.rewards[-1] += REWARDSIZES["die"]
-        print(f"Generation: {self.generation}, Reward: {np.sum(self.rewards)}")
-        if len(self.rewards) != 1:
-            self.ai.train(self.states, self.rewards, [0 for i in self.rewards])
-        else:
-            self.ai.actor = Network(39, [30,20,10], 4)
+        self.done[-1] = True
         self.reset()
 
     def reset(self):
@@ -76,10 +80,7 @@ class Snake:
         self.length = 5
         self.apple = [g + 5, g]
         self.lastdistance = np.sum(np.abs(np.subtract(self.parts[-1], self.apple)))
-        self.rewards = []
-        self.states = []
         self.storeState()
-        self.generation += 1
 
     def newApple(self):
         self.rewards[-1] += REWARDSIZES["apple"]
@@ -120,6 +121,7 @@ class Snake:
         2 for relative position to apple
         2 for relative position to tail
         1 for snake lenght
+        39 total
         """
         state = []
         # vision 0-1 and (-1)-1
@@ -174,8 +176,18 @@ snake = Snake()
 
 moves = [[0,1], [1,0], [0,-1], [-1,0]]
 while True:
-    for event in pg.event.get():
-        if event.type == pg.QUIT:
-            break
-    move = snake.ai.actor.forward(snake.states[-1])
-    snake.move(moves[np.argmax(move)])
+    for i in range(batchSize):
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                break
+        move = snake.ai.actor.forward(snake.states[-1])
+        snake.actions.append(move)
+        snake.move(moves[np.argmax(move)])
+
+    snake.ai.train(snake.states, snake.actions, snake.rewards, snake.done)
+    snake.generation += 1
+    snake.rewards = []
+    snake.done = []
+    snake.actions = []
+    snake.states = []
+    snake.storeState()

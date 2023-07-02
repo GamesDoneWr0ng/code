@@ -1,16 +1,18 @@
 from Layers.Layer import Layer
 from Layers.LayerReLU import LayerReLU
 from Layers.LayerTanh import LayerTanh
+from Layers.LayerSoftmax import LayerSoftmax
 import numpy as np
 
 types = {0: LayerReLU,
-         1: LayerTanh}
+         1: LayerSoftmax,
+         2: LayerTanh}
 
 class Network:
     def __init__(self, input_size, hidden_sizes, output_size, layerTypes=[]):
         self.size = [input_size] + hidden_sizes + [output_size]
         if layerTypes == []:
-            layerTypes = [1] * (len(self.size) - 1) + [1]
+            layerTypes = [0] * (len(self.size) - 1) + [2]
         self.layers = []
         for index, layer in enumerate(hidden_sizes):
             if (index == 0):
@@ -47,7 +49,7 @@ class Network:
                 output = inputs[i]
                 for layer in self.layers:
                     output = layer.forward(output)
-                output = 50*((2 * output)-1)
+                #output = (2 * output) - 1
 
                 # backward propagation
                 error = loss_prime(expected[i], output[0])
