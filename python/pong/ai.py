@@ -1,12 +1,9 @@
 import argparse
 import os
-os.environ['KMP_DUPLICATE_LIB_OK'] = "TRUE"
 from distutils.util import strtobool
 import gymnasium as gym
 import time
-import random
-import numpy as np
-import torch
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 gym.register( # register the environment
     id='Pong-v0',
@@ -34,6 +31,7 @@ def parse_args():
                         help="the wandb's project name")
     parser.add_argument('--wandb-entity', type=str, default=None,
                         help="the entity (team) of wandb's project")
+    
     args = parser.parse_args()
     return args
 
@@ -43,37 +41,4 @@ run_name = f"{args.gym_id}__{args.exp_name}__{args.seed}__{int(time.time())}"
 
 if args.track:
     import wandb
-    wandb.init(
-        project=args.wandb_project_name,
-        entity=args.wandb_entity,
-        sync_tensorboard=False,
-        config=vars(args),
-        name=run_name,
-        monitor_gym=True,
-        save_code=True
-    )
-
-# TRY NOT TO MODIFY: seeding
-random.seed(args.seed)
-np.random.seed(args.seed)
-torch.manual_seed(args.seed)
-torch.backends.cudnn.deterministic = args.torch_deterministic
-
-device = torch.device("cuda" if torch.cuda.is_available() and args.cuda else "cpu")
-
-def make_env(gym_id):
-    def thunk():
-        env = gym.make(gym_id)
-        env = gym.wrappers.RecordEpisodeStatistics(env)
-        env = gym.wrappers.RecordVideo(env, "python/pong/videos", episode_trigger = lambda t: t % 100 == 0)
-        return env
-    return thunk
-
-envs = gym.vector.SyncVectorEnv([make_env(args.gym_id)])
-observation = envs.reset()
-for _ in range(200):
-    action = envs.action_space.sample()
-    observation, reward, done, info = envs.step(action)
-    for item in info:
-        if "episode" in item.keys:
-            print(f"episodic_return: {item['episode']['r']}")
+    wandb.init(project=args.wandb_project_name, entity=args.wandb_entity, sync_tensorboard=True, config=vars(args), name=run_name, monitor_gym=True, save_code=True)
