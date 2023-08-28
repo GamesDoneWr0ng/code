@@ -1,6 +1,6 @@
 def convert(system):
-    tall = [0, 12, 25, 52, 81]
-    tegn = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"]
+    tall = [3141]
+    tegn = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
     for i in tall:
         result = ""
         n = 1
@@ -20,7 +20,7 @@ def convert(system):
         print(result[1:]+f"({system})")
     print("")
 
-convert(2)
+convert(26)
 convert(8)
 convert(10)
 convert(16)
