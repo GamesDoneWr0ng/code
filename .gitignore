@@ -11,3 +11,4 @@ node_modules/
 jspm_packages/
 package-lock.json
 package.json
+python/pong/videos/

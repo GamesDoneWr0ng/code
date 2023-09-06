@@ -4,7 +4,7 @@
 import pygame as pg
 import time
 from pong import PongEnv
-from ai import Ai
+#from ai import Ai
 pg.init()
 
 size = width, height = 800, 600
@@ -15,8 +15,8 @@ fps = 60
 
 class Main:
     def __init__(self) -> None:
-        self.pong = Pong(size)
-        self.ai = Ai()
+        self.pong = PongEnv(size, render_mode="human-vs-bot")
+        #self.ai = Ai()
 
     def inputHandler(self):
         for event in pg.event.get():
@@ -31,11 +31,11 @@ class Main:
 
 main = Main()
 
-running = True
-while running:
+main.running = True
+while main.running:
     clock.tick(fps)
 
     inputs = main.inputHandler()
-    ai = main.ai.update(main.pong.getState())
-    main.pong.update(inputs, ai)
-    main.draw()
+    #ai = main.ai.update(main.pong.getState())
+    main.pong.step(0, inputs)#, ai)
+    main.pong.render()
