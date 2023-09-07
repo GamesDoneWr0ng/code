@@ -6,7 +6,7 @@ from gymnasium import spaces
 class PongEnv(gym.Env):
     metadata = {"render_modes": ["human-vs-bot", "training", "rgb_array"], "render_fps": 60}
 
-    def __init__(self, size = [800,800], render_mode="rgb_array") -> None:
+    def __init__(self, size = [800,600], render_mode="rgb_array") -> None:
         self.size = size
         self.score = [0,0]
         self.reset()
@@ -162,7 +162,7 @@ class PongEnv(gym.Env):
     def render(self):
         if self.render_mode == "rgb_array" or self.render_mode == "human-vs-bot":
             return self._render_frame()
-        
+
     def _render_frame(self):
         if self.window is None and self.render_mode == "human-vs-bot":
             pg.init()

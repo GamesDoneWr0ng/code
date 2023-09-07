@@ -11,7 +11,6 @@ import torch.optim as optim
 from torch.distributions.categorical import Categorical
 import pickle
 from torch.utils.tensorboard import SummaryWriter
-from stable_baselines3.common.atari_wrappers import MaxAndSkipEnv
 
 gym.register( # register the environment
     id='Pong-v0',
@@ -43,7 +42,7 @@ def parse_args():
                         help='weather to capture videos of the agent performances (check out `videos` folder)')
     parser.add_argument('--save_name', type=str, default='new',
                         help='the name of the file to save the model')
-
+    
     # Algorithm specific arguments
     parser.add_argument('--num-envs', type=int, default=4,
                         help='the number of parallel game environments')
@@ -85,7 +84,6 @@ def make_env(gym_id, seed, idx, capture_video, run_name):
         if capture_video:
             if idx == 0:
                 env = gym.wrappers.RecordVideo(env, f"python/pong/videos/{run_name}", episode_trigger = lambda t: t % 200 == 0)
-        env = MaxAndSkipEnv(env, skip=4)
         env.action_space.seed(seed)
         env.observation_space.seed(seed)
         return env
@@ -137,7 +135,7 @@ if __name__ == "__main__":
     args = parse_args()
     print(args)
     run_name = f"{args.gym_id}__{args.exp_name}__{args.seed}__{int(time.time())}"
-
+    
     if args.track:
         import wandb
         wandb.init(
@@ -147,14 +145,14 @@ if __name__ == "__main__":
             config=vars(args),
             name=run_name,
             monitor_gym=True,
-            save_code=True,
+            save_code=True
         )
     writer = SummaryWriter(f"/Users/askborgen/Desktop/code/python/pong/runs/{run_name}")
     writer.add_text(
         "hyperparameters",
         "|param|value|\n|-|-|\n%s" % ("\n".join([f"|{key}|{value}|" for key, value in vars(args).items()])),
     )
-
+    
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)

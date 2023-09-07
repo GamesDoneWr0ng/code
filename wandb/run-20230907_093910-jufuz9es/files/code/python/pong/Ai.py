@@ -86,6 +86,7 @@ def make_env(gym_id, seed, idx, capture_video, run_name):
             if idx == 0:
                 env = gym.wrappers.RecordVideo(env, f"python/pong/videos/{run_name}", episode_trigger = lambda t: t % 200 == 0)
         env = MaxAndSkipEnv(env, skip=4)
+        env = gym.wrappers.FrameStack(env, 4)
         env.action_space.seed(seed)
         env.observation_space.seed(seed)
         return env
