@@ -104,7 +104,9 @@ class PongEnv(gym.Env):
                 self.playerPaddle -= 4
         
         self.ballPos += self.ballVel
-        self.aiPaddle = np.clip(self.aiPaddle, 50, self.size[1] - 50)
+        if self.aiPaddle < 0 or self.aiPaddle > self.size[1]:
+            self.aiPaddle = np.clip(self.aiPaddle, 50, self.size[1] - 50)
+            reward = -0.1
         
         # bounce off top and bottom
         if self.ballPos[1] < 10 and self.ballVel[1] < 0 or self.ballPos[1] > self.size[1] - 10 and self.ballVel[1] > 0:
@@ -141,10 +143,10 @@ class PongEnv(gym.Env):
         terminated = False
         # gain points
         if self.ballPos[0] > self.size[0]:
-            self.score[0] += 2
+            self.score[0] += 1
             self.reset()
             terminated = True
-            reward += 1
+            reward += 3
         elif self.ballPos[0] < 0:
             self.score[1] += 1
             reward -= 1 * (abs(self.aiPaddle - self.ballPos[1])) / 200

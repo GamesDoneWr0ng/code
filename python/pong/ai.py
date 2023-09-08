@@ -41,7 +41,7 @@ def parse_args():
                         help="the entity (team) of wandb's project")
     parser.add_argument('--capture-video', type=lambda x:bool(strtobool(x)), default=True, nargs='?', const=True,
                         help='weather to capture videos of the agent performances (check out `videos` folder)')
-    parser.add_argument('--save_name', type=str, default='new',
+    parser.add_argument('--save-name', type=str, default='wall',
                         help='the name of the file to save the model')
 
     # Algorithm specific arguments
@@ -161,7 +161,7 @@ if __name__ == "__main__":
     torch.backends.cudnn.deterministic = args.torch_deterministic
     
     device = torch.device("mps" if torch.backends.mps.is_available() and args.mps else "cpu")
-    
+
     # env setup
     envs = gym.vector.SyncVectorEnv(
         [make_env(args.gym_id, args.seed + i, i, args.capture_video, run_name) 
@@ -179,7 +179,7 @@ if __name__ == "__main__":
     rewards = torch.zeros((args.num_steps, args.num_envs)).to(device)
     dones = torch.zeros((args.num_steps, args.num_envs)).to(device)
     values = torch.zeros((args.num_steps, args.num_envs)).to(device)
-    
+
     # TRY NOT TO MODIFY: start the game
     with open("python/pong/policies/timesteps.pkl", 'rb') as f: # load timestep for current policy
         timesteps = pickle.load(f)
@@ -192,9 +192,10 @@ if __name__ == "__main__":
     start_time = time.time()
     next_obs = torch.Tensor(envs.reset()[0]).to(device)
     next_done = torch.zeros(args.num_envs).to(device)
-    num_updates = (args.total_timesteps - global_step) // args.num_steps
-    
-    for update in range(1, num_updates + 1):
+    num_updates = args.total_timesteps // args.num_steps
+    start_update = global_step // (args.num_steps * args.num_envs)
+
+    for update in range(start_update, num_updates + 1):
         agent.save("python/pong/policies/" + args.save_name + ".pt")
         with open("python/pong/policies/timesteps.pkl", 'wb') as f:
             timesteps[args.save_name] = global_step
