@@ -1,8 +1,9 @@
 # Main class for pong
-# Handels comunication between classes
+# Handels comunication between classes and inputs
 
 import pygame as pg
-import gymnasium as gym
+from gymnasium import make
+from gymnasium.vector import SyncVectorEnv
 from torch import Tensor, tensor, device, no_grad
 from numpy import argmax
 from torch.distributions.categorical import Categorical
@@ -19,14 +20,14 @@ class Main:
     def __init__(self) -> None:
         def make_env():
             def thunk():
-                env = gym.make("Pong-v0")
-                env = MaxAndSkipEnv(env, skip=4)
+                env = make("Pong-v0")
+                #env = MaxAndSkipEnv(env, skip=4) 
                 return env
             return thunk
         
-        env = gym.vector.SyncVectorEnv([make_env()])
+        env = SyncVectorEnv([make_env()])
         self.ai = Agent(env)
-        self.ai.load("python/pong/policies/main.pt")
+        self.ai.load("python/pong/policies/test.pt")
 
         self.pong = PongEnv(size, render_mode="human-vs-bot")
 
@@ -57,8 +58,8 @@ obs = Tensor(main.pong.reset()[0])
 main.running = True
 while main.running:
     inputs = main.inputHandler()
-    #opponent = main.getAi(obs)
-    opponent = int(main.pong.ballPos[1] > main.pong.aiPaddle)
+    opponent = main.getAi(obs)
+    #opponent = int(main.pong.ballPos[1] > main.pong.aiPaddle)
 
     obs = Tensor(main.pong.step(opponent, inputs)[0])
     main.pong.render()

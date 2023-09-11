@@ -1,0 +1,280 @@
+diff --git a/python/.DS_Store b/python/.DS_Store
+index b8c172d..2ef019a 100644
+Binary files a/python/.DS_Store and b/python/.DS_Store differ
+diff --git a/python/pong/ai.py b/python/pong/ai.py
+index 57cbfe5..4d079a0 100644
+--- a/python/pong/ai.py
++++ b/python/pong/ai.py
+@@ -27,7 +27,7 @@ def parse_args():
+                         help='the learning rate of the optimizer')
+     parser.add_argument('--seed', type=int, default=42,
+                         help='seed of the experiment')
+-    parser.add_argument('--total-timesteps', type=int, default=40000000,
++    parser.add_argument('--total-timesteps', type=int, default=5_000_000,
+                         help='total timesteps of the experiments')
+     parser.add_argument('--torch-deterministic', type=lambda x:bool(strtobool(x)), default=True, nargs='?', const=True,
+                         help='if toggled, `torch.backends.cudnn.deterministic=False`')
+@@ -41,7 +41,7 @@ def parse_args():
+                         help="the entity (team) of wandb's project")
+     parser.add_argument('--capture-video', type=lambda x:bool(strtobool(x)), default=True, nargs='?', const=True,
+                         help='weather to capture videos of the agent performances (check out `videos` folder)')
+-    parser.add_argument('--save-name', type=str, default='wall',
++    parser.add_argument('--save-name', type=str, default='test',
+                         help='the name of the file to save the model')
+ 
+     # Algorithm specific arguments
+@@ -53,7 +53,7 @@ def parse_args():
+                         help="Toggle learning rate annealing for policy and value networks")
+     parser.add_argument('--gae', type=lambda x:bool(strtobool(x)), default=True, nargs='?', const=True,
+                         help='Use GAE for advantage computation')
+-    parser.add_argument('--gamma', type=float, default=0.99,
++    parser.add_argument('--gamma', type=float, default=0.9,
+                         help='the discount factor gamma')
+     parser.add_argument('--gae-lambda', type=float, default=0.95,
+                         help='the lambda for the general advantage estimation')
+@@ -125,7 +125,7 @@ class Agent(nn.Module):
+             #action = probs.cpu().sample()
+             action = torch.tensor(np.argmax(probs.probs.cpu().numpy(), axis=1, keepdims=True).T, device=device)
+         return action, probs.log_prob(action), probs.entropy(), self.critic(x)
+-    
++
+     def save(self, filename):
+         torch.save(self.state_dict(), filename)
+ 
+@@ -222,7 +222,7 @@ if __name__ == "__main__":
+             next_obs, reward, done, idk, info = envs.step(action[0].cpu().numpy()) # e
+             rewards[step] = torch.Tensor(reward).to(device).view(-1)
+             next_obs, next_done = torch.Tensor(next_obs).to(device), torch.Tensor(done).to(device)
+-    
++
+             for index, i in enumerate(done):
+                 if i:
+                     print(f'global timestep: {global_step}, episodic_reward: {info["final_info"][index]["episode"]["r"]}')
+diff --git a/python/pong/policies/timesteps.pkl b/python/pong/policies/timesteps.pkl
+index 4252b0d..fa8c84c 100644
+Binary files a/python/pong/policies/timesteps.pkl and b/python/pong/policies/timesteps.pkl differ
+diff --git a/python/pong/policies/wall.pt b/python/pong/policies/wall.pt
+index 47a8c6a..7390077 100644
+Binary files a/python/pong/policies/wall.pt and b/python/pong/policies/wall.pt differ
+diff --git a/python/pong/pong.py b/python/pong/pong.py
+index c43eba7..f6f19f4 100644
+--- a/python/pong/pong.py
++++ b/python/pong/pong.py
+@@ -119,7 +119,7 @@ class PongEnv(gym.Env):
+ 
+         if self.ballVel[0] > 0:
+             if ballRect.colliderect(playerPaddleRect):
+-                self.ballVel[0] *= -1.2
++                self.ballVel[0] *= -1.5
+                 speed = np.sqrt(np.sum(self.ballVel**2))
+                 self.ballVel = self.ballVel / np.sqrt(np.sum(self.ballVel**2))
+                 differenece = self.ballPos[1] - self.playerPaddle
+@@ -129,10 +129,10 @@ class PongEnv(gym.Env):
+                 self.ballVel = self.ballVel / np.sqrt(np.sum(self.ballVel**2)) * speed
+         else:
+             if ballRect.colliderect(aiPaddleRect):
+-                self.ballVel[0] *= -1.2
++                self.ballVel[0] *= -1.5
+                 speed = np.sqrt(np.sum(self.ballVel**2))
+                 self.ballVel = self.ballVel / np.sqrt(np.sum(self.ballVel**2))
+-                differenece = self.ballPos[1] - self.playerPaddle
++                differenece = self.ballPos[1] - self.aiPaddle
+                 self.ballVel = self.ballVel / np.sqrt(np.sum(self.ballVel**2))
+                 self.ballVel[1] += differenece / 30
+ 
+diff --git a/wandb/debug-cli.askborgen.log b/wandb/debug-cli.askborgen.log
+index e69de29..2760225 100644
+--- a/wandb/debug-cli.askborgen.log
++++ b/wandb/debug-cli.askborgen.log
+@@ -0,0 +1,164 @@
++2023-09-08 10:43:08 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:09 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:10 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:11 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:12 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:13 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:14 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:15 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:16 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:17 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:18 INFO NumExpr defaulting to 8 threads.
++2023-09-08 10:43:18 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:19 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:20 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:21 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:22 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:23 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:24 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:25 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:26 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:27 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:28 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:29 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:30 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:31 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:32 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:33 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:34 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:35 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:37 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:38 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:39 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:40 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:41 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:42 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:43 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:44 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:45 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:46 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:47 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:48 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:49 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:50 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:51 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:52 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:53 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:54 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:55 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:56 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:57 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:58 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:43:59 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:00 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:01 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:02 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:03 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:04 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:05 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:06 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:07 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:08 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:09 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:10 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:11 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:12 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:13 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:14 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:15 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:16 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:17 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:18 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:19 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:20 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:21 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:22 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:23 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:24 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:25 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:26 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:27 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:28 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:29 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:30 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:31 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:32 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:33 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:34 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:35 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:36 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:37 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:38 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:39 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:40 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:41 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:42 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:43 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:44 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:45 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:46 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:47 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:48 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:49 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:50 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:51 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:53 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:54 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:55 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:56 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:57 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:58 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:44:59 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:00 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:01 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:02 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:03 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:04 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:05 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:06 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:07 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:08 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:09 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:10 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:11 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:12 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:13 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:14 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:15 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:16 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:17 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:18 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:19 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:20 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:21 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:22 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:23 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:24 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:25 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:26 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:27 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:28 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:29 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:30 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:31 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:32 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:33 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:34 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:35 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:36 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:37 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:38 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:39 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:40 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:41 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:42 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:43 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:44 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:45 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:46 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:47 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:48 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:49 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:50 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:51 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
++2023-09-08 10:45:52 INFO No path found after /Users/askborgen/Desktop/code/python/pong/runs/Pong-v0__Ai__42__1694162572/events.out.tfevents.1694162588.Asks-MacBook-Air-2.local.3494.0
+diff --git a/wandb/debug-internal.log b/wandb/debug-internal.log
+index 6d11b69..d329222 120000
+--- a/wandb/debug-internal.log
++++ b/wandb/debug-internal.log
+@@ -1 +1 @@
+-run-20230907_130023-xw7oawtf/logs/debug-internal.log
+\ No newline at end of file
++run-20230908_115229-70xxdwxp/logs/debug-internal.log
+\ No newline at end of file
+diff --git a/wandb/debug.log b/wandb/debug.log
+index d3e92eb..dbdddb5 120000
+--- a/wandb/debug.log
++++ b/wandb/debug.log
+@@ -1 +1 @@
+-run-20230907_130023-xw7oawtf/logs/debug.log
+\ No newline at end of file
++run-20230908_115229-70xxdwxp/logs/debug.log
+\ No newline at end of file
+diff --git a/wandb/latest-run b/wandb/latest-run
+index c44e1bb..f0a080d 120000
+--- a/wandb/latest-run
++++ b/wandb/latest-run
+@@ -1 +1 @@
+-run-20230907_130023-xw7oawtf
+\ No newline at end of file
++run-20230908_115229-70xxdwxp
+\ No newline at end of file

@@ -27,7 +27,7 @@ def parse_args():
                         help='the learning rate of the optimizer')
     parser.add_argument('--seed', type=int, default=42,
                         help='seed of the experiment')
-    parser.add_argument('--total-timesteps', type=int, default=40000000,
+    parser.add_argument('--total-timesteps', type=int, default=40_000_000,
                         help='total timesteps of the experiments')
     parser.add_argument('--torch-deterministic', type=lambda x:bool(strtobool(x)), default=True, nargs='?', const=True,
                         help='if toggled, `torch.backends.cudnn.deterministic=False`')
@@ -41,7 +41,7 @@ def parse_args():
                         help="the entity (team) of wandb's project")
     parser.add_argument('--capture-video', type=lambda x:bool(strtobool(x)), default=True, nargs='?', const=True,
                         help='weather to capture videos of the agent performances (check out `videos` folder)')
-    parser.add_argument('--save-name', type=str, default='wall',
+    parser.add_argument('--save-name', type=str, default='test',
                         help='the name of the file to save the model')
 
     # Algorithm specific arguments
@@ -53,7 +53,7 @@ def parse_args():
                         help="Toggle learning rate annealing for policy and value networks")
     parser.add_argument('--gae', type=lambda x:bool(strtobool(x)), default=True, nargs='?', const=True,
                         help='Use GAE for advantage computation')
-    parser.add_argument('--gamma', type=float, default=0.99,
+    parser.add_argument('--gamma', type=float, default=0.9,
                         help='the discount factor gamma')
     parser.add_argument('--gae-lambda', type=float, default=0.95,
                         help='the lambda for the general advantage estimation')
@@ -125,7 +125,7 @@ class Agent(nn.Module):
             #action = probs.cpu().sample()
             action = torch.tensor(np.argmax(probs.probs.cpu().numpy(), axis=1, keepdims=True).T, device=device)
         return action, probs.log_prob(action), probs.entropy(), self.critic(x)
-    
+
     def save(self, filename):
         torch.save(self.state_dict(), filename)
 
@@ -192,8 +192,8 @@ if __name__ == "__main__":
     start_time = time.time()
     next_obs = torch.Tensor(envs.reset()[0]).to(device)
     next_done = torch.zeros(args.num_envs).to(device)
-    num_updates = args.total_timesteps // args.num_steps
-    start_update = global_step // (args.num_steps * args.num_envs)
+    num_updates = args.total_timesteps // args.batch_size
+    start_update = global_step // args.batch_size
 
     for update in range(start_update, num_updates + 1):
         agent.save("python/pong/policies/" + args.save_name + ".pt")
@@ -222,7 +222,7 @@ if __name__ == "__main__":
             next_obs, reward, done, idk, info = envs.step(action[0].cpu().numpy()) # e
             rewards[step] = torch.Tensor(reward).to(device).view(-1)
             next_obs, next_done = torch.Tensor(next_obs).to(device), torch.Tensor(done).to(device)
-    
+
             for index, i in enumerate(done):
                 if i:
                     print(f'global timestep: {global_step}, episodic_reward: {info["final_info"][index]["episode"]["r"]}')

@@ -1,0 +1,61 @@
+diff --git a/python/.DS_Store b/python/.DS_Store
+index b8c172d..2ef019a 100644
+Binary files a/python/.DS_Store and b/python/.DS_Store differ
+diff --git a/python/pong/ai.py b/python/pong/ai.py
+index 57cbfe5..e197349 100644
+--- a/python/pong/ai.py
++++ b/python/pong/ai.py
+@@ -125,7 +125,7 @@ class Agent(nn.Module):
+             #action = probs.cpu().sample()
+             action = torch.tensor(np.argmax(probs.probs.cpu().numpy(), axis=1, keepdims=True).T, device=device)
+         return action, probs.log_prob(action), probs.entropy(), self.critic(x)
+-    
++
+     def save(self, filename):
+         torch.save(self.state_dict(), filename)
+ 
+@@ -143,7 +143,7 @@ if __name__ == "__main__":
+         wandb.init(
+             project=args.wandb_project_name,
+             entity=args.wandb_entity,
+-            sync_tensorboard=False,
++            sync_tensorboard=True,
+             config=vars(args),
+             name=run_name,
+             monitor_gym=True,
+@@ -222,7 +222,7 @@ if __name__ == "__main__":
+             next_obs, reward, done, idk, info = envs.step(action[0].cpu().numpy()) # e
+             rewards[step] = torch.Tensor(reward).to(device).view(-1)
+             next_obs, next_done = torch.Tensor(next_obs).to(device), torch.Tensor(done).to(device)
+-    
++
+             for index, i in enumerate(done):
+                 if i:
+                     print(f'global timestep: {global_step}, episodic_reward: {info["final_info"][index]["episode"]["r"]}')
+diff --git a/wandb/debug-internal.log b/wandb/debug-internal.log
+index 6d11b69..0a1ad03 120000
+--- a/wandb/debug-internal.log
++++ b/wandb/debug-internal.log
+@@ -1 +1 @@
+-run-20230907_130023-xw7oawtf/logs/debug-internal.log
+\ No newline at end of file
++run-20230908_104257-f9y0d3vv/logs/debug-internal.log
+\ No newline at end of file
+diff --git a/wandb/debug.log b/wandb/debug.log
+index d3e92eb..14e862f 120000
+--- a/wandb/debug.log
++++ b/wandb/debug.log
+@@ -1 +1 @@
+-run-20230907_130023-xw7oawtf/logs/debug.log
+\ No newline at end of file
++run-20230908_104257-f9y0d3vv/logs/debug.log
+\ No newline at end of file
+diff --git a/wandb/latest-run b/wandb/latest-run
+index c44e1bb..58881ed 120000
+--- a/wandb/latest-run
++++ b/wandb/latest-run
+@@ -1 +1 @@
+-run-20230907_130023-xw7oawtf
+\ No newline at end of file
++run-20230908_104257-f9y0d3vv
+\ No newline at end of file

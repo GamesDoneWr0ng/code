@@ -75,6 +75,7 @@ class PongEnv(gym.Env):
         self.ballVel = 2 * self.ballVel / np.sqrt(np.sum(self.ballVel**2)) # normalize the velocity
         self.aiPaddle     = self.size[1] / 2
         self.playerPaddle = self.size[1] / 2
+        self.target = None
 
         observation = self._get_obs()
         info = self._get_info()
@@ -85,8 +86,8 @@ class PongEnv(gym.Env):
         return observation, info
 
     def step(self, action = 0, human = 0):
-        if abs(self.ballVel[0]) < 1:
-            self.ballVel[0] = np.sign(self.ballVel[0])
+        if abs(self.ballVel[0]) < 2:
+            self.ballVel[0] = np.sign(self.ballVel[0]) * 2
 
         direction = self._action_to_direction[action]
         reward = 0
@@ -98,10 +99,27 @@ class PongEnv(gym.Env):
         if self.render_mode == "human-vs-bot":
             self.playerPaddle = np.clip(self.playerPaddle + human, 50, self.size[1] - 50)
         else:
-            if self.ballPos[1] > self.playerPaddle:
-                self.playerPaddle += 4
+            if self.target == None:
+                if self.ballVel[0] < 0:
+                    self.target = self.size[1] / 2
+                else:
+                    total_x_distance = self.size[0] - 50 - self.ballPos[0]  # Total x distance until hitting the paddle
+                    time = total_x_distance / self.ballVel[0]               # Time to travel this distance
+                    total_y_distance = time * self.ballVel[1]               # Total y distance covered (without considering wall bounces)
+                    num_wall_hits = total_y_distance // self.size[1]        # Number of wall hits
+                    remaining_distance = total_y_distance % self.size[1]    # Distance covered in the current direction after the last wall hit
+
+                    if num_wall_hits % 2 == 0:
+                        # If the number of wall hits is even, the ball is moving in the initial direction
+                        self.target = self.ballPos[1] + remaining_distance
+                    else:
+                        # If it's odd, the ball is moving in the opposite direction
+                        self.target = self.size[1] - (self.ballPos[1] + remaining_distance)
             else:
-                self.playerPaddle -= 4
+                if self.target > self.playerPaddle:
+                    self.playerPaddle += 4
+                else:
+                    self.playerPaddle -= 4
         
         self.ballPos += self.ballVel
         if self.aiPaddle < 0 or self.aiPaddle > self.size[1]:
@@ -119,7 +137,7 @@ class PongEnv(gym.Env):
 
         if self.ballVel[0] > 0:
             if ballRect.colliderect(playerPaddleRect):
-                self.ballVel[0] *= -1.2
+                self.ballVel[0] *= -1.5
                 speed = np.sqrt(np.sum(self.ballVel**2))
                 self.ballVel = self.ballVel / np.sqrt(np.sum(self.ballVel**2))
                 differenece = self.ballPos[1] - self.playerPaddle
@@ -127,16 +145,20 @@ class PongEnv(gym.Env):
                 self.ballVel[1] += differenece / 30
 
                 self.ballVel = self.ballVel / np.sqrt(np.sum(self.ballVel**2)) * speed
+
+                self.target = None
         else:
             if ballRect.colliderect(aiPaddleRect):
-                self.ballVel[0] *= -1.2
+                self.ballVel[0] *= -1.5
                 speed = np.sqrt(np.sum(self.ballVel**2))
                 self.ballVel = self.ballVel / np.sqrt(np.sum(self.ballVel**2))
-                differenece = self.ballPos[1] - self.playerPaddle
+                differenece = self.ballPos[1] - self.aiPaddle
                 self.ballVel = self.ballVel / np.sqrt(np.sum(self.ballVel**2))
                 self.ballVel[1] += differenece / 30
 
                 self.ballVel = self.ballVel / np.sqrt(np.sum(self.ballVel**2)) * speed
+
+                self.target = None
 
                 reward += 1
 
