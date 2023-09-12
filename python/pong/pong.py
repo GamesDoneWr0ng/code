@@ -122,10 +122,12 @@ class PongEnv(gym.Env):
                     self.playerPaddle -= 4
         
         self.ballPos += self.ballVel
+
+        # clip ai paddle
         if self.aiPaddle < 0 or self.aiPaddle > self.size[1]:
             self.aiPaddle = np.clip(self.aiPaddle, 50, self.size[1] - 50)
             reward = -0.1
-        
+
         # bounce off top and bottom
         if self.ballPos[1] < 10 and self.ballVel[1] < 0 or self.ballPos[1] > self.size[1] - 10 and self.ballVel[1] > 0:
             self.ballVel[1] *= -1
