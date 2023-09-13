@@ -1,0 +1,11 @@
+fn do_Math():
+    let x: Int = 5
+    let y: Int = 2
+
+    print(math.sqrt(x))
+
+fn main():
+    from python import Python
+    let math = Python.import_module("math")
+
+    do_Math()
