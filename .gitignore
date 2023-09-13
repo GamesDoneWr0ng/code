@@ -12,5 +12,5 @@ jspm_packages/
 package-lock.json
 package.json
 python/pong/videos/
-# bugged file
-python/pong/gym-examples
+python/pong/runs
+wanb/

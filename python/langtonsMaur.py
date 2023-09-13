@@ -1,15 +1,19 @@
 import numpy as np
 import pygame as pg
+import os
+os.environ['SDL_VIDEO_CENTERED'] = '1'
 pg.init()
 
 fps = 1
-size = width, height = 800, 600
-screen = pg.display.set_mode(size)
+info = pg.display.Info() # You have to call this before pygame.display.set_mode()
+size = width, height = info.current_w,info.current_h
+
+screen = pg.display.set_mode(size, pg.FULLSCREEN)
 screen.fill((0,0,0))
 clock = pg.time.Clock()
 pg.display.set_caption("Langtons maur")
 
-cellSize = 10
+cellSize = 20
 
 cells = np.ones([width // cellSize, height // cellSize], dtype=np.int8)
 
@@ -28,6 +32,8 @@ while running:
                 fps += 1
             elif event.key == pg.K_DOWN:
                 fps -= 1
+            elif event.key == pg.K_SPACE:
+                fps = 60
 
     physicstick = (physicstick + fps) % 60
 
