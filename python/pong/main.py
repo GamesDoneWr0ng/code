@@ -7,7 +7,6 @@ from gymnasium.vector import SyncVectorEnv
 from torch import Tensor, tensor, device, no_grad
 from numpy import argmax
 from torch.distributions.categorical import Categorical
-from stable_baselines3.common.atari_wrappers import MaxAndSkipEnv
 from pong import PongEnv
 from ai import Agent
 pg.init()

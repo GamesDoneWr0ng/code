@@ -1,5 +1,15 @@
-import pickle
-timesteps = {'main': 2749520}
+def test():
+    for i in range(10):
+        print(i)
+        yield
 
-with open('python/pong/policies/timesteps.pkl', 'wb') as f:
-    pickle.dump(timesteps, f)
+start = test()
+
+for i in start:
+    break
+
+for i in start:
+    break
+
+for i in start:
+    break
