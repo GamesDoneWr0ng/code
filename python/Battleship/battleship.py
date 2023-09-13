@@ -22,7 +22,7 @@ class Battleship:
                 self.placeShip[0][0:i] = 1
                 while np.sum(self.placeShip) != 0:
                     yield 
-            self.swapTimer = 180
+            self.swapTimer = 90
 
         self.started = True
 
@@ -54,7 +54,7 @@ class Battleship:
         if self.swapTimer > 0 or self.shots[self.player][pos[0]][pos[1]] == 1:
             return True
         self.shots[self.player][pos[0]][pos[1]] = 1
-        self.swapTimer = 180
+        self.swapTimer = 90
 
         if np.all(self.shots[self.player][self.ships[int(not self.player)] == 1] == 1):
             return False
