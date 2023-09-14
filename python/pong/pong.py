@@ -72,6 +72,8 @@ class PongEnv(gym.Env):
 
         self.ballPos = np.array(self.size) / 2
         self.ballVel = np.random.randn(2) # Randomize velocity
+        self.ballVel[0] = abs(self.ballVel[0])
+
         self.ballVel = 2 * self.ballVel / np.sqrt(np.sum(self.ballVel**2)) # normalize the velocity
         self.aiPaddle     = self.size[1] / 2
         self.playerPaddle = self.size[1] / 2
@@ -96,7 +98,7 @@ class PongEnv(gym.Env):
         self.aiPaddle += direction
 
         # player input
-        if self.render_mode == "human-vs-bot":
+        if self.render_mode == " human-vs-bot":
             self.playerPaddle = np.clip(self.playerPaddle + human, 50, self.size[1] - 50)
         else:
             if self.target == None:
@@ -106,15 +108,17 @@ class PongEnv(gym.Env):
                     total_x_distance = self.size[0] - 50 - self.ballPos[0]  # Total x distance until hitting the paddle
                     time = total_x_distance / self.ballVel[0]               # Time to travel this distance
                     total_y_distance = time * self.ballVel[1]               # Total y distance covered (without considering wall bounces)
+                    sign = -1 if total_y_distance < 0 else 1
+                    total_y_distance = abs(total_y_distance)
                     num_wall_hits = total_y_distance // self.size[1]        # Number of wall hits
                     remaining_distance = total_y_distance % self.size[1]    # Distance covered in the current direction after the last wall hit
 
                     if num_wall_hits % 2 == 0:
                         # If the number of wall hits is even, the ball is moving in the initial direction
-                        self.target = self.ballPos[1] + remaining_distance
+                        self.target = self.ballPos[1] + remaining_distance * sign
                     else:
                         # If it's odd, the ball is moving in the opposite direction
-                        self.target = self.size[1] - (self.ballPos[1] + remaining_distance)
+                        self.target = self.size[1] - (self.ballPos[1] + remaining_distance * sign)
             else:
                 if self.target > self.playerPaddle:
                     self.playerPaddle += 4

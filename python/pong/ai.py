@@ -1,17 +1,16 @@
-if __name__ == "__main__":
-    import argparse
-    import os
-    from distutils.util import strtobool
-    import gymnasium as gym
-    import time
-    import random
-    import numpy as np
-    import torch
-    import torch.optim as optim
-    from torch.distributions.categorical import Categorical
-    import pickle
-    from torch.utils.tensorboard import SummaryWriter
-    from stable_baselines3.common.atari_wrappers import MaxAndSkipEnv
+import argparse
+import os
+from distutils.util import strtobool
+import gymnasium as gym
+import time
+import random
+import numpy as np
+import torch
+import torch.optim as optim
+from torch.distributions.categorical import Categorical
+import pickle
+from torch.utils.tensorboard import SummaryWriter
+from stable_baselines3.common.atari_wrappers import MaxAndSkipEnv
 import torch.nn as nn
 
 gym.register( # register the environment

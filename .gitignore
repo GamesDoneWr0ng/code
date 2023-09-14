@@ -13,4 +13,5 @@ package-lock.json
 package.json
 python/pong/videos/
 python/pong/runs
-wanb/
+wandb/
+python/pong/gym-examples
