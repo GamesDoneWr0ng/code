@@ -7,6 +7,7 @@ __pycache__/
 # javascript
 .env
 .npm
+.zip
 node_modules/
 jspm_packages/
 package-lock.json

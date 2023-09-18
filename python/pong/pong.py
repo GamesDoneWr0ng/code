@@ -98,7 +98,7 @@ class PongEnv(gym.Env):
         self.aiPaddle += direction
 
         # player input
-        if self.render_mode == " human-vs-bot":
+        if self.render_mode == "human-vs-bot":
             self.playerPaddle = np.clip(self.playerPaddle + human, 50, self.size[1] - 50)
         else:
             if self.target == None:

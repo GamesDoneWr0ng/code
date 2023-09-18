@@ -4,7 +4,7 @@
 import pygame as pg
 from gymnasium import make
 from gymnasium.vector import SyncVectorEnv
-from torch import Tensor, tensor, device, no_grad
+from torch import Tensor, no_grad
 from numpy import argmax
 from torch.distributions.categorical import Categorical
 from pong import PongEnv
@@ -47,8 +47,8 @@ class Main:
             probs = Categorical(logits=logits)
             #probs = torch.nn.functional.softmax(logits, dim=-1)
             #action = probs.cpu().sample()
-            action = tensor(argmax(probs.probs.cpu().numpy(), keepdims=True).T, device=device("mps"))
-            return action.cpu().numpy()[0]
+            action = argmax(probs.probs.cpu().numpy())
+            return action
 
 
 main = Main()
