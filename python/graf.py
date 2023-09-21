@@ -130,7 +130,7 @@ def nullPunkter(x_values: list, y_values: list) -> None:
 graf = input("Graf: ")
 
 # Creates a list of x values to caluclate y values from
-x_values = linspace(-5, 5, 101)
+x_values = linspace(0, 20, 101)
 """
 List of x values to caluclate y values from
 

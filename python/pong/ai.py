@@ -161,7 +161,7 @@ if __name__ == "__main__":
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
     torch.backends.cudnn.deterministic = args.torch_deterministic
-    
+
     device = torch.device("mps" if torch.backends.mps.is_available() and args.mps else "cpu")
 
     # env setup
@@ -169,11 +169,11 @@ if __name__ == "__main__":
         [make_env(args.gym_id, args.seed + i, i, args.capture_video, run_name) 
          for i in range(args.num_envs)])
     assert isinstance(envs.single_action_space, gym.spaces.Discrete), "only discrete action space is supported"
-    
+
     agent = Agent(envs).to(device)
     agent.load("python/pong/policies/" + args.save_name + ".pt") # load the trained policy
     optimizer = optim.Adam(agent.parameters(), lr=args.learning_rate, eps=1e-5)
-    
+
     # Algo logic: Storage setup
     obs = torch.zeros((args.num_steps, args.num_envs) + envs.single_observation_space.shape).to(device)
     actions = torch.zeros((args.num_steps, args.num_envs) + envs.single_action_space.shape).to(device)
@@ -207,21 +207,21 @@ if __name__ == "__main__":
             frac = 1.0 - (update - 1.0) / num_updates
             lrnow = frac * args.learning_rate
             optimizer.param_groups[0]['lr'] = lrnow
-    
+
         for step in range(0, args.num_steps):
             global_step += 1 * args.num_envs
             obs[step] = next_obs
             dones[step] = next_done
-    
+
             # Algo logic: action logic
             with torch.no_grad():
                 action, logprob, _, value = agent.get_action_and_value(next_obs)
                 values[step] = value.flatten()
             actions[step] = action
             logprobs[step] = logprob
-    
+
             # TRY NOT TO MODIFY: execute the game and log data.
-            next_obs, reward, done, idk, info = envs.step(action[0].cpu().numpy()) # e
+            next_obs, reward, done, idk, info = envs.step(action[0].cpu().numpy())
             rewards[step] = torch.Tensor(reward).to(device).view(-1)
             next_obs, next_done = torch.Tensor(next_obs).to(device), torch.Tensor(done).to(device)
 
@@ -230,7 +230,7 @@ if __name__ == "__main__":
                     print(f'global timestep: {global_step}, episodic_reward: {info["final_info"][index]["episode"]["r"]}')
                     writer.add_scalar("charts/episodic_return", info["final_info"][index]["episode"]["r"], global_step)
                     writer.add_scalar("charts/episodic_length", info["final_info"][index]["episode"]["l"], global_step)
-    
+
         # bootstrap reward if not done.
         with torch.no_grad():
             next_value = agent.get_value(next_obs).reshape(1, -1)
@@ -258,7 +258,7 @@ if __name__ == "__main__":
                         next_return = returns[t+1]
                     returns[t] = rewards[t] + args.gamma * nextnonterminal * next_return
                 returns = advantages - values
-    
+
         # flatten the batch
         b_obs = obs.reshape((-1,) + envs.single_observation_space.shape)
         b_logprobs = logprobs.reshape(-1)
@@ -266,7 +266,7 @@ if __name__ == "__main__":
         b_advantages = advantages.reshape(-1)
         b_returns = returns.reshape(-1)
         b_values = values.reshape(-1)
-    
+
         # optimizing the policy and the value network
         b_inds = np.arange(args.batch_size)
         for epoch in range(args.update_epochs):
@@ -274,22 +274,22 @@ if __name__ == "__main__":
             for start in range(0, args.batch_size, args.minibatch_size):
                 end = start + args.minibatch_size
                 mb_inds = b_inds[start:end]
-                    
+
                 _, newlogprob, entropy, newvalue = agent.get_action_and_value(
                     b_obs[mb_inds], b_actions.long()[mb_inds]
                 )
                 logratio = newlogprob - b_logprobs[mb_inds]
                 ratio = logratio.exp()
-                    
+
                 mb_advantages = b_advantages[mb_inds]
                 if args.norm_adv:
                     mb_advantages = (mb_advantages - mb_advantages.mean()) / (mb_advantages.std() + 1e-8)
-    
+
                 # Policy loss
                 pg_loss1 = -mb_advantages * ratio
                 pg_loss2 = -mb_advantages * torch.clamp(ratio, 1 - args.clip_coef, 1 + args.clip_coef)
                 pg_loss = torch.max(pg_loss1, pg_loss2).mean()
-    
+
                 # Value loss
                 newvalue = newvalue.view(-1)
                 if args.clip_vloss:
@@ -304,15 +304,15 @@ if __name__ == "__main__":
                     v_loss = 0.5 * v_loss_max.mean()
                 else:
                     v_loss = 0.5 * ((newvalue - b_returns[mb_inds]) ** 2).mean()
-    
+
                 entropy_loss = entropy.mean()
                 loss = pg_loss - args.ent_coef * entropy_loss + v_loss * args.vf_coef
-    
+
                 optimizer.zero_grad()
                 loss.backward()
                 nn.utils.clip_grad_norm_(agent.parameters(), args.max_grad_norm)
                 optimizer.step()
-    
+
         # TRY NOT TO MODIFY: record rewards for plotting purposes
             writer.add_scalar("charts/learning_rate", optimizer.param_groups[0]["lr"], global_step)
             writer.add_scalar("losses/value_loss", v_loss.item(), global_step)
@@ -320,6 +320,6 @@ if __name__ == "__main__":
             writer.add_scalar("losses/entropy", entropy_loss.item(), global_step)
             #print("SPS:", int(global_step / (time.time() - start_time)))
             writer.add_scalar("charts/SPS", int(global_step / (time.time() - start_time)), global_step)
-    
+
     envs.close()
     writer.close()
