@@ -36,3 +36,5 @@ fire.billeter = 120*4
 print("Prisen for fire billeter er", fire.billeter)
 
 
+
+# %%
