@@ -1,1 +1,1 @@
-nasm -fmacho64 HelloWorld.s; ld -static HelloWorld.o -o HelloWorld -e _start; ./HelloWorld
+nasm -fmacho64 calculator.s; ld -static calculator.o -o calculator -e _start; ./calculator
