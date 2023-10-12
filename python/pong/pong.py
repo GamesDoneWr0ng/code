@@ -4,7 +4,7 @@ import gymnasium as gym
 from gymnasium import spaces
 
 class PongEnv(gym.Env):
-    metadata = {"render_modes": ["human-vs-bot", "training", "rgb_array"], "render_fps": 60}
+    metadata = {"render_modes": ["human-vs-bot", "rgb_array"], "render_fps": 60}
 
     def __init__(self, size = [800,600], render_mode="rgb_array") -> None:
         self.size = size
@@ -55,11 +55,18 @@ class PongEnv(gym.Env):
         self.clock = None
 
     def _get_obs(self):
-        return np.array([
-            self.ballPos[0], self.ballPos[1],
-            self.ballVel[0], self.ballVel[1], 
-            self.aiPaddle, self.playerPaddle
-        ], dtype=np.float32)
+        if self.ballVel[0] < 0:
+            return np.array([
+                self.ballPos[0], self.ballPos[1],
+                self.ballVel[0], self.ballVel[1], 
+                self.aiPaddle, self.playerPaddle
+            ], dtype=np.float32)
+        else:
+            return np.array([
+                800 - self.ballPos[0], self.ballPos[1], # pos
+                -self.ballVel[0], self.ballVel[1],      # vel
+                self.playerPaddle, self.aiPaddle        # paddle
+            ], dtype=np.float32)
 
     def _get_info(self):
         return {
@@ -95,12 +102,15 @@ class PongEnv(gym.Env):
         reward = 0
 
         # move ai paddle
-        self.aiPaddle += direction
+        if self.ballVel[0] < 0 or self.render_mode == "human-vs-bot":
+            self.aiPaddle += direction
+        else:
+            self.playerPaddle += direction
 
         # player input
         if self.render_mode == "human-vs-bot":
             self.playerPaddle = np.clip(self.playerPaddle + human, 50, self.size[1] - 50)
-        else:
+        elif False: # not used when playing against self
             if self.target == None:
                 if self.ballVel[0] < 0:
                     self.target = self.size[1] / 2
@@ -127,9 +137,12 @@ class PongEnv(gym.Env):
         
         self.ballPos += self.ballVel
 
-        # clip ai paddle
+        # clip paddles
         if self.aiPaddle < 0 or self.aiPaddle > self.size[1]:
             self.aiPaddle = np.clip(self.aiPaddle, 50, self.size[1] - 50)
+            reward = -0.1
+        if self.playerPaddle < 0 or self.playerPaddle > self.size[1]:
+            self.playerPaddle = np.clip(self.playerPaddle, 50, self.size[1] - 50)
             reward = -0.1
 
         # bounce off top and bottom
@@ -153,6 +166,8 @@ class PongEnv(gym.Env):
                 self.ballVel = self.ballVel / np.sqrt(np.sum(self.ballVel**2)) * speed
 
                 self.target = None
+
+                reward += 1
         else:
             if ballRect.colliderect(aiPaddleRect):
                 self.ballVel[0] *= -1.5
@@ -172,12 +187,12 @@ class PongEnv(gym.Env):
         # gain points
         if self.ballPos[0] > self.size[0]:
             self.score[0] += 1
+            reward -= (abs(self.playerPaddle - self.ballPos[1])) / 200
             self.reset()
             terminated = True
-            reward += 3
         elif self.ballPos[0] < 0:
             self.score[1] += 1
-            reward -= 1 * (abs(self.aiPaddle - self.ballPos[1])) / 200
+            reward -= (abs(self.aiPaddle - self.ballPos[1])) / 200
             self.reset()
             terminated = True
 

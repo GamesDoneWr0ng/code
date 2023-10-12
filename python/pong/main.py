@@ -20,13 +20,12 @@ class Main:
         def make_env():
             def thunk():
                 env = make("Pong-v0")
-                #env = MaxAndSkipEnv(env, skip=4) 
                 return env
             return thunk
         
         env = SyncVectorEnv([make_env()])
         self.ai = Agent(env)
-        self.ai.load("python/pong/policies/test.pt")
+        self.ai.load("python/pong/policies/final2.pt")
 
         self.pong = PongEnv(size, render_mode="human-vs-bot")
 

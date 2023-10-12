@@ -21,7 +21,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--exp-name', type=str, default=os.path.basename(__file__).rstrip(".py"),
                         help='the name of this experiment')
-    parser.add_argument('--gym-id', type=str, default='CartPole-v1',#'CartPole-v1, Pong-v0',
+    parser.add_argument('--gym-id', type=str, default='Pong-v0',#'CartPole-v1, Pong-v0',
                         help='the id of the gym environment')
     parser.add_argument('--learning-rate', type=float, default=2.5e-4,
                         help='the learning rate of the optimizer')
@@ -41,7 +41,7 @@ def parse_args():
                         help="the entity (team) of wandb's project")
     parser.add_argument('--capture-video', type=lambda x:bool(strtobool(x)), default=True, nargs='?', const=True,
                         help='weather to capture videos of the agent performances (check out `videos` folder)')
-    parser.add_argument('--save-name', type=str, default='cart',
+    parser.add_argument('--save-name', type=str, default='final2',
                         help='the name of the file to save the model')
 
     # Algorithm specific arguments
@@ -76,8 +76,6 @@ def parse_args():
     args = parser.parse_args()
     args.batch_size = int(args.num_envs * args.num_steps)
     args.minibatch_size = int(args.batch_size // args.num_minibatches)
-    args.capture_video = False
-    args.track = False
     return args
 
 def make_env(gym_id, seed, idx, capture_video, run_name):
@@ -145,7 +143,7 @@ if __name__ == "__main__":
         wandb.init(
             project=args.wandb_project_name,
             entity=args.wandb_entity,
-            sync_tensorboard=False,
+            sync_tensorboard=True,
             config=vars(args),
             name=run_name,
             monitor_gym=True,
