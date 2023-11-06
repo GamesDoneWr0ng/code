@@ -1,14 +1,7 @@
-from python import Python
-import math
-
-fn do_Math():
-    let x: Int = 5
-    let y: Int = 2
-
-    print(math.sqrt(x))
+@always_inline
+fn erLike(a: Int, b: Int, c: Int) -> Bool:
+    return a == b == c
 
 fn main():
-    from python import Python
-    let math = Python.import_module("math")
-
-    do_Math()
+    print(erLike(1,1,1))
+    print(erLike(1,2,3))
