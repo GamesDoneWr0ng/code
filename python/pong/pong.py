@@ -4,7 +4,7 @@ import gymnasium as gym
 from gymnasium import spaces
 
 class PongEnv(gym.Env):
-    metadata = {"render_modes": ["human-vs-bot", "rgb_array"], "render_fps": 60}
+    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 60}
 
     def __init__(self, size = [800,600], render_mode="rgb_array") -> None:
         self.size = size
@@ -45,7 +45,7 @@ class PongEnv(gym.Env):
         self.render_mode = render_mode
 
         """
-        If human-vs-bot is used, `self.window` will be a reference
+        If human is used, `self.window` will be a reference
         to the window that we draw to. `self.clock` will be a clock that is used
         to ensure that the environment is rendered at the correct framerate in
         human-mode. They will remain `None` until human-mode is used for the
@@ -89,7 +89,7 @@ class PongEnv(gym.Env):
         observation = self._get_obs()
         info = self._get_info()
 
-        if self.render_mode == "human-vs-bot":
+        if self.render_mode == "human":
             self._render_frame()
 
         return observation, info
@@ -102,13 +102,13 @@ class PongEnv(gym.Env):
         reward = 0
 
         # move ai paddle
-        if self.ballVel[0] < 0 or self.render_mode == "human-vs-bot":
+        if self.ballVel[0] < 0 or self.render_mode == "human":
             self.aiPaddle += direction
         else:
             self.playerPaddle += direction
 
         # player input
-        if self.render_mode == "human-vs-bot":
+        if self.render_mode == "human":
             self.playerPaddle = np.clip(self.playerPaddle + human, 50, self.size[1] - 50)
         elif False: # not used when playing against self
             if self.target == None:
@@ -199,21 +199,21 @@ class PongEnv(gym.Env):
         observation = self._get_obs()
         info = self._get_info()
 
-        if self.render_mode == "human-vs-bot":
+        if self.render_mode == "human":
             self._render_frame()
 
         return observation, reward, terminated, False, info
     
     def render(self):
-        if self.render_mode == "rgb_array" or self.render_mode == "human-vs-bot":
+        if self.render_mode == "rgb_array" or self.render_mode == "human":
             return self._render_frame()
 
     def _render_frame(self):
-        if self.window is None and self.render_mode == "human-vs-bot":
+        if self.window is None and self.render_mode == "human":
             pg.init()
             pg.display.init()
             self.window = pg.display.set_mode(self.size)
-        if self.clock is None and self.render_mode == "human-vs-bot":
+        if self.clock is None and self.render_mode == "human":
             self.clock = pg.time.Clock()
 
         pg.font.init()
@@ -231,7 +231,7 @@ class PongEnv(gym.Env):
         img = font.render(str(self.score[1]), True, (255,255,255))
         canvas.blit(img, (self.size[0] - img.get_width(), 0))
 
-        if self.render_mode == "human-vs-bot":
+        if self.render_mode == "human":
             # The following line copies our drawings from `canvas` to the visible window
             self.window.blit(canvas, canvas.get_rect())
             pg.event.pump()
