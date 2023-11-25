@@ -1,7 +1,11 @@
 class Template:
-    def __init__(self, board, notes) -> None:
+    def __init__(self, board, notes, name = "Template") -> None:
         self.board = board
         self.notes = notes
+        self.name = name
+
+    def __name__(self) -> str:
+        return self.name
 
     def getCol(self, idx):
         return self.board[:,idx]

@@ -2,7 +2,7 @@ from numpy import any
 from methods.template import Template
 class DirectSight(Template):
     def __init__(self, board, notes):
-        super().__init__(board, notes)
+        super().__init__(board, notes, "Direct Sight")
 
     def solve(self):
         change = False

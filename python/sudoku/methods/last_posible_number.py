@@ -2,7 +2,7 @@ from methods.template import Template
 from numpy import count_nonzero
 class LastPosibleNumber(Template):
     def __init__(self, board, notes):
-        super().__init__(board, notes)
+        super().__init__(board, notes, "Last Posible Number")
 
     def solve(self):
         change = False
