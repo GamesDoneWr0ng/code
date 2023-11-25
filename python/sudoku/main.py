@@ -4,6 +4,7 @@ Takes args and comunicates between classes
 from methods.direct_sight import DirectSight
 from methods.hidden_singles import HiddenSingles
 from methods.last_posible_number import LastPosibleNumber
+from methods.naked_candidates import NakedCandiadates
 from sudoku import Sudoku
 import numpy as np
 
@@ -33,5 +34,6 @@ class Main:
     """
     def __init__(self):
         self.sudoku = Sudoku(800, activeMethods, board)
+        
 
 main = Main()
