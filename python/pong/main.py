@@ -2,32 +2,24 @@
 # Handels comunication between classes and inputs
 
 import pygame as pg
-from gymnasium import make
-from gymnasium.vector import SyncVectorEnv
-from torch import Tensor, no_grad
-from numpy import argmax
-from torch.distributions.categorical import Categorical
+import gymnasium as gym
+from stable_baselines3 import PPO
+from torch import Tensor
 from pong import PongEnv
-from ai import Agent
 pg.init()
 
 size = width, height = 800, 600
 screen = pg.display.set_mode(size)
 pg.display.set_caption("Pong")
 
+gym.register( # register the environment
+    id='Pong-v0',
+    entry_point='pong:PongEnv')
+
 class Main:
     def __init__(self) -> None:
-        def make_env():
-            def thunk():
-                env = make("Pong-v0")
-                return env
-            return thunk
-        
-        env = SyncVectorEnv([make_env()])
-        self.ai = Agent(env)
-        self.ai.load("python/pong/policies/final2.pt")
-
-        self.pong = PongEnv(size, render_mode="human-vs-bot")
+        self.model = PPO.load("python/pong/policies/stablebase")
+        self.pong = PongEnv(size, render_mode="human")
 
     def inputHandler(self):
         for event in pg.event.get():
@@ -41,14 +33,8 @@ class Main:
         return 0
     
     def getAi(self, obs):
-        with no_grad(): # ai
-            logits = self.ai.actor(obs)
-            probs = Categorical(logits=logits)
-            #probs = torch.nn.functional.softmax(logits, dim=-1)
-            #action = probs.cpu().sample()
-            action = argmax(probs.probs.cpu().numpy())
-            return action
-
+        action, _states = self.model.predict(obs)
+        return int(action)
 
 main = Main()
 
