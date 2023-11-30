@@ -16,8 +16,8 @@ vec_env = make_vec_env(make_env, n_envs=4)
 
 model = PPO.load("python/pong/policies/stablebase")
 
-#model = PPO("MlpPolicy", vec_env, verbose=1, ent_coef=0.02, gamma=0.95, device="auto", tensorboard_log="./python/pong/runs/ppo_pong_tensorboard/")
-#model.learn(total_timesteps=1000000, progress_bar=True, tb_log_name="run")
+model = PPO("MlpPolicy", vec_env, verbose=1, ent_coef=0.02, gamma=0.95, device="auto", tensorboard_log="./python/pong/runs/ppo_pong_tensorboard/")
+model.learn(total_timesteps=1000000, progress_bar=True, tb_log_name="run")
  
 #model.save("python/pong/policies/stablebase")
 
