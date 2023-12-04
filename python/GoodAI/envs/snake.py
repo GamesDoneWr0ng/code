@@ -21,7 +21,7 @@ class SnakeEnv(gym.Env):
         self.size = size
         self.reset()
         self.action_space = gym.spaces.Discrete(4)
-        self.observation_space = gym.spaces.Box(low=0, high=4, shape=(2, size, size), dtype=np.int8)
+        self.observation_space = gym.spaces.Box(low=0, high=self.size, shape=(39,), dtype=np.float64)
 
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
@@ -36,7 +36,45 @@ class SnakeEnv(gym.Env):
     #    obs[1][self.tail[0]][self.tail[1]]   = 2
     #    obs[1][self.apple[0]][self.apple[1]] = 3
     #    return obs
-    
+
+    def _get_obs(self):
+        # 16 lines from head returning distance to collision
+        # this is 2 values for each line distance collision type # wall, snake, apple
+        # 2 for head position
+        # 2 for relative position to apple
+        # 2 for relative position to tail
+        # 1 for snake lenght
+        obs = []
+        for i in [[0,1], [1,2], [1,1], [2,1], [1,0], [2,-1], [1,-1], [1,-2], [0,-1], [-1, -2], [-1,-1], [-2, -1], [-1, 0], [-2, 1], [-1,1], [-1, 2]]:
+            pos = self.head
+            for length in range(self.size):
+                if np.sum(np.abs(i)) == 3:
+                    tempPos = np.add(pos, np.floor_divide(i,2))
+                    if np.max(tempPos) >= self.size or np.min(tempPos) < 0:
+                        obs.append([length, 0])
+                        break
+                    elif self.snake[tempPos[0]][tempPos[1]] != 0:
+                        obs.append([length, 1])
+                        break
+                    elif np.all(tempPos == self.apple):
+                        obs.append([length, 2])
+                        break
+
+                pos = np.add(pos, i)
+                if np.max(pos) >= self.size or np.min(pos) <= 0:
+                    obs.append([length, 0])
+                    break
+                elif self.snake[pos[0]][pos[1]] != 0:
+                    obs.append([length, 1])
+                    break
+                elif np.all(pos == self.apple):
+                    obs.append([length, 2])
+                    break
+        
+        obs.append(list(self.head))
+        obs.append(list(self.apple-self.head))
+        obs.append(list(self.tail-self.head))
+        return np.append(np.array(obs, dtype=np.float64).flatten(), self.length/self.size)
     
     def _get_info(self):
         return {
