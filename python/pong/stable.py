@@ -9,9 +9,9 @@ gym.register( # register the environment
 
 vec_env = make_vec_env("Pong-v0", n_envs=4)
 
-model = PPO("MlpPolicy", vec_env, verbose=1, ent_coef=0.02, gamma=0.95, device="auto")
-model.learn(total_timesteps=500000, progress_bar=True)
-model.save("stablebase")
+model = PPO("MlpPolicy", vec_env, verbose=1, ent_coef=0.02, gamma=0.95, device="auto", tensorboard_log="./python/pong/ppo_pong_tensorboard/")
+model.learn(total_timesteps=500000, progress_bar=True, tb_log_name="1")
+model.save("stablebase1")
 
 obs = vec_env.reset()
 while True:
