@@ -16,3 +16,5 @@ python/pong/videos/
 python/pong/runs
 wandb/
 python/pong/gym-examples
+python/Manimations/**/media/videos/**/1080p60/partial_movie_files
+python/Manimations/**/media/Tex/
