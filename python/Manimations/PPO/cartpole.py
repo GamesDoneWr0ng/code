@@ -5,27 +5,6 @@ down = 2
 position1 = -0.17
 angle1 = -0.40
 
-class ArrowLineTip(ArrowTip, Line):
-    r"""Line arrow tip."""
-
-    def __init__(
-        self,
-        stroke_width: float = 6,
-        length: float = DEFAULT_ARROW_TIP_LENGTH,
-        start_angle: float = PI/2,
-        **kwargs,
-    ) -> None:
-        self.start_angle = start_angle
-        Line.__init__(
-            self,
-            start=UP*length,
-            end=UP*length,
-            stroke_width=stroke_width,
-            **kwargs,
-        )
-        self.width = length
-        self.stretch_to_fit_height(length)
-
 class CartpoleMobject(VGroup):
     def __init__(self, **kwargs):
         VGroup.__init__(self, **kwargs)
@@ -73,15 +52,22 @@ class CartpoleMobject(VGroup):
         thetaDot.move_to(rotate_vector(self.pole.get_end()-self.pole.get_start(), -PI/5) + self.pole.get_start())
         obs.add(thetaDot)
 
-        distance = DoubleArrow(start=self.cart.get_center()+DOWN, 
-                               end=self.cart.get_center()+DOWN+LEFT*7,
-                               tip_shape_end=ArrowLineTip,
-                               tip_shape_start=ArrowLineTip
-                               )
-        x = MathTex(r"x")
-        x.move_to(self.cart.get_corner(DOWN+RIGHT)*np.array([0.5,1,0])+DOWN)
+        distance = Arrow(start=self.cart.get_center()+DOWN+LEFT*7, 
+                         end=self.cart.get_center()+DOWN
+                         )
+        x = MathTex(r"\boldsymbol{x}")
+        x.move_to(self.cart.get_center()+DOWN+RIGHT/2)
         obs.add(distance)
         obs.add(x)
+
+        speed = Arrow(start=self.cart.get_corner(DL),
+                      end=self.cart.get_corner(DL)+LEFT*2
+                      )
+        
+        xDot = MathTex(r"\dot{\boldsymbol{x}}")
+        xDot.move_to(self.cart.get_corner(DL)+LEFT*2.5)
+        obs.add(speed)
+        obs.add(xDot)
 
         obs.set_color(BLUE)
         obs[0].set_color(WHITE)
@@ -114,5 +100,35 @@ class CartpoleScene(Scene):
         self.play(Create(obs[6]))
         self.play(Write(obs[7]), Write(obs[3][2]))
 
+        self.play(Wait(1))
+        self.play(Create(obs[8]))
+        self.play(Write(obs[9]), Write(obs[3][3]))
+
+        self.wait(2)
+        self.play(FadeOut(obs))
+
+        # Update cart position
+        cart_move_animation = ApplyMethod(cartpole.cart.shift, -15*position1*RIGHT)
+        pole_move_amimation = ApplyMethod(cartpole.pole.set_points_smoothly, 
+                                          [cartpole.cart.get_top() -15*position1*RIGHT, 
+                                           cartpole.cart.get_top() -15*position1*RIGHT +UP*3])
+
+        self.play(cart_move_animation, pole_move_amimation, run_time=2)
+
+        self.wait(2)
+        self.play(FadeOut(cartpole))
+
+        normalCart = MathTex(r"N_c=(m_c+m_p)g-m_pl(\ddot{\theta}sin\theta+\dot{\theta}^2cos\theta)")
+        thetaDoubleDot = MathTex(r"\ddot{\theta}=\frac{gsin\theta+cos\theta*\{\frac{-F-m_pl\dot{\theta}^2[sin\theta+\mu_csgn(N_c\dot{x})cos\theta]}{m_c+m_p}+\mu_cgsgn(N_c\dot{x})\}-\frac{\mu_p\dot{\theta}}{m_pl}}{l\{\frac{4}{3}-\frac{m_pcos\theta}{m_c+m_p}[cos\theta-\mu sgn(N_c\dot{x})]\}}")
+        xDoubleDot = MathTex(r"\ddot{x}=\frac{F+m_pl(\dot{\theta}^2sin\theta-\ddot{\theta}cos\theta)-\mu_cN_csgn(N_c\dot{x})}{m_c+m_p}")
+        thetaDoubleDot.scale(0.75)
+
+        formulas = VGroup()
+        formulas.add(normalCart)
+        formulas.add(thetaDoubleDot)
+        formulas.add(xDoubleDot)
+        formulas.arrange(DOWN)
+
+        self.play(Write(formulas), run_time=10)
 
         self.wait(2)
