@@ -24,13 +24,15 @@ class NeuralNetworkMobject(VGroup):
     def create_connections(self, neural_network_architecture):
         connections = VGroup()
         for layer_index in range(len(neural_network_architecture) - 1):
+            layer = VGroup()
             for neuron_index_pre, neuron_pre in enumerate(self.layers[layer_index]):
                 for neuron_index_post, neuron_post in enumerate(self.layers[layer_index + 1]):
                     line = Line(neuron_pre.get_center(), neuron_post.get_center())
                     line.set_z_index(-1)
                     colorValue = np.random.randint(0,255)
                     line.set_color(ManimColor((colorValue, 0, 255-colorValue)))
-                    connections.add(line)
+                    layer.add(line)
+            connections.add(layer)
         return connections
 
 class NeuralNetworkScene(Scene):
@@ -43,6 +45,9 @@ class NeuralNetworkScene(Scene):
             self.play(Create(layer, lag_ratio=0.2))
             self.wait(0.2)  # Small wait time between layer draws
 
-        # Draw the connections
-        self.play(Create(neural_network.connections, run_time=5, lag_ratio=0.2))
+        # Animate the creation of the network
+        for layer in neural_network.connections:
+            self.play(Create(layer, lag_ratio=0.2))
+            self.wait(0.2)  # Small wait time between layer draws
+
         self.wait(1)  # Wait for 1 second at the end

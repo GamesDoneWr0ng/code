@@ -119,7 +119,7 @@ class CartpoleScene(Scene):
         self.play(FadeOut(cartpole))
 
         normalCart = MathTex(r"N_c=(m_c+m_p)g-m_pl(\ddot{\theta}sin\theta+\dot{\theta}^2cos\theta)")
-        thetaDoubleDot = MathTex(r"\ddot{\theta}=\frac{gsin\theta+cos\theta*\{\frac{-F-m_pl\dot{\theta}^2[sin\theta+\mu_csgn(N_c\dot{x})cos\theta]}{m_c+m_p}+\mu_cgsgn(N_c\dot{x})\}-\frac{\mu_p\dot{\theta}}{m_pl}}{l\{\frac{4}{3}-\frac{m_pcos\theta}{m_c+m_p}[cos\theta-\mu sgn(N_c\dot{x})]\}}")
+        thetaDoubleDot = MathTex(r"\ddot{\theta}=\frac{gsin\theta+cos\theta*\{\frac{-F-m_pl\dot{\theta}^2[sin\theta+\mu_csgn(N_c\dot{x})cos\theta]}{m_c+m_p}+\mu_cgsgn(N_c\dot{x})\}-\frac{\mu_p\dot{\theta}}{m_pl}}{l\{\frac{4}{3}-\frac{m_pcos\theta}{m_c+m_p}[cos\theta-\mu_csgn(N_c\dot{x})]\}}")
         xDoubleDot = MathTex(r"\ddot{x}=\frac{F+m_pl(\dot{\theta}^2sin\theta-\ddot{\theta}cos\theta)-\mu_cN_csgn(N_c\dot{x})}{m_c+m_p}")
         thetaDoubleDot.scale(0.75)
 
