@@ -1,19 +1,17 @@
 class Vehicle:
     """Class for making a Vehicle."""
-    def __init__(self, registerNumber: str, brand: str, model: str, owner: str) -> None:
+    def __init__(self, numberplate: str, brand: str, model: str, owner: str, fuel: str) -> None:
         """Constructor"""
-        self.registerNumber = registerNumber
+        self.numberplate = numberplate
         self.brand = brand
         self.model = model
         self.owner = owner
-
-    def __hash__(self) -> int:
-        """Return the hash of the registerNumber. Used for dictonary and set keys."""
-        return hash(self.registerNumber)
-    
-    def getType(self) -> str:
-        """Return the type of car."""
-        raise NotImplementedError
+        self.fuel = fuel # Instead of creating more classes for electric and gas cars i simply add one field(fancy word for variable of a class) that stores if its a electric or gas car.
     
     def __str__(self) -> str:
-        return f"{self.brand} model {self.model} registernumber {self.registerNumber} owned by {self.owner}"
+        """Used by print."""
+        return f"{self.brand:<8} model {self.model:<3} numberplate {self.numberplate:<10} owned by {self.owner:<10} fueltype {self.fuel}"
+    
+    def info(self) -> str:
+        """Same as __str__ but only returns the data without labels. I use this when printing out the whole trafikksystem."""
+        return f"{self.brand:<8} {self.model:<5} {self.numberplate:<11} {self.owner:<10} {self.fuel}"

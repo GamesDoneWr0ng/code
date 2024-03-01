@@ -1,8 +1,8 @@
-chickens = 16514
-eggpermin = 16021822
-intHatchery = 4087 * 2*4
+chickens = 30618
+eggpermin = 35991497
+intHatchery = 5544 * 2*4
 
-goal = 100_000_000_000
+goal = 3_000_000_000_000
 eggs = 0
 mins = 0
 eggperchicken = eggpermin / chickens
