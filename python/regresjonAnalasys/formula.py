@@ -1,12 +1,12 @@
-from numpy import random
+import numpy as np
 import torch
 import matplotlib.pyplot as plt
 import torch.nn as nn
 
-#inputs  = torch.tensor(([0],[1],[2],[3],[4],[5],[6],[7],[8] ,[9]), dtype=torch.float32)
-#outputs = torch.tensor(([1],[3],[2],[5],[7],[8],[8],[9],[10],[12]), dtype=torch.float32)
-inputs = torch.linspace(0, 10, 50, dtype=torch.float32).unsqueeze(-1)
-outputs = 2*torch.sin(inputs+2) + torch.tensor(random.randn(50), dtype=torch.float32).unsqueeze(-1)/3
+inputs  = torch.tensor(([1],[3],[5],[7],[9],[11],[13],[15],[17],[19],[21],[23]), dtype=torch.float32)
+outputs = torch.tensor(([94], [43], [26], [61], [113], [138], [111], [59], [35], [64], [117], [146]), dtype=torch.float32)
+#inputs = torch.linspace(0, 10, 50, dtype=torch.float32).unsqueeze(-1)
+#outputs = 2*torch.sin(inputs+2) + torch.tensor(random.randn(50), dtype=torch.float32).unsqueeze(-1)/3
 
 assert inputs.shape[0] == outputs.shape[0]
 
@@ -14,12 +14,12 @@ class customModule(nn.Module):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.a = torch.nn.Parameter(torch.randn(()))
-        self.b = torch.nn.Parameter(torch.randn(()))
+        #self.b = torch.nn.Parameter(torch.randn(()))
         self.c = torch.nn.Parameter(torch.randn(()))
         self.d = torch.nn.Parameter(torch.randn(()))
 
     def forward(self, x):
-        return self.a * torch.sin(self.b * x + self.c) + self.d
+        return self.a * torch.sin(np.pi/6 * x + self.c) + self.d
 
 model = customModule()
 
@@ -52,9 +52,18 @@ print(t, loss.item())
 #ax.scatter(x,y,z)
 plt.scatter(inputs, outputs)
 
-xValues = torch.linspace(inputs.min(), inputs.max(), 100)
+xValues = torch.linspace(inputs.min()-1, inputs.max()+1, 100)
 yValues = model(xValues.unsqueeze(-1))
 
 plt.plot(xValues.detach().numpy(), yValues.detach().numpy())
 
 plt.show()
+"""
+A = 54.92
+phi = 52.48
+d = 83.88
+
+A=-54.8026
+phi=-0.9208
+d=-83.9008
+"""

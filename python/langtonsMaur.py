@@ -5,32 +5,51 @@ from itertools import product
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 pg.init()
 
-pattern = np.random.choice(["R","L"], 256)
-pattern[0] = "L" if pattern[0] == "N" else pattern[0]
-#pattern = "RUUUNRRULRRNRRLRLNUNURLNLRNLUNRURLRLRRUNUNNLULRRNUNRLRURNNNUUNNLURULNUURULRLRLNRNRLNRRRLNNRLNNULUNRRURRLUNLRRNNUULNLLRRNLRRULRLUNLURUNNNNNNRNRRRULLNNURUURUNRLNUUNLLNRNURRULULRRULLULLRUNNRNNNLNUNURRURULLRNRRUUNUNLLUURLNRNNRURRRLRULUUURRRNNNNULRLLURULLURRNNL"
+#pattern = np.random.choice(["R","L"], 256)
+#pattern[0] = "L" if pattern[0] == "N" else pattern[0]
+pattern = "LLRRRLRRRRRR"
 R = np.array([[0, -1], [1, 0]])
 L = np.array([[0, 1], [-1, 0]])
 U = -1
 N = 1
 
-directions = []
-for i in pattern:
-    match i:
-        case "R":
-            directions.append(R)
-        case "L":
-            directions.append(L)
-        case "N":
-            directions.append(N)
-        case "U":
-            directions.append(U)
-        case _:
-            print("Invalid pattern")
-            exit()
+class Ant:
+    def __init__(self, pattern, pos, dir) -> None:
+        self.pos = pos
+        self.direction = dir
 
-colors = [(i,i,i) for i in range(256)] # 256 colors
+        self.directions = []
+        for i in pattern:
+            match i:
+                case "R":
+                    self.directions.append(R)
+                case "L":
+                    self.directions.append(L)
+                case "N":
+                    self.directions.append(N)
+                case "U":
+                    self.directions.append(U)
+                case _:
+                    print("Invalid pattern")
+                    exit()
+
+    def tick(self):
+        cell = cells[self.pos[0]][self.pos[1]]
+        # rotation matrix
+        self.direction = np.dot(self.direction, self.directions[cell])
+        cell = (cell + 1) % len(pattern)
+
+        #pg.draw.rect(screen, colors[cell], (pos[0] * cellSize, pos[1] * cellSize, cellSize, cellSize))
+        screen.set_at(self.pos, colors[cell])
+
+        cells[self.pos[0]][self.pos[1]] = cell
+        self.pos += self.direction
+        screen.set_at(self.pos, colors[cell])
+#        pg.draw.rect(screen, colors[cell], (pos[0] * cellSize, pos[1] * cellSize, cellSize, cellSize))
+
+#colors = [(i,i,i) for i in range(256)] # 256 colors
 #colors = list(product([0,255//3,2*255//3,255], [0,255//3,2*255//3,255], [0,255//3,2*255//3,255])) # 64 colors
-#colors = list(product([0,255,255], [0,127,255], [0,127,255])) # 27 colors
+colors = list(product([0,255,255], [0,127,255], [0,127,255])) # 27 colors
 #colors = list(product([0,255], [0,255], [0,255])) # 8 colors 
 
 fps = 1
@@ -43,13 +62,13 @@ clock = pg.time.Clock()
 pg.display.set_caption("Langtons maur")
 
 cellSize = 1
-
 cells = np.zeros([width // cellSize, height // cellSize], dtype=np.int8)
-
-pos = (np.array(cells.shape) // 2)
-direction = np.array([0, 1])
-
 skip = 0
+
+ants = [
+    Ant(pattern, (np.array(cells.shape) // 2), np.array([0, 1])),
+    Ant(pattern, (np.array(cells.shape) // 2 + np.array((0,50))), np.array([0, 1]))
+]
 
 physicstick = 0
 running = True
@@ -66,22 +85,10 @@ while running:
             elif event.key == pg.K_SPACE:
                 fps = 60
 
-    #physicstick = (physicstick + fps) % 60
-
-    #if physicstick < fps:
-    cell = cells[pos[0]][pos[1]]
-    # rotation matrix
-    direction = np.dot(direction, directions[cell])
-    cell = (cell + 1) % len(pattern)
-
-    #pg.draw.rect(screen, colors[cell], (pos[0] * cellSize, pos[1] * cellSize, cellSize, cellSize))
-    screen.set_at(pos, colors[cell])
-
-    cells[pos[0]][pos[1]] = cell
-    pos += direction
-    screen.set_at(pos, colors[cell])
-#    pg.draw.rect(screen, colors[cell], (pos[0] * cellSize, pos[1] * cellSize, cellSize, cellSize))
+    for ant in ants:
+        ant.tick()
 
     skip = (skip + 1) % 1500
     if skip == 0:
         pg.display.flip()
+        #clock.tick(fps)
