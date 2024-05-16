@@ -44,8 +44,8 @@ class Room:
             self.player = entity
 
     def removeEntity(self, entity: Entity, reason: RemovalReason) -> None:
-        entity.remove(reason) # TODO: removalreason
         self.entities.remove(entity)
+        entity.remove(reason)
 
     def addObject(self, object: Object) -> None:
         self.objects.append(object)

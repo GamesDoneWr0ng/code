@@ -26,10 +26,10 @@ class World:
         raise Exception(f"Room with id {id} not found")
 
     def move(self, roomFrom: str, roomTo: str, entity: Entity):
-        if entity.isPlayer:
+        if entity.isPlayer():
             for room in self.rooms[roomFrom].getNeighboursWithout(roomTo):
                 self.rooms[room].unload()
-                self.rooms.pop(room)
+                del self.rooms[room]
             for room in self.rooms[roomTo].getNeighboursWithout(roomFrom):
                 self.rooms[room].load()
                 self.rooms[room].setWorld(self)
@@ -37,6 +37,7 @@ class World:
 
         self.getRoomById(roomTo).addEntity(entity)
         self.getRoomById(roomFrom).removeEntity(entity, RemovalReason.MOVED)
+        entity.setRoom(self.rooms[roomTo])
 
     def tick(self, deltaTime: float):
         self.deltaTime = deltaTime

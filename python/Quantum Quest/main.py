@@ -6,6 +6,7 @@ from world.Camera import Camera
 from entities.PlayerEntity import PlayerEntity
 from entities.TempEntity import TempEntity
 from world.objects.Playform import Platform
+from world.objects.Transition import Transition
 from util.math.Hitbox import Polygon
 import numpy as np
 import pygame as pg
@@ -18,11 +19,17 @@ scale = 16
 
 world = World(screen)
 
-world.rooms[world.currentRoom].addEntity(PlayerEntity(world.rooms[world.currentRoom]))
-world.rooms[world.currentRoom].addEntity(TempEntity(world.rooms[world.currentRoom]))
-world.rooms[world.currentRoom].entities[1].setPosition(np.array([1,1], dtype=np.float64))
-world.rooms[world.currentRoom].addObject(Platform(Polygon(np.array([[-5, 3], [-5, 4], [50, 4], [50, 3]])), world.rooms[world.currentRoom]))
-world.rooms[world.currentRoom].addObject(Platform(Polygon(np.array([[-5, -1], [-5, -2], [5, -2], [5, -1]])+1), world.rooms[world.currentRoom]))
+world.rooms["start"].addEntity(PlayerEntity(world.rooms["start"]))
+world.rooms["start"].addEntity(TempEntity(world.rooms["start"]))
+world.rooms["start"].entities[1].setPosition(np.array([1,1], dtype=np.float64))
+world.rooms["start"].addObject(Platform(Polygon(np.array([[-5, 3], [-5, 4], [11, 4], [11, 3]])), world.rooms["start"]))
+world.rooms["start"].addObject(Platform(Polygon(np.array([[-5, -1], [-5, -2], [5, -2], [5, -1]])+1), world.rooms["start"]))
+
+world.rooms["left"].addObject(Platform(Polygon(np.array([[8, 3], [8, 4], [21, 4], [21, 3]])), world.rooms["left"]))
+
+world.rooms["start"].addObject(Transition(Polygon(np.array([[9, 1], [9, 3], [10, 3], [10, 1]])), world.rooms["start"], "left", np.array([1,0])))
+world.rooms["left"].addObject(Transition(Polygon(np.array([[9, 1], [9, 3], [10, 3], [10, 1]])), world.rooms["left"], "start", np.array([-1,0])))
+
 
 camera = Camera(scale, world.getPlayer(), 
                 np.array([[-WIDTH, -HEIGHT], [WIDTH, HEIGHT]], dtype=np.float64) / (scale* 4), 
