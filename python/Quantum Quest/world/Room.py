@@ -55,7 +55,7 @@ class Room:
             entity.tick()
 
         for object in self.objects:
-            if object.isTicking():
+            if object.isTicking() or object.isTrigger():
                 object.tick()
 
     def emitGameEvent(self, event, pos: np.ndarray) -> None:

@@ -104,20 +104,39 @@ class Entity:
         else:
             hitbox = self.getHitbox()
 
+        wasSafeGround = False
+
         for object in self.room.objects:
+            if not object.hasCollision():
+                continue
+
+            if object.isTrigger():
+                object.onCollide(self)
+
             collision, correction, axis = hitbox.checkCollision(object.getHitbox())
             if collision:
                 movement += correction
+
                 # axes are normalized so we can check the first element
-                if np.abs(axis)[1] > self.type.getMaxSlope():
+                if np.abs(axis)[1] > self.type.getMaxSlope() and correction[1] < 0:
+                    wasSafeGround = True
                     self.setOnGround(True)
 
-                #self.setVelocity(self.getVelocity()*axis[::-1])
+                if movement[1] == 0:
+                    self.setVelocityY(0)
+                if movement[0] == 0:
+                    self.setVelocityX(0)
+
+        if not wasSafeGround:
+            self.setOnGround(False)        
 
         return movement
         
     def render(self, screen, camera: Camera, scale: float):
-        return self.getType().getHitbox().touches(camera.getHardBorder())
+        if self.hasHitbox():
+            return self.getHitbox().touches(camera.getHardBorder())
+        else:
+            return True
     
     def setOnGround(self, onGround: bool):
         self.onGround = onGround
@@ -132,10 +151,10 @@ class Entity:
         if self.gravity == 0:
             self.setOnGround(True)
             return
-        if self.getVelocity()[1] < 0:
-            self.setOnGround(False)
-            return
-        hitbox = self.getHitbox().stretch(np.array([0, self.gravity * self.getDeltaTime()]))
+#        if self.getVelocity()[1] < 0:
+#            self.setOnGround(False)
+#            return
+        hitbox = self.getHitbox().newMove(np.array([0, 1E-6 * self.getDeltaTime()]))
         for object in self.room.objects:
             collision, _, _ = hitbox.checkCollision(object.getHitbox())
             if collision:

@@ -23,7 +23,7 @@ class PlayerEntity(Entity):
         self.halfGravThreshold = 5
         self.jumpGraceTime = 0.1
         self.jumpXBoost = 5
-        self.jumpSpeed = -105/8
+        self.jumpSpeed = -15
 
         # vars
         self.inputDirection = np.array([0, 0])
@@ -35,7 +35,7 @@ class PlayerEntity(Entity):
     
     def tick(self):
         self.input.update(self.getDeltaTime())
-#        self.checkOnGround()
+        #self.checkOnGround()
 
         # timers
         if self.jumpGraceTimer > 0:
@@ -49,7 +49,11 @@ class PlayerEntity(Entity):
     def tickMovement(self) -> None:
 
         # Walk and friction
-        mult = 1 if self.isOnGround() else self.airMult
+        if self.isOnGround():
+            mult = 1
+            self.setVelocityY(min(0, self.getVelocity()[1]))
+        else: 
+            mult = self.airMult
 
         if abs(self.getVelocity()[0] > self.maxRun and self.input.moveX == np.sign(self.getVelocity()[0])):
             # Reduse speed down to maxSpeed
@@ -65,12 +69,12 @@ class PlayerEntity(Entity):
 
         # Apply gravity
         if not self.isOnGround():
-            mult = 1 if abs(self.getVelocity()[1] < self.halfGravThreshold and self.input.jump == 1) else 0.5
+            mult = 0.5 if self.getVelocity()[1] < self.halfGravThreshold and self.input.jump.pressed else 1
 
             self.setVelocityY(approach(self.getVelocity()[1], self.currentMaxFall, self.gravity * mult * self.getDeltaTime()))
 
         # Jumping
-        if self.input.jump.pressed:
+        if self.input.jump.lastPressed < 0.1:
             if self.jumpGraceTimer > 0:
                 self.jump()
 
@@ -79,7 +83,7 @@ class PlayerEntity(Entity):
     def jump(self) -> None:
         self.jumpGraceTimer = 0
 
-        self.setVelocityX(self.getVelocity()[0] + self.jumpXBoost)
+        self.setVelocityX(self.getVelocity()[0] + self.input.moveX * self.jumpXBoost)
         self.setVelocityY(self.jumpSpeed)
 
         # TODO: sound particles

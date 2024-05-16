@@ -1,4 +1,5 @@
 from ast import In
+from numpy import inf
 import pygame as pg
 
 # TODO: config file
@@ -47,11 +48,12 @@ class Input1D:
 class BufferedInput(BasicInput):
     def __init__(self, key) -> None:
         super().__init__(key)
-        self.lastPressed = 0
+        self.lastPressed = inf
 
     def update(self, keys, deltaTime) -> None:
+        wasPressed = self.pressed
         super().update(keys)
-        if self.pressed:
+        if self.pressed and not wasPressed:
             self.lastPressed = 0
         else:
             self.lastPressed += deltaTime

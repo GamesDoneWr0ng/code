@@ -10,6 +10,9 @@ class Hitbox:
     def move(self, movement: np.ndarray):
         raise NotImplementedError
     
+    def newMove(self, movement: np.ndarray):
+        raise NotImplementedError
+    
     def setPosition(self, position: np.ndarray):
         raise NotImplementedError
 
@@ -69,7 +72,7 @@ class Hitbox:
 class Polygon(Hitbox):
     def __init__(self, points: np.ndarray) -> None:
         super().__init__("Polygon")
-        self.points = points
+        self.points = points[::-1]
 
         self.position = np.mean(self.points, axis=0)
         self.setRadiuses()
@@ -82,6 +85,9 @@ class Polygon(Hitbox):
     def move(self, movement: np.ndarray) -> None:
         self.position += movement
         self.points += movement
+
+    def newMove(self, movement: np.ndarray):
+        return Polygon(self.points + movement)
 
     def setPosition(self,position: np.ndarray) -> None:
         lastPosition = self.position.copy()
@@ -112,7 +118,7 @@ class Polygon(Hitbox):
         dots = np.dot(self.points, axis)
         return np.array([dots.min(), dots.max()])
 
-    def satCollision(self, other) -> tuple[bool, np.ndarray]:
+    def satCollision(self, other) -> tuple[bool, np.ndarray, np.ndarray, np.ndarray]:
         # Combine the axes from both polygons
         axes = np.concatenate((self.findAxes(), other.findAxes()))
 
@@ -136,6 +142,8 @@ class Polygon(Hitbox):
         return True, corrections[index], axes[index] / np.linalg.norm(axes[index]) # Overlap on all axes
 
     def stretch(self, direction: np.ndarray):
+        if np.all(direction == 0):
+            return self
         points = []
         dots = np.dot(self.findAxes(), direction)
         for point, dot, lastDot in zip(self.points, dots, np.roll(dots, -1)):
@@ -182,7 +190,7 @@ class Polygon(Hitbox):
     def touches(self, square: np.ndarray) -> bool:
         """Square has shape (2, 2) where square[0] is top left corner and square[1] is bottom left corner of a square.
         Returns if the Polygon touches the square."""
-        return np.any(np.all(np.logical_and(self.points >= square[0], self.points <= square[1]), axis=1))
+        return self.checkCollision(Polygon(np.array([[square[0,1], square[1,0]], square[1], [square[1,0], square[0,1]], square[0]])))[0]
     
     def getPoints(self) -> np.ndarray:
         return self.points
@@ -196,6 +204,9 @@ class Circle(Hitbox):
 
     def move(self, movement: np.ndarray):
         self.position += movement
+
+    def newMove(self, movement: np.ndarray):
+        return Circle(self.position + movement, self.radius)
 
     def getPosition(self) -> np.ndarray:
         return self.position

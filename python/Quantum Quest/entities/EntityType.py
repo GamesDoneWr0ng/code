@@ -38,5 +38,5 @@ class EntityType:
     def getMaxSlope(self):
         return self.maxSlope
 
-PLAYER: EntityType = EntityType("player").setHitbox(Polygon(np.array([[0, 0], [1, 0], [1, 2], [0, 2]], dtype=np.float64))).setGravity(9.81)
+PLAYER: EntityType = EntityType("player").setHitbox(Polygon(np.array([[0, 0], [1, 0], [1, 2], [0, 2]], dtype=np.float64))).setGravity(900/8)
 TEMPENTITY: EntityType = EntityType("temp_entity").setHitbox(Polygon(np.array([[0, 0], [1, 0], [1, 2], [0, 2]], dtype=np.float64)))
