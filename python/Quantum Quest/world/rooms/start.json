@@ -1,0 +1,12 @@
+{
+    "id": "start",
+    "neighbours": ["right"],
+    "objects": [
+        {"type": "Platform", "args": {"hitbox": [[-5, 3], [-5, 4], [11, 4], [11, 3]]}},
+        {"type": "Platform", "args": {"hitbox": [[-4, 0], [-4, -1], [6, -1], [6, 0]]}},
+        {"type": "Transition", "args": {"hitbox": [[9, 1], [9, 3], [10, 3], [10, 1]], "connected": "right", "direction": [1,0]}}
+    ],
+    "entities": [
+        {"type": "TempEntity", "args": {}}
+    ]
+}

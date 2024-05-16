@@ -87,7 +87,7 @@ class Entity:
         self.move(MovementType.SELF, self.getVelocity() * self.getDeltaTime())
 
     def move(self, movementType: MovementType.MovementType, movement: np.ndarray) -> None:
-        if self.noClip or not self.hasHitbox(): # TODO: movement
+        if self.noClip or not self.hasHitbox():
             self.setPosition(self.getPosition() + movement)
             return
         

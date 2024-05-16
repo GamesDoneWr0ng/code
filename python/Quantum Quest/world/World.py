@@ -1,25 +1,26 @@
-from world import Room
+from world.Room import Room
 from entities.Entity import Entity
 from entities import RemovalReason
+from entities.PlayerEntity import PlayerEntity
 
 class World:
     def __init__(self, screen) -> None:
-        self.screen = screen 
-        self.currentRoom: str = "start" # TODO rooms savefile
-        self.rooms: dict[str, Room.Room] = {self.currentRoom: Room.rooms[self.currentRoom]}
-        for room in self.rooms[self.currentRoom].getNeighbours():
-            self.rooms[room] = Room.rooms[room]
-        for room in self.rooms.values():
-            room.setWorld(self)
-            room.load()
-        
         self.currentId = -1
         self.deltaTime = 1/60
+
+        self.screen = screen 
+        self.currentRoom: str = "start" # TODO rooms savefile
+        self.rooms: dict[str, Room.Room] = {self.currentRoom: Room(f"/Users/askborgen/Desktop/code/python/Quantum Quest/world/rooms/{self.currentRoom}.json", self)}
+        for room in self.rooms[self.currentRoom].getNeighbours():
+            self.rooms[room] = Room(f"/Users/askborgen/Desktop/code/python/Quantum Quest/world/rooms/{room}.json", self)
+
+        self.rooms["start"].addEntity(PlayerEntity(self.rooms["start"]))
+        
 
     def getPlayer(self):
         return self.rooms[self.currentRoom].getPlayer()
     
-    def getRoomById(self, id) -> Room.Room:
+    def getRoomById(self, id) -> Room:
         for room in self.rooms.values():
             if room.getId() == id:
                 return room

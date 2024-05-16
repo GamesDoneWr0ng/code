@@ -1,24 +1,41 @@
-from entities.Entity import Entity
-from entities import EntityType
+from world.objects.Playform import Platform
+from util.math.Hitbox import Polygon
+from entities.TempEntity import TempEntity
+from world.objects.Transition import Transition
 from entities.RemovalReason import RemovalReason
 from entities.PlayerEntity import PlayerEntity
 from world.objects.Object import Object
+from entities.Entity import Entity
+from entities import EntityType
 import numpy as np
+import json
 
 class Room:
-    def __init__(self, id: str, neighbours: list[str], dataFile: str) -> None:
-        self.id: str = id
-        self.neighbours: list[str] = neighbours
-        self.dataFile: str = dataFile
-        self.world = None
-
+    def __init__(self, dataFile: str, world) -> None:
+        self.world = world
         self.player: PlayerEntity = None
 
-        self.currentEntityId: int = -1
-        self.entities: list[Entity] = [] # TODO: load from file
-        self.objects:  list[Object] = []
+        self.dataFile: str = dataFile
+        with open(self.dataFile, 'r') as file:
+            data = json.load(file)
 
-        self.load()
+        self.id: str = data["id"]
+        self.neighbours: list[str] = data["neighbours"]
+
+        self.objects:  list[Object] = []
+        for object in data["objects"]:
+            match object["type"]:
+                case "Platform":
+                    #world.rooms["start"].addObject(Platform(Polygon(np.array([[-5, 3], [-5, 4], [11, 4], [11, 3]])), world.rooms["start"]))
+                    self.addObject(Platform(Polygon(np.array(object["args"]["hitbox"])), self))
+                case "Transition":
+                    self.addObject(Transition(Polygon(np.array(object["args"]["hitbox"])), self, object["args"]["connected"], np.array(object["args"]["direction"])))
+
+        self.entities: list[Entity] = []
+        for entity in data["entities"]:
+            match entity["type"]:
+                case "TempEntity":
+                    self.addEntity(TempEntity(self))
 
     def getPlayer(self) -> PlayerEntity:
         return self.player
@@ -80,9 +97,5 @@ class Room:
         pass # TODO Rooms load
 
     def unload(self):
-        pass
-
-rooms = {
-    "start": Room("start", ["left"], "start.idk"),
-    "left": Room("left", ["start"], "left.idk")
-}
+        for entity in self.entities:
+            entity.remove(RemovalReason.UNLOAD)

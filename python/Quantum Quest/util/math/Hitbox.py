@@ -65,14 +65,12 @@ class Hitbox:
         """Square has shape (2, 2) where square[0] is top left corner and square[1] is bottom left corner of a square.
         Returns if the Hitbox touches the square."""
         raise NotImplementedError
-    
-    #def raycast(self, ) # TODO raycasting maybe
 
 
 class Polygon(Hitbox):
     def __init__(self, points: np.ndarray) -> None:
         super().__init__("Polygon")
-        self.points = points[::-1]
+        self.points = points
 
         self.position = np.mean(self.points, axis=0)
         self.setRadiuses()
