@@ -3,6 +3,7 @@ from entities import EntityType, MovementType
 from entities.Input import Input
 from util.math.Calc import approach
 from util.math.Hitbox import Polygon
+import entities.PlayerState as PlayerState
 import pygame as pg
 import numpy as np
 
@@ -29,6 +30,7 @@ class PlayerEntity(Entity):
         self.inputDirection = np.array([0, 0])
         self.currentMaxFall = 0
         self.jumpGraceTimer = 0.1
+        self.playerState = PlayerState.NORMAL
     
     def isPlayer(self) -> bool:
         return True
@@ -47,6 +49,13 @@ class PlayerEntity(Entity):
         #self.move(MovementType.PLAYER, self.getVelocity())
 
     def tickMovement(self) -> None:
+        match self.playerState:
+            case PlayerState.NORMAL:
+                self.playerState = self.tickMovementNormal()
+            case PlayerState.PHOTONDASH:
+                self.playerState = self.tickMovementPhotonDash()
+
+    def tickMovementNormal(self) -> PlayerState.PlayerState:
 
         # Walk and friction
         if self.isOnGround():
@@ -79,6 +88,11 @@ class PlayerEntity(Entity):
                 self.jump()
 
         self.move(MovementType.PLAYER, self.getVelocity() * self.getDeltaTime())
+
+        return PlayerState.NORMAL
+
+    def tickMovementPhotonDash(self) -> PlayerState.PlayerState:
+        pass
     
     def jump(self) -> None:
         self.jumpGraceTimer = 0
