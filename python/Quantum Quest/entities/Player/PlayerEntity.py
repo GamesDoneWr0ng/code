@@ -1,9 +1,8 @@
 from entities.Entity import Entity
 from entities import EntityType, MovementType
-from entities.Input import Input
+from entities.Player.Input import Input
 from util.math.Calc import approach
-from util.math.Hitbox import Polygon
-import entities.PlayerState as PlayerState
+from util.StateMachine import StateMachine
 import pygame as pg
 import numpy as np
 
@@ -13,7 +12,7 @@ class PlayerEntity(Entity):
 
         self.input = Input()
 
-        # constants
+        # region constants
         self.maxRun = 90/8
         self.runAccel = 125
         self.runReduce = 50
@@ -26,12 +25,21 @@ class PlayerEntity(Entity):
         self.jumpXBoost = 5
         self.jumpSpeed = -15
 
-        # vars
+        self.stateNormal = 0
+        self.statePhotonDash = 1
+
+        # endregion
+
+        # region vars
         self.inputDirection = np.array([0, 0])
         self.currentMaxFall = 0
         self.jumpGraceTimer = 0.1
-        self.playerState = PlayerState.NORMAL
     
+        # endregion
+        
+        self.stateMachine = StateMachine(0) # TODO: initialize to correct state from savefile
+        self.stateMachine.addState(self.updateNormal, None, None, None)
+
     def isPlayer(self) -> bool:
         return True
     
@@ -49,14 +57,10 @@ class PlayerEntity(Entity):
         #self.move(MovementType.PLAYER, self.getVelocity())
 
     def tickMovement(self) -> None:
-        match self.playerState:
-            case PlayerState.NORMAL:
-                self.playerState = self.tickMovementNormal()
-            case PlayerState.PHOTONDASH:
-                self.playerState = self.tickMovementPhotonDash()
+        self.stateMachine.update()
 
-    def tickMovementNormal(self) -> PlayerState.PlayerState:
-
+    # region state normal
+    def updateNormal(self):
         # Walk and friction
         if self.isOnGround():
             mult = 1
@@ -83,19 +87,23 @@ class PlayerEntity(Entity):
             self.setVelocityY(approach(self.getVelocity()[1], self.currentMaxFall, self.gravity * mult * self.getDeltaTime()))
 
         # Jumping
-        if self.input.jump.lastPressed < 0.1:
+        if self.input.jump:
             if self.jumpGraceTimer > 0:
                 self.jump()
 
         self.move(MovementType.PLAYER, self.getVelocity() * self.getDeltaTime())
+    
+    # endregion
 
-        return PlayerState.NORMAL
-
-    def tickMovementPhotonDash(self) -> PlayerState.PlayerState:
+    # region state photon dash
+    def tickMovementPhotonDash(self):
         pass
+
+    # endregion
     
     def jump(self) -> None:
         self.jumpGraceTimer = 0
+        self.input.jump.consumeBuffer()
 
         self.setVelocityX(self.getVelocity()[0] + self.input.moveX * self.jumpXBoost)
         self.setVelocityY(self.jumpSpeed)

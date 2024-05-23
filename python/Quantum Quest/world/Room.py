@@ -3,7 +3,7 @@ from util.math.Hitbox import Polygon
 from entities.TempEntity import TempEntity
 from world.objects.Transition import Transition
 from entities.RemovalReason import RemovalReason
-from entities.PlayerEntity import PlayerEntity
+from entities.Player.PlayerEntity import PlayerEntity
 from world.objects.Object import Object
 from entities.Entity import Entity
 from entities import EntityType

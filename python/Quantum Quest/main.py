@@ -16,7 +16,7 @@ world = World(screen)
 
 camera = Camera(scale, world.getPlayer(), 
                 np.array([[-WIDTH, -HEIGHT], [WIDTH, HEIGHT]], dtype=np.float64) / (scale* 4), 
-                np.array([[-WIDTH, -HEIGHT], [WIDTH, HEIGHT]], dtype=np.float64) / (scale*2))
+                np.array([[-WIDTH, -HEIGHT], [WIDTH, HEIGHT]], dtype=np.float64) / (scale* 2))
 
 running = True
 while running:
