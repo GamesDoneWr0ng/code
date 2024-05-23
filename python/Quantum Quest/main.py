@@ -23,10 +23,12 @@ while running:
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
+
+        # TODO: remove debug
         if event.type == pg.KEYDOWN:
-            if event.key == pg.K_k:
+            if event.key == pg.K_i:
                 pass
-            if event.key == pg.K_l:
+            if event.key == pg.K_o:
                 player = world.getPlayer()
                 player.noClip = not player.noClip
     

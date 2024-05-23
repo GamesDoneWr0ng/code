@@ -1,3 +1,4 @@
+from typing import Any
 from numpy import inf
 import pygame as pg
 
@@ -45,9 +46,9 @@ class Input1D:
     def __le__(self, __value) -> bool: return self.val <= __value
     def __gt__(self, __value) -> bool: return self.val >  __value
     def __ge__(self, __value) -> bool: return self.val >= __value
-    def __bool__(self) -> bool: return self.val != 0
+    def __bool__(self)        -> bool: return self.val != 0
 
-    def __mul__(self, __value) -> float: return self.val * __value
+    def __mul__(self, __value)-> float:return self.val *  __value
 
 class BufferedInput(BasicInput):
     def __init__(self, key) -> None:

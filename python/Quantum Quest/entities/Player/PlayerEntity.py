@@ -24,6 +24,13 @@ class PlayerEntity(Entity):
         self.jumpGraceTime = 0.1
         self.jumpXBoost = 5
         self.jumpSpeed = -15
+        self.dashCooldownTime = 0.2
+        self.dashRefillCooldownTime = 0.1
+        self.dashSpeed = 30
+        self.endDashSpeed = 20
+        self.endDashUpMult = 0.75
+        self.dashTime = 0.15
+        self.maxDashes = 1
 
         self.stateNormal = 0
         self.statePhotonDash = 1
@@ -31,14 +38,18 @@ class PlayerEntity(Entity):
         # endregion
 
         # region vars
-        self.inputDirection = np.array([0, 0])
         self.currentMaxFall = 0
-        self.jumpGraceTimer = 0.1
+        self.jumpGraceTimer = self.jumpGraceTime
+        self.dashCooldownTimer = self.dashCooldownTime
+        self.dashRefillCooldownTimer = self.dashRefillCooldownTime
+        self.startedDashing = False
+        self.dashes = 1
     
         # endregion
         
         self.stateMachine = StateMachine(0) # TODO: initialize to correct state from savefile
         self.stateMachine.addState(self.updateNormal, None, None, None)
+        self.stateMachine.addState(self.updatePhotonDash, self.coroutinePhotonDash, self.startPhotonDash, self.endPhotonDash)
 
     def isPlayer(self) -> bool:
         return True
@@ -48,19 +59,30 @@ class PlayerEntity(Entity):
         #self.checkOnGround()
 
         # timers
+        # jump
         if self.jumpGraceTimer > 0:
             self.jumpGraceTimer -= self.getDeltaTime()
         if self.onGround:
             self.jumpGraceTimer = self.jumpGraceTime
 
+        # dashes
+        if self.dashCooldownTimer > 0:
+            self.dashCooldownTimer -= self.getDeltaTime()        
+        if self.dashRefillCooldownTimer > 0:
+            self.dashRefillCooldownTimer -= self.getDeltaTime()
+        if self.onGround and self.dashRefillCooldownTimer <= 0:
+            self.dashes = self.maxDashes
+
         super().tick()
-        #self.move(MovementType.PLAYER, self.getVelocity())
 
     def tickMovement(self) -> None:
         self.stateMachine.update()
 
     # region state normal
-    def updateNormal(self):
+    def updateNormal(self) -> int:
+        if self.canDash():
+            return self.statePhotonDash
+
         # Walk and friction
         if self.isOnGround():
             mult = 1
@@ -92,12 +114,62 @@ class PlayerEntity(Entity):
                 self.jump()
 
         self.move(MovementType.PLAYER, self.getVelocity() * self.getDeltaTime())
+
+        return self.stateNormal
     
     # endregion
 
     # region state photon dash
-    def tickMovementPhotonDash(self):
+    def callDashEvents(self):
+        if not self.calledDashEvents:
+            self.calledDashEvents = True
+            # TODO: dash events
         pass
+
+    def startPhotonDash(self):
+        self.dashDir = np.array((self.input.moveX.val, self.input.moveY.val), dtype=np.float32)
+        if np.all(self.dashDir == 0):
+            return self.stateNormal
+
+        self.beforeDashSpeed = self.getVelocity()
+        self.setVelocity(np.zeros(2))
+        self.dashes -= 1
+
+        self.calledDashEvents = False
+        self.dashStartedOnGround = self.onGround
+        self.dashCooldownTimer = self.dashCooldownTime
+        self.dashRefillCooldownTimer = self.dashRefillCooldownTime
+        self.startedDashing = True
+
+    def endPhotonDash(self):
+        pass
+
+    def updatePhotonDash(self):
+        # TODO: super grab n jump n shit
+        self.move(MovementType.PLAYER, self.getVelocity() * self.getDeltaTime())
+        return self.statePhotonDash
+
+    def coroutinePhotonDash(self):
+        newSpeed = self.dashDir * self.dashSpeed
+        if np.sign(self.beforeDashSpeed[0]) == np.sign(newSpeed[0]) and np.abs(self.beforeDashSpeed[0]) > np.abs(newSpeed[0]):
+            newSpeed[0] = self.beforeDashSpeed[0]
+        self.setVelocity(newSpeed)
+
+        self.callDashEvents()
+
+        yield self.dashTime
+        
+        if self.dashDir[1] <= 0:
+            self.setVelocity(self.dashDir * self.endDashSpeed)
+        if self.getVelocity()[1] < 0:
+            self.setVelocityY(self.getVelocity()[1] * self.endDashUpMult)
+
+        self.stateMachine.resetCoroutine()
+        self.stateMachine.state = self.stateNormal
+
+    def canDash(self):
+        return self.input.photonDash and self.dashCooldownTimer <= 0 and self.dashes > 0
+
 
     # endregion
     

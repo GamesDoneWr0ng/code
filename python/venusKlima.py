@@ -3,9 +3,9 @@ import sympy
 # Klima on Venus
  
 def temperatureAt(layers):
-    S = 652.5 # Energy from the sun
+    S = 340 # Energy from the sun
     sigma = 5.67e-8  # Stefan-Boltzmann constant
-    albedo = 0.75
+    albedo = 0.3
     #layers = 100 # More layers give more accuracy
  
     # Define the symbols for the temperature variables T_0 is the ground
@@ -30,4 +30,5 @@ def temperatureAt(layers):
 #    values += list(temperatureAt(i))
 
 #print(str(values).replace(", ", "], ["))
-print(temperatureAt(93))
+for i in temperatureAt(3):
+    print(i)
