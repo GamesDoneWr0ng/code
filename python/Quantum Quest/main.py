@@ -16,17 +16,19 @@ world = World(screen)
 
 camera = Camera(scale, world.getPlayer(), 
                 np.array([[-WIDTH, -HEIGHT], [WIDTH, HEIGHT]], dtype=np.float64) / (scale* 4), 
-                np.array([[-WIDTH, -HEIGHT], [WIDTH, HEIGHT]], dtype=np.float64) / (scale*2))
+                np.array([[-WIDTH, -HEIGHT], [WIDTH, HEIGHT]], dtype=np.float64) / (scale* 2))
 
 running = True
 while running:
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
+
+        # TODO: remove debug
         if event.type == pg.KEYDOWN:
-            if event.key == pg.K_k:
+            if event.key == pg.K_i:
                 pass
-            if event.key == pg.K_l:
+            if event.key == pg.K_o:
                 player = world.getPlayer()
                 player.noClip = not player.noClip
     

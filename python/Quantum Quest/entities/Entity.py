@@ -9,7 +9,7 @@ class Entity:
         self.hitbox = self.type.getHitbox() if self.type.hasHitbox() else None
         self.room = room
         self.id: int = room.nextId()
-        self.velocity: np.ndarray = np.zeros(2)
+        self.velocity: np.ndarray = np.zeros(2, dtype=np.float32)
         self.position: np.ndarray = self.hitbox.getPosition() if self.hasHitbox() else None
         self.onGround: bool = False
         self.gravity: float = self.type.getGravity()

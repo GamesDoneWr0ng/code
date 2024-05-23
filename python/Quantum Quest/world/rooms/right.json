@@ -3,7 +3,7 @@
     "neighbours": ["start"],
     "objects": [
         {"type": "Platform", "args": {"hitbox": [[8, 3], [8, 4], [21, 4], [21, 3]]}},
-        {"type": "Transition", "args": {"hitbox": [[9, 1], [9, 3], [10, 3], [10, 1]], "connected": "start", "direction": [-1,0]}}
+        {"type": "Transition", "args": {"hitbox": [[9, -10], [9, 3], [10, 3], [10, -10]], "connected": "start", "direction": [-1,0]}}
     ],
     "entities": [
         

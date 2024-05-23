@@ -1,7 +1,6 @@
 from entities.Entity import Entity
-from entities import EntityType, MovementType
+from entities import EntityType
 import pygame as pg
-import numpy as np
 
 class TempEntity(Entity):
     def __init__(self, room):

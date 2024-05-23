@@ -1,7 +1,7 @@
 from world.Room import Room
 from entities.Entity import Entity
 from entities import RemovalReason
-from entities.PlayerEntity import PlayerEntity
+from entities.Player.PlayerEntity import PlayerEntity
 
 class World:
     def __init__(self, screen) -> None:
