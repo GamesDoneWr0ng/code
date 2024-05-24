@@ -31,6 +31,9 @@ class PlayerEntity(Entity):
         self.endDashUpMult = 0.75
         self.dashTime = 0.15
         self.maxDashes = 1
+        self.superJumpX = 32.5
+        self.duckSuperJumpXMult = 1.25
+        self.duckSuperJumpYMult = 0.5  
 
         self.stateNormal = 0
         self.statePhotonDash = 1
@@ -44,6 +47,7 @@ class PlayerEntity(Entity):
         self.dashRefillCooldownTimer = self.dashRefillCooldownTime
         self.startedDashing = False
         self.dashes = 1
+        self.facing = 1
     
         # endregion
         
@@ -57,6 +61,9 @@ class PlayerEntity(Entity):
     def tick(self):
         self.input.update(self.getDeltaTime())
         #self.checkOnGround()
+
+        if self.input.moveX != 0:
+            self.facing = self.input.moveX.val
 
         # timers
         # jump
@@ -129,7 +136,7 @@ class PlayerEntity(Entity):
     def startPhotonDash(self):
         self.dashDir = np.array((self.input.moveX.val, self.input.moveY.val), dtype=np.float32)
         if np.all(self.dashDir == 0):
-            return self.stateNormal
+            self.dashDir = np.array([self.facing, 0])
 
         self.beforeDashSpeed = self.getVelocity()
         self.setVelocity(np.zeros(2))
@@ -146,6 +153,11 @@ class PlayerEntity(Entity):
 
     def updatePhotonDash(self):
         # TODO: super grab n jump n shit
+        if self.dashDir[1] >= 0 and self.dashDir[0] != 0 and self.input.jump and self.jumpGraceTimer > 0:
+            self.superJump(self.dashDir[1] > 0)
+            self.stateMachine.resetCoroutine()
+            return self.stateNormal
+
         self.move(MovementType.PLAYER, self.getVelocity() * self.getDeltaTime())
         return self.statePhotonDash
 
@@ -173,6 +185,7 @@ class PlayerEntity(Entity):
 
     # endregion
     
+    # region jumps
     def jump(self) -> None:
         self.jumpGraceTimer = 0
         self.input.jump.consumeBuffer()
@@ -181,6 +194,21 @@ class PlayerEntity(Entity):
         self.setVelocityY(self.jumpSpeed)
 
         # TODO: sound particles
+
+    def superJump(self, d) -> None:
+        self.jumpGraceTimer = 0
+        self.input.jump.consumeBuffer()
+
+        self.setVelocityX(self.superJumpX * self.facing)
+        self.setVelocityY(self.jumpSpeed)
+
+        if d: #TODO: if ducking
+            self.setVelocityX(self.getVelocity()[0] * self.duckSuperJumpXMult)
+            self.setVelocityY(self.getVelocity()[1] * self.duckSuperJumpYMult)
+
+        # TODO: sfx, particals
+
+    # endregion
 
     def render(self, screen, camera, scale: float):
         if not super().render(screen, camera, scale):
