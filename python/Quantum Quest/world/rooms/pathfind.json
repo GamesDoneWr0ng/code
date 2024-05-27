@@ -1,0 +1,17 @@
+{
+    "id": "pathfind",
+    "neighbours": ["right"],
+    "objects": [
+        {"type": "Platform", "args": {"hitbox": [[18, 3], [18, 4], [21, 4], [21, 3]]}},
+        {"type": "Platform", "args": {"hitbox": [[24, 1], [28, 1], [28, 0], [24, 0]]}},
+        {"type": "Platform", "args": {"hitbox": [[51, 1], [54, 1], [54, 0], [51, 0]]}},
+
+        {"type": "Platform", "args": {"hitbox": [[23, -4], [60, -4], [60, -5], [23, -5]]}},
+
+        {"type": "Transition", "args": {"hitbox": [[19, -10], [19, 3], [20, 3], [20, -10]], "connected": "right", "direction": [-1,0]}}
+    ],
+    "entities": [
+        
+    ]
+}
+

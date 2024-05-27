@@ -136,7 +136,7 @@ class PlayerEntity(Entity):
     def startPhotonDash(self):
         self.dashDir = np.array((self.input.moveX.val, self.input.moveY.val), dtype=np.float32)
         if np.all(self.dashDir == 0):
-            self.dashDir = np.array([self.facing, 0])
+            self.dashDir = np.array([self.facing, 0], dtype=np.float32)
 
         self.beforeDashSpeed = self.getVelocity()
         self.setVelocity(np.zeros(2))
@@ -149,13 +149,12 @@ class PlayerEntity(Entity):
         self.startedDashing = True
 
     def endPhotonDash(self):
-        pass
+        self.stateMachine.resetCoroutine()
 
     def updatePhotonDash(self):
         # TODO: super grab n jump n shit
         if self.dashDir[1] >= 0 and self.dashDir[0] != 0 and self.input.jump and self.jumpGraceTimer > 0:
             self.superJump(self.dashDir[1] > 0)
-            self.stateMachine.resetCoroutine()
             return self.stateNormal
 
         self.move(MovementType.PLAYER, self.getVelocity() * self.getDeltaTime())
@@ -176,7 +175,6 @@ class PlayerEntity(Entity):
         if self.getVelocity()[1] < 0:
             self.setVelocityY(self.getVelocity()[1] * self.endDashUpMult)
 
-        self.stateMachine.resetCoroutine()
         self.stateMachine.state = self.stateNormal
 
     def canDash(self):
@@ -196,6 +194,8 @@ class PlayerEntity(Entity):
         # TODO: sound particles
 
     def superJump(self, d) -> None:
+        if self.dashRefillCooldownTimer <= 0:
+            self.dashes = self.maxDashes
         self.jumpGraceTimer = 0
         self.input.jump.consumeBuffer()
 
@@ -213,4 +213,4 @@ class PlayerEntity(Entity):
     def render(self, screen, camera, scale: float):
         if not super().render(screen, camera, scale):
             return
-        pg.draw.polygon(screen, (255,255,255), (self.getHitbox().getPoints()-camera.topLeft())*scale)
+        pg.draw.polygon(screen, (255,255,255) if self.dashes != 0 else (255,255,0), (self.getHitbox().getPoints()-camera.topLeft())*scale)

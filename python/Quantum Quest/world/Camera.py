@@ -1,7 +1,7 @@
 import numpy as np
 
-def defaultSoftSpeed(distance: np.ndarray, speed: float) -> np.ndarray:
-    return distance * speed * np.sqrt(np.sum(distance**2))
+def defaultSoftSpeed(distance: np.ndarray, speed: float, scale) -> np.ndarray:
+    return distance * (1 - np.power(0.01 / scale, speed))
 
 class Camera:
     def __init__(self, scale, target, softBorder: np.ndarray, hardBorder: np.ndarray, softSpeed = defaultSoftSpeed) -> None:
@@ -56,6 +56,6 @@ class Camera:
         if np.all(distanceSoftBorder == 0):
             return
         elif np.all(distanceHardBorder == 0):
-            self.move(self.softSpeed(distanceSoftBorder, speed))
+            self.move(self.softSpeed(distanceSoftBorder, speed, self.scale))
         else:
             self.move(distanceHardBorder)

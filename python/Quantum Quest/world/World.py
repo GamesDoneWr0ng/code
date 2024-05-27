@@ -2,6 +2,7 @@ from world.Room import Room
 from entities.Entity import Entity
 from entities import RemovalReason
 from entities.Player.PlayerEntity import PlayerEntity
+from copy import deepcopy
 
 class World:
     def __init__(self, screen) -> None:
@@ -12,9 +13,12 @@ class World:
         self.currentRoom: str = "start" # TODO rooms savefile
         self.rooms: dict[str, Room.Room] = {self.currentRoom: Room(f"/Users/askborgen/Desktop/code/python/Quantum Quest/world/rooms/{self.currentRoom}.json", self)}
         for room in self.rooms[self.currentRoom].getNeighbours():
-            self.rooms[room] = Room(f"/Users/askborgen/Desktop/code/python/Quantum Quest/world/rooms/{room}.json", self)
+            self.loadRoom(room)
 
         self.rooms["start"].addEntity(PlayerEntity(self.rooms["start"]))
+
+        self.addedRooms = []
+        self.removedRooms = []
         
 
     def getPlayer(self):
@@ -29,11 +33,9 @@ class World:
     def move(self, roomFrom: str, roomTo: str, entity: Entity):
         if entity.isPlayer():
             for room in self.rooms[roomFrom].getNeighboursWithout(roomTo):
-                self.rooms[room].unload()
-                del self.rooms[room]
+                self.removedRooms.append(room)
             for room in self.rooms[roomTo].getNeighboursWithout(roomFrom):
-                self.rooms[room].load()
-                self.rooms[room].setWorld(self)
+                self.addedRooms.append(room)
             self.currentRoom = roomTo
 
         self.getRoomById(roomTo).addEntity(entity)
@@ -44,6 +46,15 @@ class World:
         self.deltaTime = deltaTime
         for room in self.rooms.values():
             room.tick()
+
+        # to avoid changing the dict while iterating
+        for room in self.addedRooms:
+            self.loadRoom(room)
+        for room in self.removedRooms:
+            self.rooms[room].unload()
+            del self.rooms[room]
+        self.addedRooms, self.removedRooms = [], []
+
     
     def render(self, camera, scale: float):
         for room in self.rooms.values():
@@ -55,3 +66,7 @@ class World:
     
     def getDeltaTime(self) -> float:
         return self.deltaTime
+    
+    def loadRoom(self, room: str):
+        self.rooms[room] = Room(f"/Users/askborgen/Desktop/code/python/Quantum Quest/world/rooms/{room}.json", self)
+        self.rooms[room].load()

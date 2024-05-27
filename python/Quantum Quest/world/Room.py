@@ -2,7 +2,7 @@ from world.objects.Playform import Platform
 from util.math.Hitbox import Polygon
 from entities.TempEntity import TempEntity
 from world.objects.Transition import Transition
-from entities.RemovalReason import RemovalReason
+import entities.RemovalReason as RemovalReason
 from entities.Player.PlayerEntity import PlayerEntity
 from world.objects.Object import Object
 from entities.Entity import Entity
@@ -60,7 +60,7 @@ class Room:
         if entity.getType() == EntityType.PLAYER:
             self.player = entity
 
-    def removeEntity(self, entity: Entity, reason: RemovalReason) -> None:
+    def removeEntity(self, entity: Entity, reason: RemovalReason.RemovalReason) -> None:
         self.entities.remove(entity)
         entity.remove(reason)
 
@@ -98,4 +98,4 @@ class Room:
 
     def unload(self):
         for entity in self.entities:
-            entity.remove(RemovalReason.UNLOAD)
+            entity.remove(RemovalReason.UNLOADED)
