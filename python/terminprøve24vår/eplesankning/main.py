@@ -8,11 +8,12 @@ SIZE = WIDTH, HEIGHT = 800, 600
 screen = pg.display.set_mode(SIZE)
 clock = pg.time.Clock()
 font = pg.font.SysFont("Arial", 30)
-f = open("/Users/askborgen/Desktop/code/python/terminprøve24vår/eplesankning/apples.csv").read().split("\n")
+with open("/Users/askborgen/Desktop/code/python/terminprøve24vår/eplesankning/apples.csv") as data:
+    f = data.read().split("\n")
 
 points = 0
 
-def collision(apples, player):
+def collision(apples: list[Apple], player: Player):
     newApples = []
     points = 0
 
@@ -22,7 +23,7 @@ def collision(apples, player):
 
         if player.pos[0] + player.width <  apple.pos[0] -  apple.size  or \
             apple.pos[0] + apple.size   < player.pos[0] - player.width or \
-            apple.pos[1] + apple.size   < player.pos[1] - player.width:
+            apple.pos[1] + apple.size   < player.pos[1]:
 
             # No collition
             newApples.append(apple)
@@ -34,15 +35,15 @@ def collision(apples, player):
 
         if player.pos[0] > apple.pos[0]:
             # Get y value of circle at x = player.pos[0]
-            y = -np.sin(np.arccos((player.pos[0] - apple.pos[0]) / apple.size)) * apple.size
+            y = np.sin(np.arccos((player.pos[0] - apple.pos[0]) / apple.size)) * apple.size
         else:
             # x = player.pos[0] + player.width
-            y = -np.sin(np.arccos((player.pos[0] + player.width - apple.pos[0]) / apple.size)) * apple.size
+            y = np.sin(np.arccos((player.pos[0] + player.width - apple.pos[0]) / apple.size, )) * apple.size
         
-        if y > player.pos[1] - player.width:
+        if y + apple.pos[1] > player.pos[1] - player.width:
             points += 1 if apple.color == player.color else -1
             continue
-        if y > player.pos[1] - player.width:
+        if y + apple.pos[1] > player.pos[1] - player.width:
             points += 1 if apple.color == player.color else -1
             continue
 
@@ -51,8 +52,8 @@ def collision(apples, player):
 
     return newApples, points
 
-player = Player(screen, np.array([WIDTH // 2, HEIGHT]), 6, 3, 50)
-apples = []
+player: Player = Player(screen, np.array([WIDTH // 2, HEIGHT]), 6, 3, 50)
+apples: list[Apple] = []
 
 while clock.get_fps() == 0:
     clock.tick(60)

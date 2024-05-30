@@ -7,11 +7,16 @@ pg.init()
 
 #pattern = np.random.choice(["R","L"], 256)
 #pattern[0] = "L" if pattern[0] == "N" else pattern[0]
-pattern = "LLRRRLRRRRRR"
+pattern = "RRLRLLRL"
 R = np.array([[0, -1], [1, 0]])
 L = np.array([[0, 1], [-1, 0]])
 U = -1
 N = 1
+
+#colors = [(i,i,i) for i in range(256)] # 256 colors
+#colors = list(product([0,255//3,2*255//3,255], [0,255//3,2*255//3,255], [0,255//3,2*255//3,255])) # 64 colors
+#colors = list(product([0,127,255], [0,127,255], [0,127,255])) # 27 colors
+colors = list(product([0,255], [0,255], [0,255])) # 8 colors 
 
 class Ant:
     def __init__(self, pattern, pos, dir) -> None:
@@ -44,13 +49,9 @@ class Ant:
 
         cells[self.pos[0]][self.pos[1]] = cell
         self.pos += self.direction
+        self.pos = self.pos % cells.shape
         screen.set_at(self.pos, colors[cell])
 #        pg.draw.rect(screen, colors[cell], (pos[0] * cellSize, pos[1] * cellSize, cellSize, cellSize))
-
-#colors = [(i,i,i) for i in range(256)] # 256 colors
-#colors = list(product([0,255//3,2*255//3,255], [0,255//3,2*255//3,255], [0,255//3,2*255//3,255])) # 64 colors
-colors = list(product([0,255,255], [0,127,255], [0,127,255])) # 27 colors
-#colors = list(product([0,255], [0,255], [0,255])) # 8 colors 
 
 fps = 1
 info = pg.display.Info() # You have to call this before pygame.display.set_mode()

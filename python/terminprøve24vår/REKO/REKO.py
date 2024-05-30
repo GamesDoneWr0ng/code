@@ -12,7 +12,7 @@ class REKO:
     def leggTilPerson(self, person: Person):
         self.personer.append(person)
     
-    def leggTilProdukter(self, produkter):
+    def leggTilProdukter(self, produkter: Counter):
         self.produkter += produkter
 
     def fåProdukter(self):

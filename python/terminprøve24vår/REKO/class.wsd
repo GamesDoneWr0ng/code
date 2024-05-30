@@ -1,0 +1,61 @@
+@startuml REKO
+title REKO
+scale 2
+top to bottom direction
+
+
+class REKO {
+    personer: dict
+    produkter: Counter
+
+    leffTilPerson(person: Person) -> None
+    leffTilProdukter(produkter: Counter) -> None
+    fåProdukter() -> Counter
+    fjærnProdukter(produkter: Counter) -> None
+}
+
+class Person {
+    navn: str
+    mobil: int
+
+    __eq__(other: Self) -> bool
+    fåNavn() -> str
+    fåMobil() -> int
+    bestil(reko: REKO) -> Counter | None
+    selg(produkter:Counter, reko: REKO) -> None
+}
+
+class Bestiling {
+    produkter: Counter
+    
+    __str__() -> str
+    totalPris() -> float
+}
+
+class Produkt {
+    navn: str
+    kiloPris: float
+
+    __str__() -> str
+    fåKiloPris() -> float
+    fåNavn() -> str
+}
+
+class Eple {
+    farge: str
+
+    __str__() -> str
+    fåFarge() -> str
+}
+
+class Mel {
+    bestfør: datetime
+
+}
+
+REKO "0.." -- "0.." Person
+Person "1" -- "1" Bestiling
+Bestiling "0.." -- "1" Produkt
+Produkt <- Eple
+Produkt <- Mel
+@enduml

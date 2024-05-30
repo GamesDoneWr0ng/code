@@ -33,10 +33,10 @@ class PlayerEntity(Entity):
         self.maxDashes = 1
         self.superJumpX = 32.5
         self.duckSuperJumpXMult = 1.25
-        self.duckSuperJumpYMult = 0.5  
+        self.duckSuperJumpYMult = 0.5
 
-        self.stateNormal = 0
-        self.statePhotonDash = 1
+        self.stateNormal, \
+        self.statePhotonDash = range(2)
 
         # endregion
 
@@ -48,7 +48,7 @@ class PlayerEntity(Entity):
         self.startedDashing = False
         self.dashes = 1
         self.facing = 1
-    
+
         # endregion
         
         self.stateMachine = StateMachine(0) # TODO: initialize to correct state from savefile
@@ -74,7 +74,7 @@ class PlayerEntity(Entity):
 
         # dashes
         if self.dashCooldownTimer > 0:
-            self.dashCooldownTimer -= self.getDeltaTime()        
+            self.dashCooldownTimer -= self.getDeltaTime()
         if self.dashRefillCooldownTimer > 0:
             self.dashRefillCooldownTimer -= self.getDeltaTime()
         if self.onGround and self.dashRefillCooldownTimer <= 0:
@@ -213,4 +213,6 @@ class PlayerEntity(Entity):
     def render(self, screen, camera, scale: float):
         if not super().render(screen, camera, scale):
             return
-        pg.draw.polygon(screen, (255,255,255) if self.dashes != 0 else (255,255,0), (self.getHitbox().getPoints()-camera.topLeft())*scale)
+        pg.draw.polygon(screen, 
+                        (255,255,255) if self.dashes != 0 else (255,255,0), 
+                        (self.getHitbox().getPoints() - camera.topLeft()) * scale)

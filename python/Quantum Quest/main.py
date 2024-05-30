@@ -31,6 +31,10 @@ while running:
             if event.key == pg.K_o:
                 player = world.getPlayer()
                 player.noClip = not player.noClip
+            if event.key == pg.K_u:
+                world = World(screen)
+                camera.setTarget(world.getPlayer())
+
     
     screen.fill((0,0,0))
 
