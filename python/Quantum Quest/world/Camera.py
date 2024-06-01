@@ -1,7 +1,8 @@
 import numpy as np
+from util.math.Calc import lerp
 
-def defaultSoftSpeed(distance: np.ndarray, speed: float, scale) -> np.ndarray:
-    return distance * (1 - np.power(0.01 / scale, speed))
+def defaultSoftSpeed(cameraPos: np.ndarray, targetPos: np.ndarray, dt: float, scale) -> np.ndarray:
+    return lerp(cameraPos, targetPos, 4.5, dt) - cameraPos
 
 class Camera:
     def __init__(self, scale, target, softBorder: np.ndarray, hardBorder: np.ndarray, softSpeed = defaultSoftSpeed) -> None:
@@ -56,6 +57,6 @@ class Camera:
         if np.all(distanceSoftBorder == 0):
             return
         elif np.all(distanceHardBorder == 0):
-            self.move(self.softSpeed(distanceSoftBorder, speed, self.scale))
+            self.move(self.softSpeed(self.position, self.position+distanceSoftBorder, speed, self.scale))
         else:
             self.move(distanceHardBorder)

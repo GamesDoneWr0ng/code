@@ -19,3 +19,7 @@ def approachVector(val: np.ndarray, target: np.ndarray, maxMove: float) -> np.nd
         return target
     else:
         return val + diff / length * maxMove
+    
+def lerp(a, b, decay, dt):
+    """Actualy expDecay, usefull range for decay is arround 1 to 25 from slow to fast."""
+    return b + (a - b) * np.exp(-decay * dt)

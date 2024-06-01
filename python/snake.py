@@ -172,7 +172,7 @@ def astar(maze, start, end):
 
             # Create the f, g, and h values
             child.g = current_node.g + 1
-            child.h = int(math.sqrt((child.position[0] - end_node.position[0])**2)) + int(math.sqrt((child.position[1] - end_node.position[1])**2))
+            child.h = child.position[0] - end_node.position[0] + child.position[1] - end_node.position[1]
             child.f = child.g + child.h
 
             # Child is already in the open list

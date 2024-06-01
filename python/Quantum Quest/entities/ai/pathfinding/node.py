@@ -9,8 +9,13 @@ class Node:
         self.distance = -inf
         self.cost = inf
 
-        self.parents = []
-        self.children = []
+        # astar
+        self.f = 0
+        self.h = 0
+        self.g = 0
+
+        self.parents: list[Node] = []
+        self.children: dict[Node, float] = {}
 
     def __eq__(self, __value: Self) -> bool:
         return self.id == __value.id
@@ -25,6 +30,5 @@ class Node:
         for ability in abilities:
             posible, cost = ability.canConnect(self.pos, node.pos)
             if posible and node.cost > cost:
-                node.cost = cost
                 node.addParent(self)
-                self.children.append(node)
+                self.children[node] = cost
