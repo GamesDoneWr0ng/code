@@ -3,8 +3,8 @@ import torch
 import matplotlib.pyplot as plt
 import torch.nn as nn
 
-inputs  = torch.tensor(([1],[3],[5],[7],[9],[11],[13],[15],[17],[19],[21],[23]), dtype=torch.float32)
-outputs = torch.tensor(([94], [43], [26], [61], [113], [138], [111], [59], [35], [64], [117], [146]), dtype=torch.float32)
+inputs  = torch.tensor(([100],[130],[160],[175],[190],[220],[235]), dtype=torch.float32)
+outputs = torch.tensor(([1450], [2300], [3050], [3365], [3720], [4140], [4175]), dtype=torch.float32)
 #inputs = torch.linspace(0, 10, 50, dtype=torch.float32).unsqueeze(-1)
 #outputs = 2*torch.sin(inputs+2) + torch.tensor(random.randn(50), dtype=torch.float32).unsqueeze(-1)/3
 
@@ -14,12 +14,12 @@ class customModule(nn.Module):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.a = torch.nn.Parameter(torch.randn(()))
-        #self.b = torch.nn.Parameter(torch.randn(()))
+        self.b = torch.nn.Parameter(torch.randn(()))
         self.c = torch.nn.Parameter(torch.randn(()))
-        self.d = torch.nn.Parameter(torch.randn(()))
+        #self.d = torch.nn.Parameter(torch.randn(()))
 
     def forward(self, x):
-        return self.a * torch.sin(np.pi/6 * x + self.c) + self.d
+        return self.a * x**2 + self.b * x + self.c
 
 model = customModule()
 
