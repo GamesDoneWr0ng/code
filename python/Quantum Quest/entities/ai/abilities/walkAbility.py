@@ -13,6 +13,3 @@ class Walk(Ability):
 
     def update(self):
         pass
-
-    def start(self):
-        pass

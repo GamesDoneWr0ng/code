@@ -21,7 +21,7 @@ class Entity:
     def getHitbox(self) -> Hitbox:
         return self.hitbox
     
-    def hasHitbox(self):
+    def hasHitbox(self) -> bool:
         return not self.hitbox == None
 
     def remove(self, reason: RemovalReason.RemovalReason) -> None:
@@ -79,11 +79,6 @@ class Entity:
         self.tickMovement()
 
     def tickMovement(self) -> None:
-#        self.checkOnGround()
-
-#        if not self.isOnGround():
-#            self.setVelocity(self.getVelocity() + np.array([0, self.gravity * self.getDeltaTime()]))
-
         self.move(MovementType.SELF, self.getVelocity() * self.getDeltaTime())
 
     def move(self, movementType: MovementType.MovementType, movement: np.ndarray) -> None:
@@ -93,16 +88,13 @@ class Entity:
         
         movement = self.adjustMovementForWorldCollisions(movement)
         
-        if np.sum(movement**2) < 1E-7:
+        if np.sum(movement**2) < 1E-10:
             return
         
         self.setPosition(self.getPosition() + movement)
     
     def adjustMovementForWorldCollisions(self, movement: np.ndarray) -> np.ndarray:
-        if np.sum(movement**2) > 1E-4:
-            hitbox = self.getHitbox().stretch(movement)
-        else:
-            hitbox = self.getHitbox()
+        hitbox = self.getHitbox().stretch(movement)
 
         wasSafeGround = False
 
@@ -122,15 +114,13 @@ class Entity:
                 # axes are normalized so we can check the first element
                 if np.abs(axis)[1] > self.type.getMaxSlope() and correction[1] < 0:
                     wasSafeGround = True
-                    self.setOnGround(True)
 
                 if movement[1] == 0:
                     self.setVelocityY(0)
                 if movement[0] == 0:
                     self.setVelocityX(0)
 
-        if not wasSafeGround:
-            self.setOnGround(False)        
+        self.setOnGround(wasSafeGround)
 
         return movement
         
