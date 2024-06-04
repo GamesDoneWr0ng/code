@@ -11,6 +11,7 @@ grid = np.zeros(gridSize, dtype=int)
 
 screenSize = (gridSize[0] * cellSize, gridSize[1] * cellSize) 
 screen = pg.display.set_mode(screenSize)
+clock = pg.time.Clock()
 font = pg.font.Font(None, 24)
 
 def update(grid):
@@ -27,23 +28,26 @@ def update(grid):
     
     # Combine birth and survival conditions to form the new grid
     new_grid = np.logical_or(birth, survive).astype(int)
+    change = np.logical_xor(grid, new_grid)
     
-    return new_grid
+    return new_grid, change
 
-def draw(grid, screenSize = screenSize, cellSize = cellSize):
+def draw(grid, change, screen = screen, cellSize = cellSize):
     # Create a surface to hold the grid image
-    gridSurface = pg.Surface(screenSize)
-    gridSurface.fill((0, 0, 0))
 
     # Draw each alive cell onto the grid surface
+    x,y = np.nonzero(change)
+    for i in zip(x,y):
+        #pg.draw.rect(gridSurface, (255, 255, 255), (i[0] * cellSize, i[1] * cellSize, cellSize, cellSize))
+        screen.set_at(i, (255, 255, 255) if grid[i[0], i[1]] else (0, 0, 0))
+
+    """    # Draw each alive cell onto the grid surfa
     for i in range(grid.shape[0]):
         for j in range(grid.shape[1]):
             if grid[i, j] == 1:
                 #pg.draw.rect(gridSurface, (255, 255, 255), (i * cellSize, j * cellSize, cellSize, cellSize))
                 gridSurface.set_at((i,j), (255, 255, 255))
-
-    # Blit the grid surface onto the screen
-    screen.blit(gridSurface, (0, 0))
+    """
     pg.display.flip()
 
 running = True
@@ -55,17 +59,19 @@ while running:
 
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_SPACE:    
-                grid = update(grid)
-                draw(grid)
+                grid, change = update(grid)
+                draw(grid, change)
             if event.key == pg.K_g:
                 grid = np.random.randint(0, 2, gridSize)
-                draw(grid)
+                draw(grid, np.ones(gridSize))
             if event.key == pg.K_UP:
+                draw(grid, np.ones(gridSize))
                 fps += 1
                 text = font.render(f"FPS: {fps}", True, (255, 255, 255))
                 screen.blit(text, (0, 0))
                 pg.display.flip()
             if event.key == pg.K_DOWN:
+                draw(grid, np.ones(gridSize))
                 fps -= 1
                 text = font.render(f"FPS: {fps}", True, (255, 255, 255))
                 screen.blit(text, (0, 0))
@@ -75,10 +81,15 @@ while running:
             pos = pg.mouse.get_pos()
             pos = [pos[0]//cellSize, pos[1]//cellSize]
             grid[pos[0], pos[1]] = not grid[pos[0], pos[1]]
-            draw(grid)
+            change = np.zeros(gridSize)
+            change[pos[0], pos[1]] = 1
+            draw(grid, change)
 
         keys = pg.key.get_pressed()
         if keys[pg.K_b]:
-            for _ in range(fps):
-                grid = update(grid)
-            draw(grid)
+            change = np.zeros(gridSize)
+            for i in range(fps):
+                grid, c = update(grid)
+                change = np.logical_or(change, c)
+            draw(grid, change)
+    clock.tick(60)
