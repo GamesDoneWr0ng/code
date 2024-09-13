@@ -28,26 +28,18 @@ def update(grid):
     
     # Combine birth and survival conditions to form the new grid
     new_grid = np.logical_or(birth, survive).astype(int)
+
+    # what changed for faster drawing
     change = np.logical_xor(grid, new_grid)
     
     return new_grid, change
 
 def draw(grid, change, screen = screen, cellSize = cellSize):
-    # Create a surface to hold the grid image
-
-    # Draw each alive cell onto the grid surface
     x,y = np.nonzero(change)
     for i in zip(x,y):
         #pg.draw.rect(gridSurface, (255, 255, 255), (i[0] * cellSize, i[1] * cellSize, cellSize, cellSize))
         screen.set_at(i, (255, 255, 255) if grid[i[0], i[1]] else (0, 0, 0))
 
-    """    # Draw each alive cell onto the grid surfa
-    for i in range(grid.shape[0]):
-        for j in range(grid.shape[1]):
-            if grid[i, j] == 1:
-                #pg.draw.rect(gridSurface, (255, 255, 255), (i * cellSize, j * cellSize, cellSize, cellSize))
-                gridSurface.set_at((i,j), (255, 255, 255))
-    """
     pg.display.flip()
 
 running = True

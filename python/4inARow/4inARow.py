@@ -1,7 +1,7 @@
 import numpy as np
 from copy import deepcopy
 
-maxDeapth = 2
+maxDeapth = 4
 
 board = np.zeros((6,7), dtype=np.int8)
 #turn = 1
@@ -44,14 +44,20 @@ def doTurn(b, turn, column, maxDeapth, depth=0):
         return 1, column
 
     # next move
-    moves = np.array([doTurn(board, -turn, i, maxDeapth, depth+1) for i in range(0, board.shape[1])])
+    moves = np.zeros((board.shape[1], 2))
+    for i in range(board.shape[1]):
+        moves[i] = doTurn(board, -turn, i, maxDeapth, depth+1)
+        if moves[i,0] == turn:
+            return turn, i
+    
+    #moves = np.array([doTurn(board, -turn, i, maxDeapth, depth+1) for i in range(0, board.shape[1])])
     #moves[:,0] *= turn
     if turn == 1:
         best = moves[np.argmax(moves[:,0])]
     else:
         best = moves[np.argmin(moves[:,0])]
-    seen[str(b)] = best[0]
-    return best[0], best[1]
+    seen[str(board)] = best[0]
+    return best[0], int(best[1])
 
 def justMakeMove(board, turn, column):
     row = np.where(board[:, column] == 0)[0][-1]
