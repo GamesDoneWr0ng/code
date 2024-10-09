@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minesweeper</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="hoved">
+        <table>
+            <tbody>
+                <tr>
+                    <td>
+                        <div id="dim_container">
+                            <div id="dimInfo">
+                                <b>Select 2 checkboxes.</b>
+                                <p>The sliders that are <b>not<br>selected</b> will be functional <br>and select what slice you see.</p>
+                            </div>
+                        </div>
+                    </td>
+                    <!--<td>
+                        <table class="invis">
+                            <tbody>
+                                <tr class="invis">
+                                    <td class="invis"></td>
+                                    <td class="invis"></td>
+                                    <td class="invis"></td>
+                                </tr>
+                                <tr class="invis">
+                                    <td class="invis"></td>
+                                    <td class="invis"><canvas id="canvas" style="width: 300px; height: 300px;"></canvas></td>
+                                    <td class="invis"></td>
+                                </tr>
+                                <tr class="invis">
+                                    <td class="invis"></td>
+                                    <td class="invis"></td>
+                                    <td class="invis"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>-->
+                    <td>
+                        <table class="invis">
+                            <tbody>
+                                <tr class="invis">
+                                    <td class="invis"></td>
+                                    <td class="invis"></td>
+                                    <td class="invis"></td>
+                                </tr>
+                                <tr class="invis">
+                                    <td class="invis"></td>
+                                    <td class="invis"><canvas id="canvas" style="width: 300px; height: 300px;"></canvas></td>
+                                    <td class="invis"></td>
+                                </tr>
+                                <tr class="invis">
+                                    <td class="invis"></td>
+                                    <td class="invis"></td>
+                                    <td class="invis"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                    <td id="side">
+                        <div id="mines"> <!--remaining mines-->
+                            Mines remaining
+                        </div>
+                        <div id="timer"> <!--timer-->
+                            <b>
+                                Time:
+                                <div id="regularTimer">0:00.000</div>
+                            </b>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

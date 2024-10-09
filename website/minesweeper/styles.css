@@ -1,0 +1,41 @@
+body {
+    background: #628d8d;
+    font-family: 'Courier New';
+}
+#hoved {
+    margin: 50px auto;
+}
+table {
+    margin-left: auto;
+    margin-right: auto;
+}
+table, td {
+    border: 3px solid #457d7d;
+    border-collapse: collapse;
+}
+#side {
+    position: relative;
+    vertical-align: top;
+    width: 200px;
+}
+#mines {
+    margin: 7px;
+}
+#timer {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+}
+#regularTimer {
+    font-size: 20px;
+    margin-left: 16px;
+}
+canvas {
+    margin: 0px;
+}
+table.invis, th.invis, td.invis, tr.invis {
+    border-collapse: collapse;
+    border: 0px;
+    font-size: x-small;
+    text-align: center;
+}
