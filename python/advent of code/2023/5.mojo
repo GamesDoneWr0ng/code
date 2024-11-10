@@ -17,6 +17,18 @@ struct Map:
                 return val - source + destination
         return val
 
+fn getNumbers(string) -> set:
+    result = []
+    for number in string.strip().replace("  ", " ").split(" "):
+        result.append(int(number))
+    return result
+
+fn getSeeds(seeds):
+    for i in range(0, len(seeds), 2):
+        print(i)
+        for k in range(seeds[i], seeds[i]+seeds[i+1]):
+            yield k
+
 fn main():
     var data: String = """seed-to-soil map:
 4170452318 3837406401 124514978
@@ -209,18 +221,6 @@ humidity-to-location map:
 2906475696 3973741766 54270895
 593974860 2074095641 171967880
 1732757471 1613910675 460184966"""
-
-def getNumbers(string) -> set:
-    result = []
-    for number in string.strip().replace("  ", " ").split(" "):
-        result.append(int(number))
-    return result
-
-def getSeeds(seeds):
-    for i in range(0, len(seeds), 2):
-        print(i)
-        for k in range(seeds[i], seeds[i]+seeds[i+1]):
-            yield k
 
 seeds = getNumbers("2276375722 160148132 3424292843 82110297 1692203766 342813967 3289792522 103516087 2590548294 590357761 1365412380 80084180 3574751516 584781136 4207087048 36194356 1515742281 174009980 6434225 291842774")
 maps: list[Map] = []
