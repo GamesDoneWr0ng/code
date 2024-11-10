@@ -37,8 +37,10 @@ def update(grid):
 def draw(grid, change, screen = screen, cellSize = cellSize):
     x,y = np.nonzero(change)
     for i in zip(x,y):
-        #pg.draw.rect(gridSurface, (255, 255, 255), (i[0] * cellSize, i[1] * cellSize, cellSize, cellSize))
-        screen.set_at(i, (255, 255, 255) if grid[i[0], i[1]] else (0, 0, 0))
+        if cellSize == 1:
+            screen.set_at(i, (255, 255, 255) if grid[i[0], i[1]] else (0, 0, 0))
+        else:
+            pg.draw.rect(screen, (255, 255, 255), (i[0] * cellSize, i[1] * cellSize, cellSize, cellSize))
 
     pg.display.flip()
 
