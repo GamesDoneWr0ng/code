@@ -22,17 +22,24 @@ const flag = [
     ["#000000", new Path2D("M 20.222,56.459 H 55.777 V 63.5 H 20.222 Z")],
     [color, new Path2D("M 40,13.875 19.375,27 40,40.125 Z")]
 ];
+const flagGreen = [
+    ["#000000", new Path2D("M 36,55.5 v -39 H 40 v 39 z")],
+    ["#000000", new Path2D("M 28.571,51.625 h 18.857 v 5.5 h -18.857 z")],
+    ["#000000", new Path2D("M 20.222,56.459 H 55.777 V 63.5 H 20.222 Z")],
+    ["00FF00", new Path2D("M 40,13.875 19.375,27 40,40.125 Z")]
+];
 
 function getBombs(bombs, settings) {
     var result = NDArray.zeros(bombs.shape);
-    for (let i = 0; i < settings["mines"].length; i++) {
-        result.add(bombs.convolve(settings["mines"][i]["kernel"]))
+    for (let i = 1; i < Object.keys(settings["mines"]).length; i++) {
+        result.add(bombs.convolve(settings["mines"][i]["kernel"], i))
     }
     return result;
 }
 
 function populateBombs(bombs, start, settings) {
-    for (i=0;i<1000;i++){if (Math.random()<0.1) {bombs.arr[i] = 1;}}
+    for (i=0;i<bombs.size;i++){if (Math.random()<0.1) {bombs.arr[i] = 1;}}
+    for (i=0;i<bombs.size;i++){if (Math.random()<0.1) {bombs.arr[i] = 2;}}
     //bombs.set(0, ...start)
     return bombs;
 }
@@ -66,6 +73,14 @@ class NDArray {
         const size = shape.reduce((a, b) => a * b); // Total number of elements
         const zerosArray = new Array(size).fill(0);
         return new NDArray(zerosArray, shape);
+    }
+
+    static basicKernel(dims, width) {
+        const size = width**dims;
+        const zerosArray = new Array(size).fill(1);
+        zerosArray[Math.floor(size/2)] = 0;
+        const shape = new Array(dims).fill(width);
+        return new NDArray(zerosArray, shape)
     }
 
     _getShape(arr) {
@@ -225,7 +240,7 @@ class NDArray {
         }
     }
 
-    convolve(kernel) {
+    convolve(kernel, id) {
         // returns a new NDarray with the convolution of this NDArray and the kernel.
         for (let i = 0; i < kernel.shape.length; i++) {
             if (kernel.shape[i]%2 !== 1) {
@@ -240,7 +255,9 @@ class NDArray {
                 if (kernel.arr[j] === 0) {continue;}
                 var offset = thisSlice._indicies(j);
                 offset = offset.map((a, b)=>a+indices[b]-Math.floor(thisSlice.shape[b]*0.5));
-                thisSlice.arr[j] = this.get(...offset);
+                if (this.get(...offset) == id){
+                    thisSlice.arr[j] = 1;
+                } else {continue;}
                 for (let k = 0; k < offset.length; k++) {
                     if (offset[k] < 0 || offset[k] >= this.shape[k]) {
                         thisSlice.arr[j] = 0;
@@ -260,26 +277,20 @@ let settings = {
     "renderScale": 5,
     "squareSize": 30,
     "size": 10,
-    "dims": 3,
+    "dims": 2,
     "shape": "Rectangle",
-    "mines": [{
+    "mines":{
+        1: {
             "flag": flag,
             "open": 1, // TODO open bomb image
-            "kernel": new NDArray([
-                1,1,1,
-                1,1,1,
-                1,1,1,
-
-                1,1,1,
-                1,0,1,
-                1,1,1,
-
-                1,1,1,
-                1,1,1,
-                1,1,1
-            ], [3,3,3])
+            "kernel": NDArray.basicKernel(2,3)
+        }, 
+        2: {
+            "flag": flagGreen,
+            "open": 1, // TODO open bomb image
+            "kernel": NDArray.basicKernel(2,5)
         }
-    ]
+    }
 }
 
 function createDimSliders() {
@@ -373,11 +384,11 @@ function drawGrid2D(opened, bombs, bombNumbers, slice) {
             if (opened2D.get(row, column) === 1) {
                 if (bombs2D.get(row,column) === 0) {
                     drawSVG(ctx, tileOpen, column*settings["squareSize"], row*settings["squareSize"]);
-                    //getBombs(bombs, index).toString(), (column+0.5)*settings["squareSize"]*settings["renderScale"], (row+0.6)*settings["squareSize"]*settings["renderScale"]
                     ctx.fillText(bombNumbers2D.get(row,column).toString(), (column+0.5)*settings["squareSize"]*settings["renderScale"], (row+0.6)*settings["squareSize"]*settings["renderScale"]);
                 } else {
                     drawSVG(ctx, tileClosed, column*settings["squareSize"], row*settings["squareSize"]);
-                    drawSVG(ctx, flag, column*settings["squareSize"], row*settings["squareSize"])
+
+                    drawSVG(ctx, settings["mines"][bombNumbers2D.get(row,column)], column*settings["squareSize"], row*settings["squareSize"])
                 }
             } else {
                 drawSVG(ctx, tileClosed, column*settings["squareSize"], row*settings["squareSize"]);
@@ -407,6 +418,16 @@ function clickCanvas(canvas, event) {
     console.log(x, y, index);
 }
 
+function leftHandler() {
+
+}
+
+canvas.addEventListener("keydown", function(event) {
+    const callback = {
+        "ArrowLeft": leftHandler
+    }
+});
+
 var sizes = Array(settings["dims"]).fill(settings["size"]);
 
 canvas.width = sizes[0] * settings["squareSize"] * settings["renderScale"];
@@ -429,5 +450,5 @@ var flags  = NDArray.zeros(sizes);
 
 createDimSliders(settings);
 
-//for (i=0;i<1000;i++){opened.arr[i] = 1;}
+//for (i=0;i<opened.size;i++){opened.arr[i] = 1;}
 //console.log(bombNumbers.max())
