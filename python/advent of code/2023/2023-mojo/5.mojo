@@ -1,5 +1,67 @@
-from typing import Self
-data = """seed-to-soil map:
+from collections import List
+from time import now
+from algorithm import parallelize
+
+struct Map(CollectionElement, Stringable):
+    var rules: List[List[Int]]
+    fn __init__(inout self, rules: List[List[Int]]):
+        self.rules = rules
+
+    fn forward(inout self, val: Int) -> Int:
+        for i in range(len(self.rules)):
+            var destination: Int = self.rules[i][0]
+            var source: Int = self.rules[i][1]
+            var length: Int = self.rules[i][2]
+            if source <= val and source+length > val:
+                return val - source + destination
+        return val
+
+    fn __moveinit__(inout self: Self, owned existing: Self):
+        self.rules = existing.rules ^
+
+    fn __copyinit__(inout self: Self, existing: Self):
+        self.rules = existing.rules
+
+    fn __str__(self) -> String:
+        var result = String()
+        for i in self.rules[0]:
+            result = result + str(i[]) + " "
+        return result
+
+fn getNumbers(string: String) -> List[Int]:
+    var result: List[Int] = List[Int]()
+    try:
+        var striped: String = string.strip().replace("  ", " ")
+        var numbers: List[String] = striped.split(" ")
+        for number in numbers:
+            result.append(int(number[]))
+        return result
+    except:
+        print("uh oh")
+        return List[Int]()
+
+fn theThing(seeds: List[Int], inout maps: List[Map]):
+    var start: Int = now()
+    var minimum: Int = 9999999999999999
+    @parameter
+    fn checkRange(k: Int) capturing:
+        print(k*2, "Start")
+        for i in range(seeds[k*2], seeds[k*2]+seeds[k*2+1]):
+            var result: Int = i
+
+            for j in range(len(maps)):
+                result = maps[j].forward(result)
+            if result < minimum:
+                minimum = result
+                #print(minimum)
+        print(k*2, "Ferdi")
+    parallelize[checkRange](len(seeds)//2)
+
+    print(minimum)
+    print((now() - start) / 1e9)
+
+fn main():
+    var data: String = """seed-to-soil map:
 4170452318 3837406401 124514978
 2212408060 1593776674 105988696
 3837406401 4016132523 278834773
@@ -191,96 +253,17 @@ humidity-to-location map:
 593974860 2074095641 171967880
 1732757471 1613910675 460184966"""
 
-data = """seed-to-soil map:
-50 98 2
-52 50 48
+    var seeds: List[Int] = getNumbers("2276375722 160148132 3424292843 82110297 1692203766 342813967 3289792522 103516087 2590548294 590357761 1365412380 80084180 3574751516 584781136 4207087048 36194356 1515742281 174009980 6434225 291842774")
+    var maps: List[Map] = List[Map]()
+    try:
+        var split: List[String] = data.split("\n\n")
+        for i in range(len(split)):
+            var rules: List[List[Int]] = List[List[Int]]()
+            var section: List[String] = split[i].split("\n")
+            for j in range(1, len(section)):
+                rules.append(getNumbers(section[j]))
+            maps.append(Map(rules))
+    except:
+        return
 
-soil-to-fertilizer map:
-0 15 37
-37 52 2
-39 0 15
-
-fertilizer-to-water map:
-49 53 8
-0 11 42
-42 0 7
-57 7 4
-
-water-to-light map:
-88 18 7
-18 25 70
-
-light-to-temperature map:
-45 77 23
-81 45 19
-68 64 13
-
-temperature-to-humidity map:
-0 69 1
-1 0 69
-
-humidity-to-location map:
-60 56 37
-56 93 4"""
-
-class MyRange:
-    def __init__(self, destination, start, lenght):
-        self.destination = destination
-        self.start = start
-        self.lenght = lenght
-
-    def split(self, other: Self):
-        dStart = self.start - other.start
-        #dLenght = self.lenght - other.lenght
-        if dStart > other.lenght or -dStart > self.lenght: # no hit
-            return [MyRange(self.destination, self.start, self.lenght)]
-        if dStart > 0:
-            if other.start + other.lenght > self.start + self.lenght: # fully contained
-                return [MyRange(other.destination, self.start, self.lenght)]
-            return [MyRange(other.destination, self.start, other.lenght-dStart), 
-                    MyRange(self.destination, other.start-other.lenght-dStart, self.lenght - (other.lenght-dStart))]
-        elif dStart == 0:
-            if self.lenght <= other.lenght:
-                return [MyRange(other.destination, self.start, self.lenght)]
-            
-        if self.start + self.lenght > other.start + other.lenght:
-            return [MyRange(self.destination, self.start, -dStart),
-                    MyRange(other.destination, other.start, -dStart),
-                    MyRange(self.destination, other.start+other.lenght, self.lenght-other.lenght)]
-        return [MyRange(self.destination, self.start, dStart),
-                MyRange(other.destination, other.start, self.lenght + dStart)]
-
-class Map:
-    def __init__(self, rules):
-        self.rules = [MyRange(i[0], i[1], i[2]) for i in rules]
-
-    def forward(self, val: list[MyRange]):
-        before = val.copy()
-        for rule in self.rules:
-            result = []
-            for i in before:
-                result.extend(i.split(rule))
-            before = result.copy()
-        return result
-
-def getNumbers(string) -> set:
-    result = []
-    for number in string.strip().replace("  ", " ").split(" "):
-        result.append(int(number))
-    return result
-
-def getSeeds(seeds):
-    return [MyRange(seeds[i], seeds[i], seeds[i+1]) for i in range(0, len(seeds), 2)]
-
-#seeds = getNumbers("2276375722 160148132 3424292843 82110297 1692203766 342813967 3289792522 103516087 2590548294 590357761 1365412380 80084180 3574751516 584781136 4207087048 36194356 1515742281 174009980 6434225 291842774")
-seeds = getNumbers("79 14 55 13")
-maps: list[Map] = []
-for section in data.split("\n\n"):
-    name, *rules = section.split("\n")
-    maps.append(Map([getNumbers(i) for i in rules]))
-
-result = getSeeds(seeds)
-for map in maps:
-    result = map.forward(result)
-    print([i.lenght for i in result])
-print(min(result, key=lambda x: x.start).start)
+    theThing(seeds, maps)

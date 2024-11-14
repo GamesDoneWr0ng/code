@@ -1,36 +1,5 @@
-from collections import Set
-
-struct Map:
-    var rules: List[List[Int]]
-    var seen: Set[Int]
-    fn __init__(inout self, rules: List[List[Int]]):
-        self.rules = rules
-        self.seen = Set[Int]()
-
-    fn forward(self, val: Int) -> Int:
-        if val in self.seen: return -1
-        self.seen.add(val)
-        for rule in self.rules:
-            var destination = rule[0]
-            if source <= val and source+length > val:
-
-                return val - source + destination
-        return val
-
-fn getNumbers(string) -> set:
-    result = []
-    for number in string.strip().replace("  ", " ").split(" "):
-        result.append(int(number))
-    return result
-
-fn getSeeds(seeds):
-    for i in range(0, len(seeds), 2):
-        print(i)
-        for k in range(seeds[i], seeds[i]+seeds[i+1]):
-            yield k
-
-fn main():
-    var data: String = """seed-to-soil map:
+from time import time
+data = """seed-to-soil map:
 4170452318 3837406401 124514978
 2212408060 1593776674 105988696
 3837406401 4016132523 278834773
@@ -222,19 +191,45 @@ humidity-to-location map:
 593974860 2074095641 171967880
 1732757471 1613910675 460184966"""
 
+class Map:
+    def __init__(self, rules):
+        self.rules = rules
+
+    def forward(self, val):
+        result = val
+        for rule in self.rules:
+            if rule[1] <= val and val < rule[1] + rule[2]:
+                result = result - rule[1] + rule[0]
+        return result
+
+def getNumbers(string) -> set:
+    result = []
+    for number in string.strip().replace("  ", " ").split(" "):
+        result.append(int(number))
+    return result
+
+def getSeeds(seeds):
+    for i in range(0, len(seeds), 2):
+        for seed in range(seeds[i], seeds[i]+seeds[i+1]):
+            yield seed
+
 seeds = getNumbers("2276375722 160148132 3424292843 82110297 1692203766 342813967 3289792522 103516087 2590548294 590357761 1365412380 80084180 3574751516 584781136 4207087048 36194356 1515742281 174009980 6434225 291842774")
+#seeds = getNumbers("79 14 55 13")
 maps: list[Map] = []
 for section in data.split("\n\n"):
     name, *rules = section.split("\n")
     maps.append(Map([getNumbers(i) for i in rules]))
 
-results = []
-for i in getSeeds(seeds):
-    result = i
-
+start = time()
+minimum = 999999999999999999
+for i, seed in enumerate(getSeeds(seeds)):
+    if i > 1000000:
+        break
+    result = seed
     for map in maps:
         result = map.forward(result)
-        if result == -1: break
-    if result != -1:
-        results.append(result)
-print(min(results))
+    if result < minimum:
+        minimum = result
+
+print(minimum)
+print(time()-start)
