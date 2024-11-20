@@ -13,8 +13,8 @@ fn getChange(borrowed inn: List[Int]) -> List[Int]:
     return result
 
 fn checkZero(borrowed inn: List[Int]) -> Bool:
-    for i in range(len(inn)):
-        if i != 0:
+    for i in inn:
+        if i[] != 0:
             return False
     return True
 
@@ -232,6 +232,7 @@ fn main():
 8 18 38 65 105 191 414 983 2353 5493 12414 27166 57701 119382 241623 480297 940194 1813772 3444082 6419595 11703885
 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25"""
 
+
     var histories: List[List[Int]] = List[List[Int]]()
     try:
         for i in data.split("\n"):
@@ -248,9 +249,9 @@ fn main():
 
         var k: Int = len(changes)-1
         while k > 0:
-            changes[k-1].append(changes[k-1][-1] + changes[k][-1])
+            changes[k-1].insert(0, changes[k-1][0] - changes[k][0])
             k -= 1
         
-        sum += changes[0][-1]
+        sum += changes[0][0]
     
     print("sum",sum)
