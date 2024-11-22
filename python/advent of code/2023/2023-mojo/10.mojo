@@ -1,4 +1,6 @@
-struct Vec2(CollectionElement):
+from collections import Set
+
+struct Vec2(CollectionElement, KeyElement):
     var x: Int
     var y: Int
     
@@ -29,6 +31,12 @@ struct Vec2(CollectionElement):
     fn __copyinit__(inout self: Self, existing: Self):
         self.x = existing.x
         self.y = existing.y
+
+    fn __hash__(self: Self) -> UInt:
+        return hash(str(self.x) + " " + str(self.y))
+
+    fn copy(self: Self) -> Self:
+        return Vec2(self.y, self.x)
 
 
 fn move(borrowed data: String, inout pos: Vec2, inout dir: Vec2): # modify inplace
@@ -194,13 +202,39 @@ L|L|.LLL-JL|.|-777-L77J.L-LL|7L|.L7J-L.FL-J.LJL7J-7J-L.LL-77.7-JFJL--|7L|J.--J.L
     var startIndex: Int = data.find("S")
     var start: Vec2 = Vec2(startIndex//(data.count("\n")+1), startIndex % (data.find("\n")+1))
 
+    print(start.y, start.x)
+    data = data.replace("S", "|")
+
     var dir: Vec2 = Vec2(1, 0)
     var pos: Vec2 = start + dir
 
-    var steps: Int = 1
+    var loop: Set[Vec2] = Set[Vec2]()
+    loop.add(start)
+
     while start != pos:
+        loop.add(pos)
         move(data, pos, dir)
-        steps += 1
-        
+
+    var insideTiles: Int = 0
+    try:
+        var inn: Bool = False
+        var lastLetter: String = "."
+        var lines: List[String] = data.split("\n")
+        for row in range(len(lines)):
+            for col in range(len(lines[0])):
+                if Vec2(row, col) in loop:
+                    print(lastLetter, lines[row][col])
+                    if (lastLetter == "F" and lines[row][col] == "J") or (lastLetter == "L" and lines[row][col] == "7") or lines[row][col] == "|":
+                        inn = not inn
+                        lastLetter = "."
+                        print(row, col, inn)
+                    elif not lines[row][col] in Set[String](".", "-", "7", "J"):
+                        lastLetter = lines[row][col]
+                elif inn:
+                    insideTiles += 1
+                    print("increace", row, col)
+    except:
+        return
     
-    print(steps//2)
+    print(len(loop)//2)
+    print(insideTiles)
