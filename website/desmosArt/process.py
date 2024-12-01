@@ -1,7 +1,6 @@
 # %%
 import numpy as np
 import matplotlib.pyplot as plt
-import potrace
 from skimage.morphology import thin
 import cv2
 from scipy.fft import fft, fftfreq
@@ -12,8 +11,9 @@ binCutoff = 123
 thinSteps = 6
 plotprocess = True
 nSample = 1500
-num_frames = 1500
-num_harmonics = 500
+nContours = 1
+num_frames = 2000
+num_harmonics = 3000
 
 # %%
 def img_to_outline(filepath):
@@ -31,7 +31,7 @@ def img_to_outline(filepath):
 
     thinImg = thin(binImg, thinSteps)
     temp = np.zeros(thinImg.shape, dtype=np.uint8) # convert from binary array to 0-255 values
-    temp[thinImg] = 255 # remember
+    temp[thinImg] = 255
     blurredImg = cv2.GaussianBlur(temp, (5,5), 1.4)
     edges = cv2.Canny(blurredImg, 50, 150)
 
@@ -53,97 +53,32 @@ def img_to_outline(filepath):
 
 def img_to_svg(filepath):
     data = np.abs(img_to_outline(filepath))
-    contours, _ = cv2.findContours(data, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    #cv2.drawContours(data, contours, -1, (0, 255, 0), 3)
+    contours, _ = cv2.findContours(data, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+    zeros = np.zeros(data.shape)
+    #cv2.drawContours(zeros, contours, -1, 255, 3)
     
-    #plt.imshow(data)
+    #plt.imshow(zeros)
     #plt.show()
-
-    points = [pt[0] for pt in contours[0]]
-    return np.array(points)
-
-    bmp = potrace.Bitmap(data)
-    path = bmp.trace()
-    return path
-
-def path_to_array(path: potrace.Path):
     points = []
-    for curve in path:
-        start = curve.start_point
-        for segment in curve:
-            if segment.is_corner:
-                points.append([(start.x, start.y),
-                               (segment.c.x, segment.c.y),
-                               (segment.end_point.x, segment.end_point.y)])
-            else:
-                points.append([(start.x, start.y),
-                               (segment.c1.x, segment.c1.y),
-                               (segment.c2.x, segment.c2.y),
-                               (segment.end_point.x, segment.end_point.y)])
-            start = segment.end_point
-    return points
-
-# %%
-def bezier(t, control_points):
-    """Evaluate a Bézier curve at parameter t using De Casteljau's algorithm."""
-    n = len(control_points) - 1
-    points = np.array(control_points)
-    for r in range(1, n + 1):
-        points[:n - r + 1] = (1 - t) * points[:n - r + 1] + t * points[1:n - r + 2]
-    return points[0]
-
-def approx_arc_lenght(control_points, num_samples = 100):
-    t_vals = np.linspace(0,1, num_samples)
-    points = np.array([bezier(t, control_points) for t in t_vals])
-    distances = np.linalg.norm(np.diff(points, axis=0), axis=1)
-    return np.cumsum(distances), points
-
-def sample_path(path, num_samples = nSample):
-    # compute total arc lenght
-    curve_lenghts = []
-    curve_cumulative_lenghts = [0]
-    for bezier in path:
-        arc_lenghts, _ = approx_arc_lenght(bezier)
-        curve_lenghts.append(arc_lenghts[-1])
-        curve_cumulative_lenghts.append(curve_cumulative_lenghts[-1] + arc_lenghts[-1])
-
-    total_lenght = curve_cumulative_lenghts[-1]
-    even_lenghts = np.linspace(0, total_lenght, num_samples)
-
-    # Map global lenght to bezier curves
-    sampled_points = []
-    for target_lenght in even_lenghts[1:]:
-        curve_idx = np.searchsorted(curve_cumulative_lenghts, target_lenght) - 1
-        length_within_curve = target_lenght - curve_cumulative_lenghts[curve_idx]
-
-        control_points = path[curve_idx]
-        arc_lenghts, curve_points = approx_arc_lenght(control_points)
-
-        idx = np.searchsorted(arc_lenghts, length_within_curve)-1
-        t_low, t_high = arc_lenghts[idx - 1], arc_lenghts[idx]
-        point_low, point_high = curve_points[idx-1], curve_points[idx]
-        alpha = (length_within_curve - t_low) / (t_high - t_low)
-        sampled_point = (1 - alpha) * point_low + alpha * point_high
-
-        sampled_points.append(sampled_point)
-    
-    return sampled_points
+    for i in sorted(contours, key=cv2.contourArea, reverse=True)[:nContours]:
+        points.extend([pt[0] for pt in i])
+    return np.array(points)
 
 # %%
 #path = path_to_array(sorted(img_to_svg(img_path)[2:], key=len, reverse=True)[:1])
 #points = sample_path(path)
-points = img_to_svg(img_path) / cv2.imread(img_path).shape[0]
-z = np.array([complex(x, -y) for x,y in points])
+points = np.vstack(img_to_svg(img_path)) / cv2.imread(img_path).shape[0]
 #points = np.vstack(points) / cv2.imread(img_path).shape[0]
-#points[:,1]*=-1
+points[:,1]*=-1
 
 # %%
 t = np.linspace(0, 2 * np.pi, len(points))
-x = np.real(z)
-y = np.imag(z)
+x = points[:,0]
+y = points[:,1]
 
 # Create a complex signal
-#z = x + 1j * y
+#z = np.array([complex(x, -y) for x,y in points])
+z = x + 1j * y
 
 colors = np.arange(len(x))
 plt.scatter(x,y, c=colors, cmap="viridis")
@@ -157,10 +92,16 @@ def harmonic_circles(points, num_harmonics=num_harmonics, num_frames=num_frames)
 
     # Sort coefficients by magnitude
     harmonics = sorted(
-        ((np.abs(c), k, c) for k, c in zip(fftfreq(len(fourier_coeffs))*n, fourier_coeffs)),
+        ((np.abs(c), k, np.angle(c)) for k, c in zip(np.round(fftfreq(len(fourier_coeffs))*n), fourier_coeffs)),
         key=lambda x: x[0],
         reverse=True
     )[:num_harmonics]
+
+    # Print the data in JavaScript array format
+    print("const data = [")
+    for row in harmonics:
+        print(f"  [{row[0]:.10g}, {row[1]:.10g}, {row[2]:.10g}],")
+    print("];")
 
     # Generate the animation
     fig, ax = plt.subplots()
@@ -168,9 +109,10 @@ def harmonic_circles(points, num_harmonics=num_harmonics, num_frames=num_frames)
     ax.set_xlim(points.real.min() - 1, points.real.max() + 1)
     ax.set_ylim(points.imag.min() - 1, points.imag.max() + 1)
     
-    circle_lines = [plt.Circle((0, 0), radius=0, fill=False, color="gray") for _ in harmonics]
-    for circle in circle_lines:
-        ax.add_artist(circle)
+    #circle_lines = [plt.Circle((0, 0), radius=0, fill=False, color="gray") for _ in harmonics]
+    #for circle in circle_lines:
+    #    ax.add_artist(circle)
+
     trajectory_line, = ax.plot([], [], 'r-', lw=1)
     #points_scatter = ax.scatter(points.real, points.imag, s=5, c='blue')
 
@@ -179,22 +121,25 @@ def harmonic_circles(points, num_harmonics=num_harmonics, num_frames=num_frames)
     def update(frame):
         nonlocal trajectory
         x, y = 0, 0
-        for i, (radius, freq, coeff) in enumerate(harmonics):
-            phase = np.angle(coeff)
-            x += radius * np.cos(2 * np.pi * freq * frame / num_frames + phase)
-            y += radius * np.sin(2 * np.pi * freq * frame / num_frames + phase)
-            circle_lines[i].center = (x, y)
-            circle_lines[i].radius = radius
+        arrows = [ax.arrow(0,0,0,0,width=0,head_width=0,head_length=0) for i in harmonics]
+        for i, (radius, freq, phase) in enumerate(harmonics):
+            dx = radius * np.cos(2 * np.pi * freq * frame / num_frames + phase)
+            dy = radius * np.sin(2 * np.pi * freq * frame / num_frames + phase)
+            
+            arrows[i]=(ax.arrow(x,y, dx, dy, head_width=0.005, head_length=0.01, width=0.001, color="blue"))
+            
+            x += dx
+            y += dy
 
         trajectory.append((x, y))
         trajectory = trajectory[-n:]
         trajectory_line.set_data(*zip(*trajectory))
 
-        return trajectory_line, *circle_lines
+        return trajectory_line, *arrows[2:]
 
     ani = FuncAnimation(fig, update, frames=num_frames, interval=10, blit=True)
-    plt.show()
+#    plt.show()
 
 # %%
-plt.show()
+#plt.show()
 harmonic_circles(z)
