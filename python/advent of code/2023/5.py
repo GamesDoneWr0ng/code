@@ -263,7 +263,7 @@ class Map:
             before = result.copy()
         return result
 
-def getNumbers(string) -> set:
+def getNumbers(string):
     result = []
     for number in string.strip().replace("  ", " ").split(" "):
         result.append(int(number))
