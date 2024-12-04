@@ -9,11 +9,12 @@ from matplotlib.animation import FuncAnimation
 img_path = "/Users/askborgen/Desktop/code/website/desmosArt/images/pikachu.jpeg"
 binCutoff = 123
 thinSteps = 6
-plotprocess = True
+plotprocess = False
 nSample = 1500
-nContours = 1
+nContours = 2
 num_frames = 2000
 num_harmonics = 3000
+maxDistance = 3
 
 # %%
 def img_to_outline(filepath):
@@ -51,17 +52,50 @@ def img_to_outline(filepath):
         #plt.show()
     return edges
 
-def img_to_svg(filepath):
+def img_to_svg(filepath, maxDistance = maxDistance):
     data = np.abs(img_to_outline(filepath))
     contours, _ = cv2.findContours(data, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
-    zeros = np.zeros(data.shape)
+    #zeros = np.zeros(data.shape)
     #cv2.drawContours(zeros, contours, -1, 255, 3)
     
     #plt.imshow(zeros)
     #plt.show()
+    contours = sorted(contours, key=cv2.contourArea, reverse=True)
+
+    minDistances = np.zeros(len(contours), 3) + np.inf
+
+    remaining = np.ones(len(contours), dtype=bool)
+    remaining[0] = False
     points = []
-    for i in sorted(contours, key=cv2.contourArea, reverse=True)[:nContours]:
-        points.extend([pt[0] for pt in i])
+    for point in contours[0]: # somehow doesent take 5 years
+        points.append(point[0])
+        minDistance = np.inf
+        minDistanceIndex = -1
+        minIndex = -1
+        for index, countour in enumerate(contours):
+            if not remaining[index]:
+                continue
+            distances = np.linalg.norm(countour[:,0] - point, axis=1)
+            distanceIndex = np.argmin(distances)
+            distance = distances[distanceIndex]
+            if distance < minDistances[index]:
+                minDistances[index] = distance
+            if distance < minDistance:
+                minDistance = distance
+                minDistanceIndex = distanceIndex
+                minIndex = index
+        if minDistance < maxDistance:
+            # add the countour points
+            remaining[minIndex] = False
+            countour = contours[minIndex][:,0]
+            if np.linalg.norm(countour[0]-countour[-1]) < maxDistance:
+                points.extend(pt for pt in countour[minDistanceIndex:])
+                points.extend(pt for pt in countour[:minDistanceIndex])
+            else:
+                points.extend(pt for pt in countour[minDistanceIndex::-1])
+                points.extend(pt for pt in countour)
+                points.extend(pt for pt in countour[len(countour):minDistanceIndex:-1])
+
     return np.array(points)
 
 # %%
@@ -141,5 +175,5 @@ def harmonic_circles(points, num_harmonics=num_harmonics, num_frames=num_frames)
 #    plt.show()
 
 # %%
-#plt.show()
+plt.show()
 harmonic_circles(z)
