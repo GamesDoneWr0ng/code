@@ -62,7 +62,7 @@ def img_to_svg(filepath, maxDistance = maxDistance):
     #plt.show()
     contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
-    minDistances = np.zeros(len(contours), 3) + np.inf
+    minDistances = np.zeros((len(contours), 3)) + np.inf
 
     remaining = np.ones(len(contours), dtype=bool)
     remaining[0] = False
@@ -78,8 +78,12 @@ def img_to_svg(filepath, maxDistance = maxDistance):
             distances = np.linalg.norm(countour[:,0] - point, axis=1)
             distanceIndex = np.argmin(distances)
             distance = distances[distanceIndex]
-            if distance < minDistances[index]:
-                minDistances[index] = distance
+            
+            if distance < minDistances[index][0]:
+                minDistances[index, 0] = distance
+                minDistances[index, 1] = len(points)
+                minDistances[index, 2] = distanceIndex
+
             if distance < minDistance:
                 minDistance = distance
                 minDistanceIndex = distanceIndex
@@ -171,7 +175,7 @@ def harmonic_circles(points, num_harmonics=num_harmonics, num_frames=num_frames)
 
         return trajectory_line, *arrows[2:]
 
-    ani = FuncAnimation(fig, update, frames=num_frames, interval=10, blit=True)
+#    ani = FuncAnimation(fig, update, frames=num_frames, interval=10, blit=True)
 #    plt.show()
 
 # %%
