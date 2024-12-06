@@ -67,21 +67,21 @@ def img_to_svg(filepath, maxDistance = maxDistance):
     remaining = np.ones(len(contours), dtype=bool)
     remaining[0] = False
     points = []
-    for point in contours[0]: # somehow doesent take 5 years
+    for pointIndex, point in enumerate(contours[0]):
         points.append(point[0])
         minDistance = np.inf
         minDistanceIndex = -1
         minIndex = -1
-        for index, countour in enumerate(contours):
+        for index, contour in enumerate(contours):
             if not remaining[index]:
                 continue
-            distances = np.linalg.norm(countour[:,0] - point, axis=1)
+            distances = np.linalg.norm(contour[:,0] - point, axis=1)
             distanceIndex = np.argmin(distances)
             distance = distances[distanceIndex]
-            
-            if distance < minDistances[index][0]:
+
+            if distance < minDistances[index, 0]:
                 minDistances[index, 0] = distance
-                minDistances[index, 1] = len(points)
+                minDistances[index, 1] = pointIndex
                 minDistances[index, 2] = distanceIndex
 
             if distance < minDistance:
@@ -91,14 +91,57 @@ def img_to_svg(filepath, maxDistance = maxDistance):
         if minDistance < maxDistance:
             # add the countour points
             remaining[minIndex] = False
-            countour = contours[minIndex][:,0]
-            if np.linalg.norm(countour[0]-countour[-1]) < maxDistance:
-                points.extend(pt for pt in countour[minDistanceIndex:])
-                points.extend(pt for pt in countour[:minDistanceIndex])
+            contour = contours[minIndex][:,0]
+            if np.linalg.norm(contour[0]-contour[-1]) < maxDistance:
+                points.extend(pt for pt in contour[minDistanceIndex:])
+                points.extend(pt for pt in contour[:minDistanceIndex])
             else:
-                points.extend(pt for pt in countour[minDistanceIndex::-1])
-                points.extend(pt for pt in countour)
-                points.extend(pt for pt in countour[len(countour):minDistanceIndex:-1])
+                points.extend(pt for pt in contour[minDistanceIndex::-1])
+                points.extend(pt for pt in contour)
+                points.extend(pt for pt in contour[len(contour):minDistanceIndex:-1])
+        
+    # connect remaining contours
+    while np.any(remaining):
+        minDistances[~remaining] = np.inf
+        index = np.argmin(minDistances[:,0])
+        remaining[index] = False
+
+        # add the poitns
+        addedPoints = []
+        # lerp
+        d = contours[index][int(minDistances[index,2]),0] - points[int(minDistances[index, 1])]
+        for i in range(int(np.linalg.norm(d))):
+            addedPoints.append(points[int(minDistances[index, 1])] + d*i/np.linalg.norm(d))
+
+        contour = contours[index][:,0]
+        if np.linalg.norm(contour[0]-contour[-1]) < maxDistance:
+            addedPoints.extend(pt for pt in contour[minDistanceIndex:])
+            addedPoints.extend(pt for pt in contour[:minDistanceIndex])
+        else:
+            addedPoints.extend(pt for pt in contour[minDistanceIndex::-1])
+            addedPoints.extend(pt for pt in contour)
+            addedPoints.extend(pt for pt in contour[len(contour):minDistanceIndex:-1])
+
+        addedPoints.extend(addedPoints[int(np.linalg.norm(d))::-1])
+
+        # update minDistances
+        minDistances[index+1:,1] += len(addedPoints)
+        for pointIndex, point in enumerate(addedPoints):
+            for contourIndex, contour in enumerate(contours):
+                if not remaining[index]:
+                    continue
+                distances = np.linalg.norm(contour[:,0] - point, axis=1)
+                distanceIndex = np.argmin(distances)
+                distance = distances[distanceIndex]
+
+                if distance < minDistances[contourIndex, 0]:
+                    minDistances[contourIndex, 0] = distance
+                    minDistances[contourIndex, 1] = pointIndex + minDistances[index, 1]
+                    minDistances[contourIndex, 2] = distanceIndex
+
+        # insert points
+        for i in range(len(addedPoints)):
+            points.insert(i + int(minDistances[index, 1]), addedPoints[i])
 
     return np.array(points)
 
@@ -118,6 +161,7 @@ y = points[:,1]
 #z = np.array([complex(x, -y) for x,y in points])
 z = x + 1j * y
 
+print(z.size)
 colors = np.arange(len(x))
 plt.scatter(x,y, c=colors, cmap="viridis")
 
@@ -137,8 +181,10 @@ def harmonic_circles(points, num_harmonics=num_harmonics, num_frames=num_frames)
 
     # Print the data in JavaScript array format
     print("const data = [")
-    for row in harmonics:
-        print(f"  [{row[0]:.10g}, {row[1]:.10g}, {row[2]:.10g}],")
+    #for row in harmonics:
+    #    print(f"  [{row[0]:.10g}, {row[1]:.10g}, {row[2]:.10g}],")
+    for point in points[::len(points)//15000]:
+        print(f"  [{point.real}, {point.imag}],")
     print("];")
 
     # Generate the animation
