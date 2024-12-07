@@ -158,6 +158,7 @@ def explore(m, guard):
         elif m[newPos] == "#":
             dir *= 1j
 
+#print(explore(m, guard))
 #print(len(explore(m, guard)))
 
 loops = 0
@@ -169,7 +170,7 @@ for index, pos in enumerate(list(tiles)):
         m[pos] = "#"
         if explore(m, guard) == -1:
             loops += 1
-            print(f"{int(pos.real)}, {int(pos.imag)}")
+            #print(f"{int(pos.real)}, {int(pos.imag)}")
         m[pos] = "."
 
 print(loops)
