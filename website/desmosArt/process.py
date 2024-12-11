@@ -100,6 +100,7 @@ def img_to_svg(filepath, maxDistance = maxDistance):
                 points.extend(pt for pt in contour)
                 points.extend(pt for pt in contour[len(contour):minDistanceIndex:-1])
         
+    #return np.array(points)
     # connect remaining contours
     while np.any(remaining):
         minDistances[~remaining] = np.inf
@@ -181,10 +182,10 @@ def harmonic_circles(points, num_harmonics=num_harmonics, num_frames=num_frames)
 
     # Print the data in JavaScript array format
     print("const data = [")
-    #for row in harmonics:
-    #    print(f"  [{row[0]:.10g}, {row[1]:.10g}, {row[2]:.10g}],")
-    for point in points[::len(points)//15000]:
-        print(f"  [{point.real}, {point.imag}],")
+    for row in harmonics:
+        print(f"  [{row[0]:.10g}, {row[1]:.10g}, {row[2]:.10g}],")
+    #for point in points:#[::len(points)//15000]:
+    #    print(f"  [{point.real}, {point.imag}],")
     print("];")
 
     # Generate the animation
