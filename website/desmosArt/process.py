@@ -143,6 +143,8 @@ def img_to_svg(filepath, maxDistance = maxDistance):
         # insert points
         for i in range(len(addedPoints)):
             points.insert(i + int(minDistances[index, 1]), addedPoints[i])
+        
+        minDistances[index] = np.inf
 
     return np.array(points)
 
