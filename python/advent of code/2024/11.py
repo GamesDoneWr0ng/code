@@ -24,3 +24,4 @@ for i in range(1000):
     #print(i)
 print(time()-start)
 print(sum(data.values()))
+print(len(data))
