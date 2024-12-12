@@ -1,4 +1,5 @@
 import numpy as np
+from time import time
 data = """YYYYYYYYYEJJEEEEEEEEEEEEEEGGGGGGGGGGGGGGGGGGCCCCCCCCCCWWCCLLLKKKKJKKKKKKFFFFFFFBBBBBBBBBBBAEEEEEEEEEEEEPPPPPPPPPOOOOZYYYZZZZZZAAUUUUUUUUUUUU
 YYYYYYYYNEEEEEEEEEEEEEEEEEGGGGGGGGGGGGGGGGGCCCCCCCCCCCCCCCLLLLKKKKKKKKKKKFFFFFBBFBOBBBBBBBBBEEEEEEEEEEEPPPPPPOOOOOOOZZZZZZZZZZZAAUKUUUUUUUUU
 YYYYYYNNNNYEEEEEEEEEEEEEEEGGGGGGGGGGGGGGGGGGCCCCCCCCCCCCCCCCLKKKKKKKKKKKKFFFFFFFFBBBBBBBBBBBBEEEEEEEEPPPPPPPOOOOOOOOOZZZZZZZZZUUUUUUUUUUUUUU
@@ -139,50 +140,55 @@ VVDDDFFFFFFFFFFFFAAAAAAAAAAAXXXXXXIIIIIIIIIIIIIIZZZZZZZZZZZZZPPPPPPPPPPPDGGGGGGG
 VVFFFFFFFFFFFFFFFAAAAAAAAAAAXXXXXXIPIIIIIIIIIIZZZZZZZZZZZZZZZDDDDDDPPPPDDDGGGGGGGGGGGGGGYYYYYJJJJIIIIIIIIIIIVVUUUUUUUUUUUUUUUFFFFFFQFFFFFFFF
 FVFFFFFFFFFFFFFFFAAAAAAAAAAXXXXXXXIIIIIIIIIIIIZZZZZZZZZZZZZZZDDDDDDDPDDDDGGGGGGGGGGGGGGGYYYYJJJJJJJIIIIIIIIIVUUUUUUUUUUUUUUUUFFFFFFFFFFFFFFF
 FFFFFFFFFFFFFFFFFFAAAAATTAXXXXXXIIIIIIIIIIIIIIIZZZZZZZZZZZZZZDDDDDDDDDDDDDGGGGGGGGGGGGGGJJJJJJJJJJJJIIIIIIIIVVVUUUUUUUUUUUUUFFFFFFFFFFFFFFFF"""
-# data = """RRRRIICCFF
-# RRRRIICCCF
-# VVRRRCCFFF
-# VVRCCCJFFF
-# VVVVCJJCFE
-# VVIVCCJJEE
-# VVIIICJJEE
-# MIIIIIJJEE
-# MIIISIJEEE
-# MMMISSJEEE"""
+# data = """AAAAAAAA
+# AACBBDDA
+# AACBBAAA
+# ABBAAAAA
+# ABBADDDA
+# AAAADADA
+# AAAAAAAA"""
+def main():
+    start = time()
+    m = dict()
+    for y, row in enumerate(data.split("\n")):
+        for x, letter in enumerate(row):
+            m[x+y*1j] = letter
 
-m = dict()
-for y, row in enumerate(data.split("\n")):
-    for x, letter in enumerate(row):
-        m[x+y*1j] = letter
-
-sum = 0
-while len(m) != 0:
-    area = {list(m.keys())[0]}
-    perimiter = 0
-    points = [list(m.keys())[0]]
-    while len(points) != 0:
-        for dir in (1+0j, 0+1j, -1+0j, 0-1j):
-            newPos = points[0]+dir
-            if newPos in area:
-                continue
-            if newPos not in m or m[newPos] != m[points[0]]:
-                perimiter += 1
-            else:
-                area.add(newPos)
-                points.append(newPos)
-        points.pop(0)
+    sum = 0
+    while len(m) != 0:
+        area = {list(m.keys())[0]}
+        perimiter = 0
+        points = [list(m.keys())[0]]
+        while len(points) != 0:
+            for dir in (1+0j, 0+1j, -1+0j, 0-1j):
+                newPos = points[0]+dir
+                if newPos in area:
+                    continue
+                if newPos not in m or m[newPos] != m[points[0]]:
+                    perimiter += 1
+                else:
+                    area.add(newPos)
+                    points.append(newPos)
+            points.pop(0)
     
-    #sum += len(area)*perimiter
-    sides = np.zeros((int((max(area, key=lambda x:x.imag)-min(area, key=lambda x:x.imag)).imag)+3, int((max(area, key=lambda x:x.real)-min(area, key=lambda x:x.real)).real)+3), dtype=np.int8)
-    corner = (int(min(area, key=lambda x:x.real).real), int(min(area, key=lambda x:x.imag).imag))
-    for i in area:
-        sides[int(i.imag+1)-corner[1], int(i.real+1)-corner[0]] = 1
-        del m[i]
+        #sum += len(area)*perimiter
+        
+        sides = np.zeros((int((max(area, key=lambda x:x.imag)-min(area, key=lambda x:x.imag)).imag)+3, int((max(area, key=lambda x:x.real)-min(area, key=lambda x:x.real)).real)+3), dtype=np.int8)
+        corner = (int(min(area, key=lambda x:x.real).real), int(min(area, key=lambda x:x.imag).imag))
+        for i in area:
+            sides[int(i.imag+1)-corner[1], int(i.real+1)-corner[0]] = 1
+            del m[i]
 
-    perimiter  = len(np.where((sides[ 1:,:-1]==1) & (sides[ 1:, 1:]==0) & ((sides[:-1,:-1]==0) | (sides[:-1, 1:])))[0]) # ikke over,  ikke høyre
-    perimiter += len(np.where((sides[:-1,:-1]==1) & (sides[:-1, 1:]==0) & ((sides[ 1:,:-1]==0) | (sides[ 1:, 1:])))[0]) # ikke under, ikke høyre
-    perimiter += len(np.where((sides[ 1:, 1:]==1) & (sides[ 1:,:-1]==0) & ((sides[:-1, 1:]==0) | (sides[:-1,:-1])))[0]) # ikke over,  ikke venstre
-    perimiter += len(np.where((sides[:-1, 1:]==1) & (sides[:-1,:-1]==0) & ((sides[ 1:, 1:]==0) | (sides[ 1:,:-1])))[0]) # ikke under, ikke venstre
-    sum += len(area)*perimiter
+        # found out later but this is corner detection
+        perimiter  = len(np.where((sides[ 1:,:-1]==1) & (sides[ 1:, 1:]==0) & ((sides[:-1,:-1]==0) | (sides[:-1, 1:]==1)))[0]) # ikke over,  ikke høyre
+        perimiter += len(np.where((sides[:-1,:-1]==1) & (sides[:-1, 1:]==0) & ((sides[ 1:,:-1]==0) | (sides[ 1:, 1:]==1)))[0]) # ikke under, ikke høyre
+        perimiter += len(np.where((sides[ 1:, 1:]==1) & (sides[ 1:,:-1]==0) & ((sides[:-1, 1:]==0) | (sides[:-1,:-1]==1)))[0]) # ikke over,  ikke venstre
+        perimiter += len(np.where((sides[:-1, 1:]==1) & (sides[:-1,:-1]==0) & ((sides[ 1:, 1:]==0) | (sides[ 1:,:-1]==1)))[0]) # ikke under, ikke venstre
+        sum += len(area)*perimiter
 
-print(sum)
+#    print(sum)
+    return time() - start
+sum = 0
+for i in range(100):
+    sum += main()
+print(sum/100)
