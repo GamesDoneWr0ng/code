@@ -81,7 +81,7 @@ def img_to_svg(filepath, maxDistance = maxDistance):
 
             if distance < minDistances[index, 0]:
                 minDistances[index, 0] = distance
-                minDistances[index, 1] = pointIndex
+                minDistances[index, 1] = len(points)
                 minDistances[index, 2] = distanceIndex
 
             if distance < minDistance:
@@ -107,6 +107,17 @@ def img_to_svg(filepath, maxDistance = maxDistance):
         index = np.argmin(minDistances[:,0])
         remaining[index] = False
 
+        if True:
+            fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6,6))
+            ax1.imshow(cv2.drawContours(np.zeros(data.shape), contours, 0, 255, 1))
+            ax2.imshow(cv2.drawContours(np.zeros(data.shape), contours, index, 255, 1))
+            ax1.scatter(points[int(minDistances[index][1])][0], points[int(minDistances[index][1])][1])
+            ax2.scatter(contours[index][:,0][int(minDistances[index][2])][0], contours[index][:,0][int(minDistances[index][2])][1])
+            ax2.scatter(points[int(minDistances[index][1])][0], points[int(minDistances[index][1])][1])
+            ax1.scatter(contours[index][:,0][int(minDistances[index][2])][0], contours[index][:,0][int(minDistances[index][2])][1])
+            fig.show()
+            plt.show()
+        
         # add the poitns
         addedPoints = []
         # lerp
