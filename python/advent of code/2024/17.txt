@@ -1,0 +1,8 @@
+bst A
+bxl 3
+cdv B
+adv 3
+bxl 5
+bxc
+out B
+jnz 0
