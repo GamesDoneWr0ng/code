@@ -3431,9 +3431,9 @@ opt = Optimize()
 vars = {node: Bool(node) for node in nodes}
 
 # Add connectivity constraints
-for node1 in nodes:
-    for node2 in nodes:
-        if node1 != node2 and node2 not in connections.get(node1, []):
+for i, node1 in enumerate(nodes):
+    for node2 in nodes[i+1:]:
+        if node2 not in connections.get(node1, []):
             opt.add(Or(Not(vars[node1]), Not(vars[node2])))
 
 # Objective: Maximize the number of selected nodes
