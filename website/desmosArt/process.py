@@ -81,7 +81,7 @@ def img_to_svg(filepath, maxDistance = maxDistance):
 
             if distance < minDistances[index, 0]:
                 minDistances[index, 0] = distance
-                minDistances[index, 1] = pointIndex
+                minDistances[index, 1] = len(points)
                 minDistances[index, 2] = distanceIndex
 
             if distance < minDistance:
@@ -100,12 +100,24 @@ def img_to_svg(filepath, maxDistance = maxDistance):
                 points.extend(pt for pt in contour)
                 points.extend(pt for pt in contour[len(contour):minDistanceIndex:-1])
         
+    #return np.array(points)
     # connect remaining contours
     while np.any(remaining):
         minDistances[~remaining] = np.inf
         index = np.argmin(minDistances[:,0])
         remaining[index] = False
 
+        if True:
+            fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6,6))
+            ax1.imshow(cv2.drawContours(np.zeros(data.shape), contours, 0, 255, 1))
+            ax2.imshow(cv2.drawContours(np.zeros(data.shape), contours, index, 255, 1))
+            ax1.scatter(points[int(minDistances[index][1])][0], points[int(minDistances[index][1])][1])
+            ax2.scatter(contours[index][:,0][int(minDistances[index][2])][0], contours[index][:,0][int(minDistances[index][2])][1])
+            ax2.scatter(points[int(minDistances[index][1])][0], points[int(minDistances[index][1])][1])
+            ax1.scatter(contours[index][:,0][int(minDistances[index][2])][0], contours[index][:,0][int(minDistances[index][2])][1])
+            fig.show()
+            plt.show()
+        
         # add the poitns
         addedPoints = []
         # lerp
@@ -142,6 +154,8 @@ def img_to_svg(filepath, maxDistance = maxDistance):
         # insert points
         for i in range(len(addedPoints)):
             points.insert(i + int(minDistances[index, 1]), addedPoints[i])
+        
+        minDistances[index] = np.inf
 
     return np.array(points)
 
@@ -181,10 +195,10 @@ def harmonic_circles(points, num_harmonics=num_harmonics, num_frames=num_frames)
 
     # Print the data in JavaScript array format
     print("const data = [")
-    #for row in harmonics:
-    #    print(f"  [{row[0]:.10g}, {row[1]:.10g}, {row[2]:.10g}],")
-    for point in points[::len(points)//15000]:
-        print(f"  [{point.real}, {point.imag}],")
+    for row in harmonics:
+        print(f"  [{row[0]:.10g}, {row[1]:.10g}, {row[2]:.10g}],")
+    #for point in points:#[::len(points)//15000]:
+    #    print(f"  [{point.real}, {point.imag}],")
     print("];")
 
     # Generate the animation

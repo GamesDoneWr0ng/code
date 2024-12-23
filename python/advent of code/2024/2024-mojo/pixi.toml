@@ -1,0 +1,11 @@
+[project]
+authors = ["GamesDoneWr0ng <ask@flaten.no>"]
+channels = ["conda-forge", "https://conda.modular.com/max"]
+description = "Add a short description here"
+name = "2024-mojo"
+platforms = ["osx-arm64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
