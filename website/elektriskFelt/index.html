@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elektiske felt</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Elektrisk felt styrke</h1>
+    <div id="main">
+        <div>
+            <input type="number" name="x" id="c_x" step="1" min="0" max="700" value="100">
+            <input type="number" name="y" id="c_y" step="1" min="0" max="700" value="100">
+            <input type="number" name="q" id="c_q">
+            <input type="button" value="create" id="charge_btn">
+            <ul id="charges" class="unselectable"></ul>
+        </div>
+        <div>
+            <input type="number" name="x" id="q_x" step="1" min="0" max="700" value="100">
+            <input type="number" name="y" id="q_y" step="1" min="0" max="700" value="100">
+            <input type="button" value="create" id="query_btn">
+            <ul id="queries" class="unselectable"></ul>
+        </div>
+        
+        <div id="render">
+            <canvas id="canvas", width="600", height="600"></canvas>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
