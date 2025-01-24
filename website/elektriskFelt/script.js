@@ -150,4 +150,4 @@ function getForce(x, y) {
     return {x:f_x, y:f_y};
 }
 
-draw()
+draw();
