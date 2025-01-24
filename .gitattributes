@@ -1,3 +1,14 @@
-* linguist-vendored=false
-.conda linguist-vendored=true
-.venv linguist-vendored=true 
+* linguist-vendored
+*.py linguist-vendored=false
+*.ipynb linguist-vendored=false
+*.scpt linguist-vendored=false 
+*.s linguist-vendored=false 
+*.cpp linguist-vendored=false 
+*.c linguist-vendored=false 
+*.lua linguist-vendored=false 
+*.mojo linguist-vendored=false 
+*.🔥 linguist-vendored=false 
+*.js linguist-vendored=false
+*.htm linguist-vendored=false 
+*.html linguist-vendored=false 
+*.css linguist-vendored=false 
