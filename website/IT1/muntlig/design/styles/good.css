@@ -1,0 +1,29 @@
+body {
+    background-color: #dcfddc;
+}
+.hoved {
+    margin: 5em auto;
+    width: 70%;
+    background-color: #7dd77d;
+    padding: 1em;
+}
+.dyr {
+    align-items: center;
+    justify-items: center;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1em;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+@media (max-width: 650px) {
+    .dyr {
+        grid-template-columns: 1fr;
+    }
+}
+.dyr_konteiner {
+    padding: 20px;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+}

@@ -40,9 +40,12 @@ main = Main()
 
 obs = Tensor(main.pong.reset()[0])
 main.running = True
+t = 0
 while main.running:
     inputs = main.inputHandler()
-    opponent = main.getAi(obs)
+    if t == 0:
+        opponent = main.getAi(obs)
+    t = (t+1) % 5
     #opponent = int(main.pong.ballPos[1] > main.pong.aiPaddle)
 
     obs = Tensor(main.pong.step(opponent, inputs)[0])

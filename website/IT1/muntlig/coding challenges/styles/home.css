@@ -1,0 +1,48 @@
+body {
+    background-color:#1A1A1A;
+}
+.main {
+    background-color: #282828;
+    margin: 2em auto;
+    padding: 1em;
+    width: 70%;
+    min-width: 350px;
+    box-shadow: 0px 0px 20px 10px aquamarine;
+    border: 5px outset black;
+}
+p, h1, h2, h3 {
+    color: white;
+}
+h2 {
+    width: 100%;
+}
+#dificulties {
+    margin: 1em auto;
+    padding: 2rem;
+}
+.dificulty_container {
+    padding: 20px;
+    border: 3px outset aqua;
+    box-shadow: 0px 0px 10px aqua;
+    margin: 1em;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    gap: 1em;
+}
+.dificulty_container > a {
+    flex: 1 1 25%;
+    text-decoration: none;
+}
+.dificulty_container > a:hover {
+    transform: scale(1.02);
+}
+.problem {
+    max-width: 100%;
+    min-width: 200px;
+    padding: 20px;
+    border: 3px outset blue;
+    box-shadow: 0px 0px 10px blue;
+    background-color: #303030;
+}
