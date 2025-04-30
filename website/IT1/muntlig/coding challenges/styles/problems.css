@@ -87,13 +87,10 @@ html, body {
     padding-right: 1rem;
     width: calc(100% - 2rem);
     overflow-y: auto;
-    display: flex;
-    flex: 1 1 0%;
-    flex-direction: column;
-    gap: 1rem;
 }
 h1, p {
     margin: 0px;
+    margin-bottom: 1rem;
 }
 h1 {
     font-size: 24px;
@@ -111,6 +108,7 @@ code {
 pre {
     border-color: #ffffff24;
     border-left-width: 2px;
+    border-left-style: solid;
     color: #fff9;
     font-size: 0.875rem;
     line-height: 1.25rem;
@@ -120,11 +118,15 @@ pre {
     padding-left: 1rem;
     white-space: pre-wrap;
 }
+pre> {
+    text-size-adjust: 100%;
+}
 strong {
     color: white;
 }
 ul {
     margin: 0px 1rem 1rem 1rem;
+    padding: 0px;
 }
 li {
     margin-bottom: 1rem;
@@ -155,4 +157,61 @@ li {
     background-color: #262626;
     color: white;
     cursor: pointer;
+}
+#terminal {
+    background: #1e1e1e;
+    color: #00ff00;
+    font-family: monospace;
+    padding: 10px;
+    height: 100%;
+    overflow: scroll;
+    white-space: nowrap;
+    cursor: text;
+}
+.prompt {
+    color: #00ffff;
+}
+input {
+    background: transparent;
+    border: none;
+    color: #00ff00;
+    font-family: monospace;
+    width: 90%;
+    outline: none;
+}
+.relative {
+    position: relative;
+    height: 48px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+#home_btn {
+    width: 0px;
+    overflow: visible;
+    user-select: none;
+}
+#home_btn > a {
+    text-decoration: none;
+    color: aquamarine;
+}
+a > div {
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+    position: absolute;
+    left: 1em;
+}
+.home_btn_content {
+    margin: 0px;
+    padding: 0px;
+}
+#problem_name, #home_btn {
+    line-height: 32px;
+    height: 32px;
+    padding: 0px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    margin: 0px;
 }
