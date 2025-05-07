@@ -10,3 +10,9 @@ version = "0.1.0"
 
 [dependencies]
 max = ">=25.2.0,<26"
+astroquery = ">=0.4.10,<0.5"
+matplotlib = ">=3.10.1,<4"
+
+[pypi-dependencies]
+tensor = ">=0.3.6, <0.4"
+astroquery = "*"
