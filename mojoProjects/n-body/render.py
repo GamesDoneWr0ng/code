@@ -1,31 +1,24 @@
 def render(data):
-    trail_length=50
-    """
-    Animate celestial bodies in 3D space
-    
-    Parameters:
-    data : list of 3 lists [[x_coords], [y_coords], [z_coords]]
-        Each coordinate list contains arrays for individual bodies
-    trail_length : number of previous positions to display
-    **kwargs : visual parameters (colors, labels, sizes)
-    """
+    trail_length=150
+    print("Rendering animation...")
     # Validate input
     assert len(data) == 3, "Data must contain [x, y, z] components"
     assert len(data[0]) == len(data[1]) == len(data[2]), "Coordinate lists must have equal numbers of bodies"
 
     from matplotlib import pyplot as plt
     from matplotlib.animation import FuncAnimation
+    import numpy as np
     
     n_planets = len(data[0])
     n_frames = len(data[0][0])
     
     # Set default visual parameters
-    colors = ['gold', 'blue', 'black', 'gray', 'orange']
-    labels = [f'Body {i+1}' for i in range(n_planets)]
-    sizes = [12, 8, 6, 6, 6][:n_planets]
+    colors = ['gold', 'blue', 'black',    'gray',   'red', "orange",   'brown',  'yellow', 'green', 'blue'][:n_planets]
+    labels = ["Sun", "Earth",  "Moon", "Mercury", "Venus",   "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"][:n_planets]
+    sizes = [12, 6, 4, 4, 4, 6, 8, 7, 6, 6][:n_planets]
     
     # Setup figure
-    fig = plt.figure(figsize=(10, 8))
+    fig = plt.figure(figsize=(8, 6))
     ax = fig.add_subplot(111, projection='3d')
     
     # Auto-scale axes based on data extremes
@@ -39,7 +32,7 @@ def render(data):
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
     ax.grid(True)
-    ax.set_title('3D Celestial Animation')
+    ax.set_title('n-body simulation')
 
     # Create plot objects for each body
     lines = []
@@ -86,25 +79,27 @@ def render(data):
     
     plt.show()
 
-import numpy as np
-n_frames = 200
-t = np.linspace(0, 4*np.pi, n_frames)
+"""if __name__ == "__main__":
+    
+    import numpy as np
+    n_frames = 200
+    t = np.linspace(0, 4*np.pi, n_frames)
 
-# Sun (stationary at origin)
-sun_x = np.zeros(n_frames)
-sun_y = np.zeros(n_frames)
-sun_z = np.zeros(n_frames)
+    # Sun (stationary at origin)
+    sun_x = np.zeros(n_frames)
+    sun_y = np.zeros(n_frames)
+    sun_z = np.zeros(n_frames)
 
-# Earth's orbit (circular in xy-plane, z=0)
-earth_radius = 1.0
-earth_x = earth_radius * np.cos(t)
-earth_y = earth_radius * np.sin(t)
-earth_z = np.zeros(n_frames)
+    # Earth's orbit (circular in xy-plane, z=0)
+    earth_radius = 1.0
+    earth_x = earth_radius * np.cos(t)
+    earth_y = earth_radius * np.sin(t)
+    earth_z = np.zeros(n_frames)
 
-# Moon's orbit (3D example: elliptical orbit with z-variation)
-moon_radius = 0.2
-moon_x = earth_x + moon_radius * np.cos(12 * t)
-moon_y = earth_y + moon_radius * np.sin(12 * t)
-moon_z = 0.1 * np.sin(8 * t)  # Add some vertical motion
+    # Moon's orbit (3D example: elliptical orbit with z-variation)
+    moon_radius = 0.2
+    moon_x = earth_x + moon_radius * np.cos(12 * t)
+    moon_y = earth_y + moon_radius * np.sin(12 * t)
+    moon_z = 0.1 * np.sin(8 * t)  # Add some vertical motion
 
-render(((sun_x, earth_x, moon_x), (sun_y, earth_y, moon_y), (sun_z, earth_z, moon_z)))
+    render(((sun_x, earth_x, moon_x), (sun_y, earth_y, moon_y), (sun_z, earth_z, moon_z)))"""

@@ -3,7 +3,7 @@ const codeEl = document.getElementById("code");
 const consoleEl = document.getElementById("console");
 const dividerDescCodeEL = document.getElementById("divider_desc_code");
 const dividerCodeConsEl = document.getElementById("divider_code_cons");
-const containerEl = document.getElementsByClassName("flexlayout")[0];
+const containerEl = descriptionEl.parentElement;
 
 //#region style
 descriptionEl.style["left"] = "0px";

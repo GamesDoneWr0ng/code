@@ -1,26 +1,10 @@
 from time import perf_counter
 from python import Python, PythonObject
-
-alias Float = Float64
-alias vec3 = SIMD[DType.float64, 4]
-
-alias PI: Float = 3.14159265358979323846
-alias SOLAR_MASS: Float = 4 * PI * PI
-alias DAYS_PER_YEAR: Float = 365.2422
-
-@value
-struct Planet:
-    var position: vec3
-    var velocity: vec3
-    var mass: Float
-
-    fn __init__(out self,
-                read position: vec3,
-                read velocity: vec3,
-                read mass: Float):
-        self.position = position
-        self.velocity = velocity
-        self.mass = mass
+from Lagrange import lagrange
+from tensor import Tensor, TensorShape
+from utils.index import Index
+from math import log10
+from common import *
 
 fn init_planets(read date: String) -> List[Planet]:
     try:
@@ -54,47 +38,47 @@ fn init_planets(read date: String) -> List[Planet]:
                 vec3(Float(Float64(moon["vx"])), Float(Float64(moon["vy"])), Float(Float64(moon["vz"])), 0)*DAYS_PER_YEAR,
                 3.69e-8*SOLAR_MASS,
             ),
-            Planet(
-                vec3(Float(Float64(mercury["x"])),  Float(Float64(mercury["y"])),  Float(Float64(mercury["z"])),  0),
-                vec3(Float(Float64(mercury["vx"])), Float(Float64(mercury["vy"])), Float(Float64(mercury["vz"])), 0)*DAYS_PER_YEAR,
-                1.652e-7*SOLAR_MASS,
-            ),
-            Planet(
-                vec3(Float(Float64(venus["x"])),  Float(Float64(venus["y"])),  Float(Float64(venus["z"])),  0),
-                vec3(Float(Float64(venus["vx"])), Float(Float64(venus["vy"])), Float(Float64(venus["vz"])), 0)*DAYS_PER_YEAR,
-                2.447e-6*SOLAR_MASS,
-            ),
-            Planet(
-                vec3(Float(Float64(mars["x"])),  Float(Float64(mars["y"])),  Float(Float64(mars["z"])),  0),
-                vec3(Float(Float64(mars["vx"])), Float(Float64(mars["vy"])), Float(Float64(mars["vz"])), 0)*DAYS_PER_YEAR,
-                3.213e-7*SOLAR_MASS,
-            ),
-            Planet(
-                vec3(Float(Float64(jupiter["x"])),  Float(Float64(jupiter["y"])),  Float(Float64(jupiter["z"])),  0),
-                vec3(Float(Float64(jupiter["vx"])), Float(Float64(jupiter["vy"])), Float(Float64(jupiter["vz"])), 0)*DAYS_PER_YEAR,
-                9.54588e-4 * SOLAR_MASS,
-            ),
-            Planet(
-                vec3(Float(Float64(saturn["x"])),  Float(Float64(saturn["y"])),  Float(Float64(saturn["z"])),  0),
-                vec3(Float(Float64(saturn["vx"])), Float(Float64(saturn["vy"])), Float(Float64(saturn["vz"])), 0)*DAYS_PER_YEAR,
-                2.857e-4 * SOLAR_MASS,
-            ),
-            Planet(
-                vec3(Float(Float64(uranus["x"])),  Float(Float64(uranus["y"])),  Float(Float64(uranus["z"])),  0),
-                vec3(Float(Float64(uranus["vx"])), Float(Float64(uranus["vy"])), Float(Float64(uranus["vz"])), 0)*DAYS_PER_YEAR,
-                4.365e-5 * SOLAR_MASS,
-            ),
-            Planet(
-                vec3(Float(Float64(neptune["x"])),  Float(Float64(neptune["y"])),  Float(Float64(neptune["z"])),  0),
-                vec3(Float(Float64(neptune["vx"])), Float(Float64(neptune["vy"])), Float(Float64(neptune["vz"])), 0)*DAYS_PER_YEAR,
-                5.149e-5 * SOLAR_MASS,
-            )
+            # Planet(
+            #     vec3(Float(Float64(mercury["x"])),  Float(Float64(mercury["y"])),  Float(Float64(mercury["z"])),  0),
+            #     vec3(Float(Float64(mercury["vx"])), Float(Float64(mercury["vy"])), Float(Float64(mercury["vz"])), 0)*DAYS_PER_YEAR,
+            #     1.652e-7*SOLAR_MASS,
+            # ),
+            # Planet(
+            #     vec3(Float(Float64(venus["x"])),  Float(Float64(venus["y"])),  Float(Float64(venus["z"])),  0),
+            #     vec3(Float(Float64(venus["vx"])), Float(Float64(venus["vy"])), Float(Float64(venus["vz"])), 0)*DAYS_PER_YEAR,
+            #     2.447e-6*SOLAR_MASS,
+            # ),
+            # Planet(
+            #     vec3(Float(Float64(mars["x"])),  Float(Float64(mars["y"])),  Float(Float64(mars["z"])),  0),
+            #     vec3(Float(Float64(mars["vx"])), Float(Float64(mars["vy"])), Float(Float64(mars["vz"])), 0)*DAYS_PER_YEAR,
+            #     3.213e-7*SOLAR_MASS,
+            # ),
+            # Planet(
+            #     vec3(Float(Float64(jupiter["x"])),  Float(Float64(jupiter["y"])),  Float(Float64(jupiter["z"])),  0),
+            #     vec3(Float(Float64(jupiter["vx"])), Float(Float64(jupiter["vy"])), Float(Float64(jupiter["vz"])), 0)*DAYS_PER_YEAR,
+            #     9.54588e-4 * SOLAR_MASS,
+            # ),
+            # Planet(
+            #     vec3(Float(Float64(saturn["x"])),  Float(Float64(saturn["y"])),  Float(Float64(saturn["z"])),  0),
+            #     vec3(Float(Float64(saturn["vx"])), Float(Float64(saturn["vy"])), Float(Float64(saturn["vz"])), 0)*DAYS_PER_YEAR,
+            #     2.857e-4 * SOLAR_MASS,
+            # ),
+            # Planet(
+            #     vec3(Float(Float64(uranus["x"])),  Float(Float64(uranus["y"])),  Float(Float64(uranus["z"])),  0),
+            #     vec3(Float(Float64(uranus["vx"])), Float(Float64(uranus["vy"])), Float(Float64(uranus["vz"])), 0)*DAYS_PER_YEAR,
+            #     4.365e-5 * SOLAR_MASS,
+            # ),
+            # Planet(
+            #     vec3(Float(Float64(neptune["x"])),  Float(Float64(neptune["y"])),  Float(Float64(neptune["z"])),  0),
+            #     vec3(Float(Float64(neptune["vx"])), Float(Float64(neptune["vy"])), Float(Float64(neptune["vz"])), 0)*DAYS_PER_YEAR,
+            #     5.149e-5 * SOLAR_MASS,
+            # )
         )
     except:
         print("Error initializing planets. Ensure astroquery and astropy are installed.")
         return List[Planet]()
 
-alias nBodies: Int = 10
+alias nBodies: Int = 3
 
 fn f(read y: List[Planet]) -> List[Tuple[vec3, vec3]]:
     var result: List[Tuple[vec3, vec3]] = List[Tuple[vec3, vec3]]()
@@ -226,91 +210,57 @@ fn main():
     #     print("Expected Planet ", i, ": ", expected[i].position, expected[i].velocity)
     #     print("Difference: ", system[i].position - expected[i].position, system[i].velocity - expected[i].velocity)
     #     print()
-    
-    var py_module = """
-def render(data):
-    trail_length=150
-    print("Rendering animation...")
-    # Validate input
-    assert len(data) == 3, "Data must contain [x, y, z] components"
-    assert len(data[0]) == len(data[1]) == len(data[2]), "Coordinate lists must have equal numbers of bodies"
 
-    from matplotlib import pyplot as plt
-    from matplotlib.animation import FuncAnimation
-    import numpy as np
-    
-    n_planets = len(data[0])
-    n_frames = len(data[0][0])
-    
-    # Set default visual parameters
-    colors = ['gold', 'blue', 'black',    'gray',   'red', "orange",   'brown',  'yellow', 'green', 'blue'][:n_planets]
-    labels = ["Sun", "Earth",  "Moon", "Mercury", "Venus",   "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"][:n_planets]
-    sizes = [12, 6, 4, 4, 4, 6, 8, 7, 6, 6][:n_planets]
-    
-    # Setup figure
-    fig = plt.figure(figsize=(8, 6))
-    ax = fig.add_subplot(111, projection='3d')
-    
-    # Auto-scale axes based on data extremes
-    all_coords = np.concatenate([np.array(data[i]) for i in range(3)])
-    max_extent = np.max(np.abs(all_coords)) * 1.2
-    ax.set_xlim(-max_extent, max_extent)
-    ax.set_ylim(-max_extent, max_extent)
-    ax.set_zlim(-max_extent, max_extent)
-    
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-    ax.grid(True)
-    ax.set_title('n-body simulation')
+    # try:
+    #     with open("render.py", "r") as f:
+    #         var py_module = f.read()
+    #         var pyRender = Python.evaluate(py_module, file=True, name="pyRender")
+    #         pyRender.render(prepareLog(log))
+    # except:
+    #     print("Error rendering.")
+    #     return
 
-    # Create plot objects for each body
-    lines = []
-    for i in range(n_planets):
-        line, = ax.plot([], [], [], 
-                       marker='o',
-                       markersize=sizes[i],
-                       color=colors[i],
-                       lw=1,
-                       markevery=[-1],
-                       label=labels[i])
-        lines.append(line)
-    ax.legend()
-
-    # Animation functions
-    def init():
-        for line in lines:
-            line.set_data([], [])
-            line.set_3d_properties([])
-        return lines
-
-    def update(frame):
-        start = max(0, frame - trail_length)
-        
-        for i in range(n_planets):
-            x = data[0][i][start:frame+1]
-            y = data[1][i][start:frame+1]
-            z = data[2][i][start:frame+1]
-            
-            lines[i].set_data(x, y)
-            lines[i].set_3d_properties(z)
-            
-        return lines
-
-    # Create and show animation
-    ani = FuncAnimation(
-        fig,
-        update,
-        frames=n_frames,
-        init_func=init,
-        blit=False,
-        interval=20
-    )
-    
-    plt.show()
-    """
     try:
-        var pyRender = Python.evaluate(py_module, file=True, name="pyRender")
-        pyRender.render(prepareLog(log))
+        var plt = Python.import_module("matplotlib.pyplot")
+        var np = Python.import_module("numpy")
+        
+        var divisions: List[Int] = List[Int](1000, 1000, 1)
+        var bounds: List[vec3] = List[vec3](vec3(-1.5, -1.5, 0, 0), vec3(1.5, 1.5, 0, 0))
+        var step: vec3 = (bounds[1] - bounds[0]) / vec3(divisions[0], divisions[1], divisions[2], 0)
+        var mag: Tensor[DType.float64] = lagrange(system, bounds, divisions)
+        
+        var fig = plt.figure()
+        var ax = fig.add_subplot(111, projection='3d')
+        
+        # render the planets
+        for i in range(nBodies):
+            var body: Planet = system[i]
+            ax.scatter(body.position[0], body.position[1], body.position[2], label=names[i])
+        
+        if bounds[0][2] == bounds[1][2]:
+            var grid = np.meshgrid(
+                np.linspace(bounds[0][0], bounds[1][0], divisions[0]),
+                np.linspace(bounds[0][1], bounds[1][1], divisions[1])
+            )
+            var x = grid[0]
+            var y = grid[1]
+            var z = np.zeros_like(x)
+            for i in range(divisions[0]):
+                for j in range(divisions[1]):
+                    z[i][j] = -log10(mag[Index(i,j,0)])
+            z[z <= -1000] = Python.none()
+            ax.plot_surface(x, y, z, alpha=0.5, cmap='viridis')
+
+        ax.legend()
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('Z')
+        ax.set_title('N-body simulation')
+        ax.set_xlim(bounds[0][0], bounds[1][0])
+        ax.set_ylim(bounds[0][1], bounds[1][1])
+        ax.set_zlim(-5, 0)
+        plt.show()
+
     except:
-        print("Error rendering.")
+        print("Error rendering lagrange.")
+        return
