@@ -16,13 +16,9 @@ fn lagrange(read bodies: List[Planet],
 
                 for body in bodies:
                     var dx: vec3 = pos - body[].position
-                    #result[Index(i,j,k)] += body[].mass * (dx*dx).reduce_add() ** (-0.5)
-                    vec -= body[].mass * dx * (dx*dx).reduce_add() ** -1.5 # M/r^2
-                    #print("pos: ", pos, " dx: ", dx, " mass: ", body[].mass, " result: ", result[Index(i,j,k)])
-                # sentripetal force
-                #result[Index(i,j,k)] -= 4 * PI * PI * (pos*pos).reduce_add() ** 0.5 / (DAYS_PER_YEAR * DAYS_PER_YEAR)
-                #vec -= 4 * PI * PI * pos / (pos*pos).reduce_add() / (DAYS_PER_YEAR * DAYS_PER_YEAR)
-                print(vec)
+                    vec -= body[].mass * (dx * ((dx*dx).reduce_add() ** -1.5)) # M/r^2
+                # centripetal force
+                vec += 4 * PI * PI * pos / ((pos*pos).reduce_add() ** 0.5) #4pi^2/T^2
                 
-                result[Index(i,j,k)] = vec.reduce_add() ** 0.5
+                result[Index(i,j,k)] = (vec*vec).reduce_add() ** 0.5
     return result

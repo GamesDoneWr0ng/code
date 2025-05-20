@@ -204,12 +204,12 @@ fn main():
     #print("Final energy: ", final_energy)
     #print("Energy difference: ", final_energy - initial_energy)
 
-    var expected: List[Planet] = init_planets("2023-05-05 00:00:00")
-    for i in range(nBodies):
-        print("Planet ", i, ": ", system[i].position, system[i].velocity)
-        print("Expected Planet ", i, ": ", expected[i].position, expected[i].velocity)
-        print("Difference: ", system[i].position - expected[i].position, system[i].velocity - expected[i].velocity)
-        print()
+    #var expected: List[Planet] = init_planets("2023-05-05 00:00:00")
+    #for i in range(nBodies):
+    #    print("Planet ", i, ": ", system[i].position, system[i].velocity)
+    #    print("Expected Planet ", i, ": ", expected[i].position, expected[i].velocity)
+    #    print("Difference: ", system[i].position - expected[i].position, system[i].velocity - expected[i].velocity)
+    #    print()
 
     # try:
     #     with open("render.py", "r") as f:
@@ -224,18 +224,13 @@ fn main():
         var plt = Python.import_module("matplotlib.pyplot")
         var np = Python.import_module("numpy")
         
-        var divisions: List[Int] = List[Int](100, 100, 1)
+        var divisions: List[Int] = List[Int](1000, 1000, 1)
         var bounds: List[vec3] = List[vec3](vec3(-1.5, -1.5, 0, 0), vec3(1.5, 1.5, 0, 0))
         #var step: vec3 = (bounds[1] - bounds[0]) / vec3(divisions[0], divisions[1], divisions[2], 0)
         var mag: Tensor[DType.float64] = lagrange(system, bounds, divisions)
         
         var fig = plt.figure()
         var ax = fig.add_subplot(111, projection='3d')
-        
-        # render the planets
-        for i in range(nBodies):
-            var body: Planet = system[i]
-            ax.scatter(body.position[0], body.position[1], body.position[2], label=names[i])
         
         if bounds[0][2] == bounds[1][2]:
             var grid = np.meshgrid(
@@ -247,18 +242,24 @@ fn main():
             var z = np.zeros_like(x)
             for i in range(divisions[0]):
                 for j in range(divisions[1]):
-                    z[i][j] = -log10(mag[Index(i,j,0)])
-            #z[z <= -5] = Python.none()
-            ax.plot_surface(x, y, z, alpha=1, cmap='viridis')
+                    #z[i,j] = -log10(mag[Index(i,j,0)])
+                    z[i,j] = -mag[Index(i,j,0)]
+            z[z <= -300] = Python.none()
+            ax.plot_surface(x, y, z, alpha=1, color='g')
+        
+        # render the planets
+        for i in range(nBodies):
+            var body: Planet = system[i]
+            ax.scatter(body.position[0], body.position[1], body.position[2], label=names[i])
 
         ax.legend()
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         ax.set_zlabel('Z')
         ax.set_title('N-body simulation')
-        ax.set_xlim(bounds[0][0], bounds[1][0])
-        ax.set_ylim(bounds[0][1], bounds[1][1])
-        ax.set_zlim(-5, 0)
+        #ax.set_xlim(bounds[0][0], bounds[1][0])
+        #ax.set_ylim(bounds[0][1], bounds[1][1])
+        #ax.set_zlim(-5, 0)
         plt.show()
 
     except:

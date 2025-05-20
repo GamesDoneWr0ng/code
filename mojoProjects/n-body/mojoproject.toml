@@ -3,7 +3,7 @@ authors = ["GamesDoneWr0ng <ask@flaten.no>"]
 channels = ["conda-forge", "https://conda.modular.com/max"]
 description = "Add a short description here"
 name = "n-body"
-platforms = ["osx-arm64"]
+platforms = ["osx-arm64", "linux-64"]
 version = "0.1.0"
 
 [tasks]
