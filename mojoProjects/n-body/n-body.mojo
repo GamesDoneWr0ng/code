@@ -171,8 +171,8 @@ fn prepareLog(read log: List[List[vec3]]) raises -> PythonObject:
     return res
 
 fn main():
-    var years: Int = 165
-    var n: Int = 365*years
+    var years: Int = 10
+    var n: Int = 365*years*24
     var dt: Float = years / n # in years
 
     var system: List[Planet] = init_planets("2022-05-05 00:00:00")
@@ -204,12 +204,12 @@ fn main():
     #print("Final energy: ", final_energy)
     #print("Energy difference: ", final_energy - initial_energy)
 
-    # var expected: List[Planet] = init_planets("2023-05-05 00:00:00")
-    # for i in range(nBodies):
-    #     print("Planet ", i, ": ", system[i].position, system[i].velocity)
-    #     print("Expected Planet ", i, ": ", expected[i].position, expected[i].velocity)
-    #     print("Difference: ", system[i].position - expected[i].position, system[i].velocity - expected[i].velocity)
-    #     print()
+    var expected: List[Planet] = init_planets("2023-05-05 00:00:00")
+    for i in range(nBodies):
+        print("Planet ", i, ": ", system[i].position, system[i].velocity)
+        print("Expected Planet ", i, ": ", expected[i].position, expected[i].velocity)
+        print("Difference: ", system[i].position - expected[i].position, system[i].velocity - expected[i].velocity)
+        print()
 
     # try:
     #     with open("render.py", "r") as f:
@@ -224,9 +224,9 @@ fn main():
         var plt = Python.import_module("matplotlib.pyplot")
         var np = Python.import_module("numpy")
         
-        var divisions: List[Int] = List[Int](1000, 1000, 1)
+        var divisions: List[Int] = List[Int](100, 100, 1)
         var bounds: List[vec3] = List[vec3](vec3(-1.5, -1.5, 0, 0), vec3(1.5, 1.5, 0, 0))
-        var step: vec3 = (bounds[1] - bounds[0]) / vec3(divisions[0], divisions[1], divisions[2], 0)
+        #var step: vec3 = (bounds[1] - bounds[0]) / vec3(divisions[0], divisions[1], divisions[2], 0)
         var mag: Tensor[DType.float64] = lagrange(system, bounds, divisions)
         
         var fig = plt.figure()
@@ -248,8 +248,8 @@ fn main():
             for i in range(divisions[0]):
                 for j in range(divisions[1]):
                     z[i][j] = -log10(mag[Index(i,j,0)])
-            z[z <= -1000] = Python.none()
-            ax.plot_surface(x, y, z, alpha=0.5, cmap='viridis')
+            #z[z <= -5] = Python.none()
+            ax.plot_surface(x, y, z, alpha=1, cmap='viridis')
 
         ax.legend()
         ax.set_xlabel('X')
