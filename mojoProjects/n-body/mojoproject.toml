@@ -12,6 +12,7 @@ version = "0.1.0"
 max = "~=25.3"
 astroquery = ">=0.4.10,<0.5"
 matplotlib = ">=3.10.1,<4"
+plotly = ">=6.1.1,<7"
 
 [pypi-dependencies]
 tensor = ">=0.3.6, <0.4"
