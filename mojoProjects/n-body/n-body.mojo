@@ -224,8 +224,9 @@ fn main():
         var go = Python.import_module("plotly.graph_objects")
         var np = Python.import_module("numpy")
         
-        var divisions: List[Int] = List[Int](1000, 1000, 1)
-        var bounds: List[vec3] = List[vec3](vec3(-1.5, -1.5, 0, 0), vec3(1.5, 1.5, 0, 0))
+        var divisions: List[Int] = List[Int](2000, 2000, 1)
+        var dim: Float64 = 1.5
+        var bounds: List[vec3] = List[vec3](vec3(-dim, -dim, 0, 0), vec3(dim, dim, 0, 0))
         #var step: vec3 = (bounds[1] - bounds[0]) / vec3(divisions[0], divisions[1], divisions[2], 0)
         var start: Float64 = perf_counter()
         var mag: Tensor[DType.float64] = lagrange(system, bounds, divisions)
@@ -242,18 +243,21 @@ fn main():
             var y = grid[1]
             var z = np.zeros_like(x)
             for i in range(divisions[0]):
+                print(i)
                 for j in range(divisions[1]):
-                    z[i,j] = -log10(mag[Index(i,j,0)])
-                    #z[i,j] = -mag[Index(i,j,0)]
-            z[z <= -3] = Python.none()
+                    #z[i,j] = -log10(mag[Index(i,j,0)])
+                    z[i,j] = -mag[Index(i,j,0)]*0.01
+
+            z[z <= -10] = Python.none()
 
             var plantes = Python.list(Python.list(), Python.list(), Python.list())
             for body in system:
-                plantes[0].append(body[].position[0])
-                plantes[1].append(body[].position[1])
+                plantes[0].append(body[].position[1])
+                plantes[1].append(body[].position[0])
                 plantes[2].append(body[].position[2])
 
-            var fig = go.Figure(data=Python.list(go.Surface(z=z, x=x, y=y, colorscale='Viridis', showscale=False),
+            var fig = go.Figure(data=Python.list(
+                go.Surface(z=z, x=x, y=y, colorscale='Viridis', showscale=False),
                 go.Scatter3d(x=plantes[0], y=plantes[1], z=plantes[2], mode='markers', marker=Python.evaluate("dict(size=5, color='red')"))))
             fig.update_layout(scene_aspectmode='data')
             fig.show()
