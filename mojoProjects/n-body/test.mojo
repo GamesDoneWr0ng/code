@@ -1,19 +1,24 @@
 from python import Python, PythonObject
 from tensor import Tensor, TensorShape
+from memory import UnsafePointer, memcpy
+from utils.index import Index
+from algorithm import parallelize
 
-def func(tensor: Tensor[DType.int32]) -> PythonObject:
-    np = Python.import_module("numpy")
-    ctypeslib = Python.import_module("numpy.ctypeslib")
-    ctypes = Python.import_module("ctypes")
+fn tensor_to_ndarray(tensor: Tensor[DType.float64]) raises -> PythonObject:
+    var np = Python.import_module("numpy")
+    var arr = np.zeros(Python.tuple(tensor.shape()[0], tensor.shape()[1], tensor.shape()[2]), dtype=np.float64)
 
-    var rows = tensor.shape()[0]
-    var cols = tensor.shape()[1]
+    for i in range(tensor.shape()[0]):
+        for j in range(tensor.shape()[1]):
+            for k in range(tensor.shape()[2]):
+                arr[i, j, k] = tensor[Index(i, j, k)]
 
-    data_ptr = ctypes.cast(tensor._ptr.cast(DType.int32), ctypes.POINTER(ctypes.c_int32))
-    numpy_array = ctypeslib.as_array(data_ptr, shape=Python.tuple(rows, cols))
-    return numpy_array
+    return arr
 
 def main():
-    var tensor: Tensor[DType.int32] = Tensor[DType.int32](TensorShape(2,2), 1, 2, 3, 4)
+    var tensor: Tensor[DType.float64] = Tensor[DType.float64](TensorShape(2,2,2), 1, 2, 3, 4, 5, 6, 7, 8)
     print(tensor)
-    print(func(tensor))
+    try:
+        print(tensor_to_ndarray(tensor))
+    except:
+        return

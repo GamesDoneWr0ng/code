@@ -15,13 +15,13 @@ fn init_planets(read date: String) -> List[Planet]:
         var sun     = jplhorizons.Horizons(id="10",  location='@sun', epochs=epoch.jd).vectors()
         var earth   = jplhorizons.Horizons(id="399", location='@sun', epochs=epoch.jd).vectors()
         var moon    = jplhorizons.Horizons(id="301", location='@sun', epochs=epoch.jd).vectors()
-        var mercury = jplhorizons.Horizons(id="199", location='@sun', epochs=epoch.jd).vectors()
-        var venus   = jplhorizons.Horizons(id="299", location='@sun', epochs=epoch.jd).vectors()
-        var mars    = jplhorizons.Horizons(id="499", location='@sun', epochs=epoch.jd).vectors()
-        var jupiter = jplhorizons.Horizons(id="599", location='@sun', epochs=epoch.jd).vectors()
-        var saturn  = jplhorizons.Horizons(id="699", location='@sun', epochs=epoch.jd).vectors()
-        var uranus  = jplhorizons.Horizons(id="799", location='@sun', epochs=epoch.jd).vectors()
-        var neptune = jplhorizons.Horizons(id="899", location='@sun', epochs=epoch.jd).vectors()
+        # var mercury = jplhorizons.Horizons(id="199", location='@sun', epochs=epoch.jd).vectors()
+        # var venus   = jplhorizons.Horizons(id="299", location='@sun', epochs=epoch.jd).vectors()
+        # var mars    = jplhorizons.Horizons(id="499", location='@sun', epochs=epoch.jd).vectors()
+        # var jupiter = jplhorizons.Horizons(id="599", location='@sun', epochs=epoch.jd).vectors()
+        # var saturn  = jplhorizons.Horizons(id="699", location='@sun', epochs=epoch.jd).vectors()
+        # var uranus  = jplhorizons.Horizons(id="799", location='@sun', epochs=epoch.jd).vectors()
+        # var neptune = jplhorizons.Horizons(id="899", location='@sun', epochs=epoch.jd).vectors()
         return List[Planet](
             Planet(
                 vec3(Float(Float64(sun["x"])),  Float(Float64(sun["y"])),  Float(Float64(sun["z"])),  0),
@@ -177,14 +177,14 @@ fn main():
 
     var system: List[Planet] = init_planets("2022-05-05 00:00:00")
 
-    # for i in range(nBodies):
-    #     print("Planet ", i, ": ", system[i].position, system[i].velocity)
+    for i in range(nBodies):
+        print("Planet ", i, ": ", system[i].position, system[i].velocity)
 
 #    offset_momentum(system)
     referenceFrame(system)
-#    var initial_energy: Float = energy(system)
+    var initial_energy: Float = energy(system)
 
-#    print("Initial energy: ", initial_energy)
+    print("Initial energy: ", initial_energy)
 
     var log: List[List[vec3]] = List[List[vec3]]()
     for _ in range(nBodies):
@@ -200,12 +200,12 @@ fn main():
     
     print("Simulation time: ", end - start, " seconds")
     
-    #var final_energy: Float = energy(system)
-    #print("Final energy: ", final_energy)
-    #print("Energy difference: ", final_energy - initial_energy)
+    var final_energy: Float = energy(system)
+    print("Final energy: ", final_energy)
+    print("Energy difference: ", final_energy - initial_energy)
 
-    #var expected: List[Planet] = init_planets("2023-05-05 00:00:00")
-    #for i in range(nBodies):
+    # var expected: List[Planet] = init_planets("2023-05-05 00:00:00")
+    # for i in range(nBodies):
     #    print("Planet ", i, ": ", system[i].position, system[i].velocity)
     #    print("Expected Planet ", i, ": ", expected[i].position, expected[i].velocity)
     #    print("Difference: ", system[i].position - expected[i].position, system[i].velocity - expected[i].velocity)
@@ -221,25 +221,26 @@ fn main():
     #     return
 
     try:
-        #var go = Python.import_module("plotly.graph_objects")
-        #var mlab = Python.import_module("mayavi.mlab")
+        var go = Python.import_module("plotly.graph_objects")
+        var mlab = Python.import_module("mayavi.mlab")
         var np = Python.import_module("numpy")
         #var scipy = Python.import_module("scipy")
-        var pv = Python.import_module("pyvista")
+        #var pv = Python.import_module("pyvista")
         
-        var divisions: List[Int] = List[Int](5000, 5000, 1)
+        var divisions: List[Int] = List[Int](2000, 2000, 1)
         var dim: Float64 = 1.5
         var bounds: List[vec3] = List[vec3](vec3(-dim, -dim, 0, 0), vec3(dim, dim, 0, 0))
         #var step: vec3 = (bounds[1] - bounds[0]) / vec3(divisions[0], divisions[1], divisions[2], 0)
 
         var start: Float64 = perf_counter()
-        var z = tensor_to_ndarray(lagrange(system, bounds, divisions))
+        var z = -lagrange(system, bounds, divisions)*0.01 #tensor_to_ndarray(lagrange(system, bounds, divisions))*0.01
         var end: Float64 = perf_counter()
         
         print(z.shape)
         print("Lagrange time: ", end - start, " seconds")
         
         if bounds[0][2] == bounds[1][2]:
+            z = z.reshape(Python.tuple(divisions[0], divisions[1]))
             var meshgrid = np.meshgrid(
                 np.linspace(bounds[0][0], bounds[1][0], divisions[0]),
                 np.linspace(bounds[0][1], bounds[1][1], divisions[1])
@@ -249,25 +250,21 @@ fn main():
 
             z[z <= -10] = Python.none()
 
-            var grid = pv.StructuredGrid(x, y, z)
-            var mesh = grid.extract_surface().triangulate()
-            var decimated = mesh.decimate_pro(reduction=0.7, preserve_topology=True)
+            var plantes = Python.list(Python.list(), Python.list(), Python.list())
+            for body in system:
+               plantes[0].append(body[].position[1])
+               plantes[1].append(body[].position[0])
+               plantes[2].append(body[].position[2])
 
-            decimated.plot()
+            var fig = go.Figure(data=Python.list(
+               go.Surface(z=z, x=x, y=y, colorscale='Viridis', showscale=False),
+               go.Scatter3d(x=plantes[0], y=plantes[1], z=plantes[2], mode='markers', marker=Python.evaluate("dict(size=5, color='red')"))))
+            # fig.update_layout(scene_aspectmode='data')
+            fig.show()
 
-            #var plantes = Python.list(Python.list(), Python.list(), Python.list())
-            #for body in system:
-            #    plantes[0].append(body[].position[1])
-            #    plantes[1].append(body[].position[0])
-            #    plantes[2].append(body[].position[2])
-
-            #var fig = go.Figure(data=Python.list(
-            #    go.Surface(z=z, x=x, y=y, colorscale='Viridis', showscale=False),
-            #    go.Scatter3d(x=plantes[0], y=plantes[1], z=plantes[2], mode='markers', marker=Python.evaluate("dict(size=5, color='red')"))))
-            #fig.update_layout(scene_aspectmode='data')
-            #fig.show()
-            #mlab.mesh(x,y,z_downsampled, colormap='viridis')
-            #mlab.show()
+            # mlab.mesh(x,y,z, colormap='viridis')
+            # mlab.points3d(plantes[1], plantes[0], plantes[2], scale_factor=0.1, color=Python.tuple(1, 0, 0), mode='sphere')
+            # mlab.show()
 
     except:
         print("Error rendering lagrange.")
