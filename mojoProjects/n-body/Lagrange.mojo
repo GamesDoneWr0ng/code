@@ -1,10 +1,12 @@
 from tensor import Tensor, TensorShape
 from utils.index import Index
 from common import *
+from row_col_matrix import MojoMatrix
 
 fn lagrange(read bodies: List[Planet],
             read bounds: List[vec3],
-            read divisions: List[Int]) -> Tensor[DType.float64]:
+            read divisions: List[Int]) raises -> Tensor[DType.float64]:
+
     var step: vec3 = (bounds[1] - bounds[0]) / vec3(divisions[0], divisions[1], divisions[2], 1)
     var result: Tensor[DType.float64] = Tensor[DType.float64](TensorShape(divisions[0], divisions[1], divisions[2]))
 

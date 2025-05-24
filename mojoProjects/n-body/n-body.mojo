@@ -221,46 +221,53 @@ fn main():
     #     return
 
     try:
-        var go = Python.import_module("plotly.graph_objects")
+        #var go = Python.import_module("plotly.graph_objects")
+        #var mlab = Python.import_module("mayavi.mlab")
         var np = Python.import_module("numpy")
+        #var scipy = Python.import_module("scipy")
+        var pv = Python.import_module("pyvista")
         
-        var divisions: List[Int] = List[Int](2000, 2000, 1)
+        var divisions: List[Int] = List[Int](5000, 5000, 1)
         var dim: Float64 = 1.5
         var bounds: List[vec3] = List[vec3](vec3(-dim, -dim, 0, 0), vec3(dim, dim, 0, 0))
         #var step: vec3 = (bounds[1] - bounds[0]) / vec3(divisions[0], divisions[1], divisions[2], 0)
+
         var start: Float64 = perf_counter()
-        var mag: Tensor[DType.float64] = lagrange(system, bounds, divisions)
+        var z = tensor_to_ndarray(lagrange(system, bounds, divisions))
         var end: Float64 = perf_counter()
         
+        print(z.shape)
         print("Lagrange time: ", end - start, " seconds")
         
         if bounds[0][2] == bounds[1][2]:
-            var grid = np.meshgrid(
+            var meshgrid = np.meshgrid(
                 np.linspace(bounds[0][0], bounds[1][0], divisions[0]),
                 np.linspace(bounds[0][1], bounds[1][1], divisions[1])
             )
-            var x = grid[0]
-            var y = grid[1]
-            var z = np.zeros_like(x)
-            for i in range(divisions[0]):
-                print(i)
-                for j in range(divisions[1]):
-                    #z[i,j] = -log10(mag[Index(i,j,0)])
-                    z[i,j] = -mag[Index(i,j,0)]*0.01
+            var x = meshgrid[0]
+            var y = meshgrid[1]
 
             z[z <= -10] = Python.none()
 
-            var plantes = Python.list(Python.list(), Python.list(), Python.list())
-            for body in system:
-                plantes[0].append(body[].position[1])
-                plantes[1].append(body[].position[0])
-                plantes[2].append(body[].position[2])
+            var grid = pv.StructuredGrid(x, y, z)
+            var mesh = grid.extract_surface().triangulate()
+            var decimated = mesh.decimate_pro(reduction=0.7, preserve_topology=True)
 
-            var fig = go.Figure(data=Python.list(
-                go.Surface(z=z, x=x, y=y, colorscale='Viridis', showscale=False),
-                go.Scatter3d(x=plantes[0], y=plantes[1], z=plantes[2], mode='markers', marker=Python.evaluate("dict(size=5, color='red')"))))
-            fig.update_layout(scene_aspectmode='data')
-            fig.show()
+            decimated.plot()
+
+            #var plantes = Python.list(Python.list(), Python.list(), Python.list())
+            #for body in system:
+            #    plantes[0].append(body[].position[1])
+            #    plantes[1].append(body[].position[0])
+            #    plantes[2].append(body[].position[2])
+
+            #var fig = go.Figure(data=Python.list(
+            #    go.Surface(z=z, x=x, y=y, colorscale='Viridis', showscale=False),
+            #    go.Scatter3d(x=plantes[0], y=plantes[1], z=plantes[2], mode='markers', marker=Python.evaluate("dict(size=5, color='red')"))))
+            #fig.update_layout(scene_aspectmode='data')
+            #fig.show()
+            #mlab.mesh(x,y,z_downsampled, colormap='viridis')
+            #mlab.show()
 
     except:
         print("Error rendering lagrange.")
