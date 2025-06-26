@@ -6,8 +6,8 @@ let snake = [{x: 10, y:  10}, {x: 9, y:  10}, {x: 8, y:  10}];
 let apple = {x: 15, y: 10};
 let dx = 1;
 let dy = 0;
-let interval;
 let score = 3;
+let interval;
 
 // create grid
 function createGrid() {
@@ -83,6 +83,7 @@ function gameLoop() {
     if (checkCollision(head)) {
         clearInterval(interval);
         alert('Game Over');
+        document.getElementById("start").hidden = false;
         return;
     }
 
@@ -99,5 +100,17 @@ function gameLoop() {
     render();
 }
 
-createGrid()
-interval = setInterval(gameLoop, 150);
+function startGame() {
+    clearInterval(interval);
+    document.getElementById("start").hidden = true;
+    snake = [{x: 10, y: 10}, {x: 9, y: 10}, {x: 8, y: 10}];
+    apple = {x: 15, y: 10};
+    dx = 1;
+    dy = 0;
+    score = 3;
+    interval = setInterval(gameLoop, 150);
+    document.getElementById("score").innerHTML = score;
+    render();
+}
+
+createGrid();
