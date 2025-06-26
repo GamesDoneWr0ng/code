@@ -1,0 +1,23 @@
+[project]
+authors = ["GamesDoneWr0ng <ask@flaten.no>"]
+channels = ["conda-forge", "https://conda.modular.com/max", "https://repo.prefix.dev/modular-community"]
+description = "Add a short description here"
+name = "n-body"
+platforms = ["osx-arm64", "linux-64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+max = "~=25.2"
+astroquery = ">=0.4.10,<0.5"
+matplotlib = ">=3.10.1,<4"
+plotly = ">=6.1.1,<7"
+mayavi = ">=4.8.3,<5"
+scipy = ">=1.15.2,<2"
+pyvista = ">=0.45.2,<0.46"
+bridge = ">=0.2.0,<0.3"
+
+[pypi-dependencies]
+tensor = ">=0.3.6, <0.4"
+astroquery = "*"
