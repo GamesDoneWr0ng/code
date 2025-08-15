@@ -13,11 +13,12 @@ COLORS = (
     (240, 0, 0),
     (6, 240, 0),
     (0, 0, 240),
-    (240, 160, 0)
+    (240, 160, 0),
+    (160, 0, 240)
 )
 
 PIECES = [
-    np.array(((1,1,1,1))),
+    np.array(((1,1,1,1))).reshape(1,4),
 
     np.array(((2,2),
               (2,2))),
@@ -55,13 +56,21 @@ class Tetris:
     def newPiece(self) -> np.ndarray:
         self.piecePos: np.ndarray = np.array((0, 4))
         if len(self.batch) == 0:
-            self.batch = np.random.shuffle(list(range(6)))
+            self.batch = list(range(6))
+            np.random.shuffle(self.batch)
         return PIECES[self.batch.pop()]
     
-    def draw(self, drawpiece: bool):
-        for row in range(max(self.piecePos[0]-1, 0), self.piecePos[1] + self.piece.shape[0]):
-            for col in range(max(self.piecePos[0]-1, 0), min(self.piecePos[1] + self.piece.shape[1] +1, WIDTH)):
-                pg.draw.rect(self.screen, COLORS[(drawpiece and self.piece[self.size-self.piecePos]) or self.board[row, col]], pg.Rect(col*CELLSIZE, row*CELLSIZE, CELLSIZE, CELLSIZE))
+    def draw(self, drawpiece: bool = True):
+        for row in range(max(self.piecePos[0]-1, 0), self.piecePos[0] + self.piece.shape[0]):
+            for col in range(max(self.piecePos[1]-1, 0), min(self.piecePos[1] + self.piece.shape[1] +1, WIDTH)):
+                pieceInternalPos = np.array((row, col)) - self.piecePos
+                pg.draw.rect(self.screen, COLORS[int((drawpiece and np.all(np.logical_and(pieceInternalPos < self.piece.shape, pieceInternalPos >= 0)) and (self.piece[pieceInternalPos[0], pieceInternalPos[1]]) or self.board[row, col]))], pg.Rect(col*CELLSIZE, row*CELLSIZE, CELLSIZE, CELLSIZE))
+    
+    def drawAll(self):
+        for row in range(HEIGHT):
+            for col in range(WIDTH):
+                pieceInternalPos = np.array((row, col)) - self.piecePos
+                pg.draw.rect(self.screen, COLORS[int((np.all(np.logical_and(pieceInternalPos < self.piece.shape, pieceInternalPos >= 0)) and (self.piece[pieceInternalPos[0], pieceInternalPos[1]]) or self.board[row, col]))], pg.Rect(col*CELLSIZE, row*CELLSIZE, CELLSIZE, CELLSIZE))
 
     def collition(self, piece: np.ndarray, pos: np.ndarray) -> bool:
         shape = piece.shape
@@ -77,41 +86,49 @@ class Tetris:
                 if event.key == pg.K_LEFT:
                     if not (self.piecePos[1] <= 0 or self.collition(self.piece, self.piecePos + np.array((0,-1)))):
                         self.piecePos[1] -= 1
-                        change = True
                 if event.key == pg.K_RIGHT:
                     if not (self.piecePos[1]+self.piece.shape[1] >= WIDTH or self.collition(self.piece, self.piecePos + np.array((0,1)))):
                         self.piecePos[1] += 1
-                        change = True
                 if event.key == pg.K_UP:
                     newPiece = np.rot90(self.piece, k=-1)
                     if not (np.any(self.piecePos+newPiece.shape > self.size) or self.collition(newPiece, self.piecePos)):
+                        self.draw(False)
                         self.piece = newPiece
-                        change = True
+                        self.draw()
                 if event.key == pg.K_z:
                     newPiece = np.rot90(self.piece, k=1)
                     if not (np.any(self.piecePos+newPiece.shape > self.size) or self.collition(newPiece, self.piecePos)):
+                        self.draw(False)
                         self.piece = newPiece
-                        change = True
+                        self.draw()
                 if event.key == pg.K_SPACE:
                     self.draw(False)
                     distance = 1
-                    while not (self.piecePos[0]+self.piece.shape[0]+distance >= HEIGHT or self.collition(self.piece, self.piecePos + np.array((distance, 0)))):
+                    while not (self.piecePos[0]+self.piece.shape[0]+distance > HEIGHT or self.collition(self.piece, self.piecePos + np.array((distance, 0)))):
                         distance += 1
-                    self.piecePos[0] += distance
+                    self.piecePos[0] += distance-1
                     self.dropTimer = 0
 
         if self.dropTimer == 0:
             self.dropTimer = self.speed
-            if not (self.piecePos[0]+self.piece.shape[0]+1 >= HEIGHT or self.collition(self.piece, self.piecePos + np.array(1,0))):
+            if not (self.piecePos[0]+self.piece.shape[0]+1 > HEIGHT or self.collition(self.piece, self.piecePos + np.array((1,0)))):
                 self.piecePos[0] += 1
             else:
-                self.board[self.piecePos[0]+self.piece.shape[0]:self.piecePos[1]+self.piece.shape[1]] = np.max(self.piece, self.board[self.piecePos[0]+self.piece.shape[0]:self.piecePos[1]+self.piece.shape[1]])
+                self.board[self.piecePos[0]:self.piecePos[0]+self.piece.shape[0],self.piecePos[1]:self.piecePos[1]+self.piece.shape[1]] = self.piece + self.board[self.piecePos[0]:self.piecePos[0]+self.piece.shape[0],self.piecePos[1]:self.piecePos[1]+self.piece.shape[1]]
                 self.draw()
-                self.newPiece()
+                
+                self.piece = self.newPiece()
         else:
             self.dropTimer -= 1
 
         self.draw()
+        pg.display.flip()
         return True
 
 tetris = Tetris(screen, SIZE)
+
+while True:
+    alive = tetris.update()
+    clock.tick(60)
+    if not alive:
+        break
