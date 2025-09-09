@@ -197,7 +197,7 @@ class Node:
             return False
         return self.pos == other.pos and self.dir == other.dir
     def __str__(self):
-        return f"{abs(self.pos.real)}+{abs(self.pos.imag)} {abs(self.dir.real)}+{abs(self.dir.imag)}"
+        return f"{int(self.pos.real)}+{int(self.pos.imag)} {int(self.dir.real)}+{int(self.dir.imag)}"
     def __hash__(self):
         return hash(self.__str__())
 

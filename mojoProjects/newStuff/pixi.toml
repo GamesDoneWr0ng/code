@@ -1,0 +1,11 @@
+[workspace]
+authors = ["GamesDoneWr0ng <ask@flaten.no>"]
+channels = ["https://conda.modular.com/max-nightly", "conda-forge"]
+name = "newStuff"
+platforms = ["osx-arm64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+mojo = ">=25.6.0.dev2025090105,<26"

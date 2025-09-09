@@ -1,6 +1,5 @@
 from cProfile import run
 import timeit
-from numba import jit
 
 # implementation for fast modular exponentiation
 # set variabels
