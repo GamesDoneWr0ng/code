@@ -143,7 +143,7 @@ targets = {
 }
 
 objects = [Object(np.random.uniform(10,np.array(SIZE)-10,2), np.random.uniform(-2,2,2), np.random.choice(["rock", "paper", "scissor"]))
-           for i in range(300)]
+           for i in range(99)]
 
 running = True
 while running:

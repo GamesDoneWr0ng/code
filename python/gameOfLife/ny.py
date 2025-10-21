@@ -40,7 +40,7 @@ def draw(grid, change, screen = screen, cellSize = cellSize):
         if cellSize == 1:
             screen.set_at(i, (255, 255, 255) if grid[i[0], i[1]] else (0, 0, 0))
         else:
-            pg.draw.rect(screen, (255, 255, 255), (i[0] * cellSize, i[1] * cellSize, cellSize, cellSize))
+            pg.draw.rect(screen, (255, 255, 255) if grid[i[0], i[1]] else (0, 0, 0), (i[0] * cellSize, i[1] * cellSize, cellSize, cellSize))
 
     pg.display.flip()
 

@@ -1,0 +1,100 @@
+loop    LDA store
+        ADD head
+        STA sm
+        INP
+        ADD snakeV
+sm      STA 0
+        ADD xx // get the move
+        STA x
+x       LDA w
+        ADD head // apply move
+        STA head
+        SUB top // collision top
+        BRP alive1
+dead    HLT
+alive1  SUB bottom //col bot
+        BRP dead
+        LDA head
+        ADD load // col snake
+        STA y
+y       LDA 0
+        BRZ alive2
+        SUB appleV // apple pickup
+        BRZ move
+        HLT // end of collision
+alive2  LDA store //move tail
+        ADD tail
+        STA q
+        ADD v200 // STA *tail -> LDA *tail
+        STA v
+v       LDA 0
+        ADD xx // *tail -> LDA move[*tail-400]
+        STA p
+        LDA dead
+q       STA 0 // remove tail
+p       LDA 0 // load tail move
+        ADD tail
+        STA tail
+move    LDA head // set head
+        ADD store
+        STA z
+        LDA snakeV
+z       LDA 0
+        BRA loop // goto start
+top     DAT 60 // change
+bottom  DAT 40 // change
+w       DAT -10
+d       DAT 1
+s       DAT 10
+a       DAT -1
+apple   DAT 77
+head    DAT 74
+tail    DAT 73
+appleV  DAT 444
+snakeV  DAT 400
+load    LDA 0
+store   STA 0
+xx      DAT 145 // change
+v200    DAT 200
+        DAT 0
+        DAT 0
+        DAT 444
+        DAT 0
+        DAT 0
+        DAT 0
+        DAT 0
+        DAT 0
+        DAT 0
+        DAT 0
+        DAT 444
+        DAT 0
+        DAT 0
+        DAT 0
+        DAT 0
+        DAT 401 // change
+        DAT 401
+        DAT 0
+        DAT 0
+        DAT 444
+        DAT 0
+        DAT 0
+        DAT 444
+        DAT 0
+        DAT 0
+        DAT 0
+        DAT 0
+        DAT 0
+        DAT 0
+        DAT 0
+        DAT 0
+        DAT 0
+        DAT 0
+        DAT 0
+        DAT 0
+        DAT 444
+        DAT 0
+        DAT 0
+        DAT 0
+        DAT 444
+        DAT 0
+        DAT 0
