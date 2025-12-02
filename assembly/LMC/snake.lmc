@@ -54,7 +54,7 @@ appleV  DAT 444
 snakeV  DAT 400
 load    LDA 0
 store   STA 0
-xx      DAT 145 // change
+xx      ADD w
 v200    DAT 200
         DAT 0
         DAT 0

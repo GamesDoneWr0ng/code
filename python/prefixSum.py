@@ -10,7 +10,7 @@ def prefixSum(arr: np.ndarray) -> np.ndarray:
 
 def parallelPrefixSum(arr: np.ndarray) -> np.ndarray:
     prefixSum = arr.copy()
-    for i in range(int((np.log2(len(arr))))):
+    for i in range(int(np.log2(len(arr)))):
         prefixSum[2**(i+1)-1::2**(i+1)] += prefixSum[2**(i)-1::2**(i+1)]
     
     for i in range(int(np.log2(len(arr)))-1, 0, -1):
