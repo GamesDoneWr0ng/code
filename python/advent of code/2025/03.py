@@ -31,8 +31,7 @@ for battery in data:
     idx = -1
     for i in range(12):
         end = -11 + len(res)
-        d = argmax(battery[idx+1 : end if end < 0 else None], key=int)
-        idx += d + 1
+        idx += argmax(battery[idx+1 : end if end < 0 else None], key=int) + 1
         res += battery[idx]
     result += int(res)
 
