@@ -52,7 +52,7 @@ perimeter[min(points[0][0], points[-1][0]):max(points[0][0], points[-1][0])+1, m
 maxSize = 0
 for i, p in enumerate(points):
     for j, q in enumerate(points):
-        size = abs((p[0] - q[0] + 1) * (p[1] - q[1] + 1))
+        size = (abs(p[0] - q[0]) + 1) * (abs(p[1] - q[1]) + 1)
         if size > maxSize and isGreen(p, q, perimeter):
             maxSize = size
             print(p,q, i, j)
