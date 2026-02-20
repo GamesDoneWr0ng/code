@@ -42,11 +42,11 @@ presents = list(map(lambda x: x.count("#"), presents))
 def canFit(size, amounts):
     return sum(presents[i]*amounts[i] for i in range(len(amounts))) <= (size[0] * size[1])
 
-a = b = 0
+a = 0
 for line in trees.splitlines():
     size, *amounts = line.split()
     size = list(map(int, size[:-1].split("x")))
     amounts = list(map(int, amounts))
     a += canFit(size, amounts)
 
-print(a, b)
+print(a)

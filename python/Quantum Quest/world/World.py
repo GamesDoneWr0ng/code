@@ -11,7 +11,7 @@ class World:
 
         self.screen = screen 
         self.currentRoom: str = "start" # TODO rooms savefile
-        self.rooms: dict[str, Room.Room] = {self.currentRoom: Room(f"/Users/askborgen/Desktop/code/python/Quantum Quest/world/rooms/{self.currentRoom}.json", self)}
+        self.rooms: dict[str, Room.Room] = {self.currentRoom: Room(f"/Users/askborgen/GithubRepos/code/python/Quantum Quest/world/rooms/{self.currentRoom}.json", self)}
         for room in self.rooms[self.currentRoom].getNeighbours():
             self.loadRoom(room)
 
@@ -68,5 +68,5 @@ class World:
         return self.deltaTime
     
     def loadRoom(self, room: str):
-        self.rooms[room] = Room(f"/Users/askborgen/Desktop/code/python/Quantum Quest/world/rooms/{room}.json", self)
+        self.rooms[room] = Room(f"/Users/askborgen/GithubRepos/code/python/Quantum Quest/world/rooms/{room}.json", self)
         self.rooms[room].load()
